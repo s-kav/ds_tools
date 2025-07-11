@@ -1,3 +1,44 @@
+[project]
+name = "dscience_tools"
+version = "0.9.1"
+description = "DSTools: Data Science Tools Library"
+readme = "README.md"
+authors = [
+  { name="Sergii Kavun", email="kavserg@gmail.com" }
+]
+maintainers = [
+  { name="Sergii Kavun", email="kavserg@gmail.com" }
+]
+license = {text = "MIT License"}
+dependencies = ["pandas<=2.2.3,>=0.25.0", "numpy<=2.2.0,>=1.22.0"]
+requires-python = ">=3.6.0"
+classifiers = [
+    "Intended Audience :: Scientists & Developers",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.6",
+]
+
+dynamic = ["version"]
+
+[project.urls]
+Homepage = "https://github.com/s-kav/ds_tools"
+Documentation = "to be soon"
+Repository = "https://github.com/s-kav/ds_tools.git"
+"Source Code" = "https://github.com/s-kav/ds_tools/src"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+numpy = "^1.22.0"
+
+
 [build-system]
-requires = ["setuptools>=42", "wheel"]
+requires = ["setuptools>=61", "wheel"]
 build-backend = "setuptools.build_meta"
+
+[tool.pytest.ini_options]
+addopts = "-v --cov"
+testpaths = ["tests"]
