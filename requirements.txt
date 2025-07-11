@@ -1,0 +1,16 @@
+numpy
+pandas
+polars
+fastparquet
+tempfile
+os
+re
+random
+matplotlib
+seaborn
+scipy
+scikit-learn
+statsmodels
+typing
+zipfile
+pydantic>=2.0
