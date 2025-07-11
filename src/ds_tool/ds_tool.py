@@ -1,5 +1,5 @@
-# src/ds_tools.py
-# version 0.9.1 - Refactored and optimized
+# src/ds_tool/ds_tools.py
+# version 0.9.2 - Refactored and optimized
 
 
 # Library consisting of additional & helpful functions for data science research stages.
