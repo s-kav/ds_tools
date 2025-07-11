@@ -27,7 +27,10 @@ pip install dscience_tools
 
 Here's a simple example of how to use the library to evaluate a classification model.
 
+<<<<<<< HEAD
 Full code base for other function testing you can find [here](https://github.com/s-kav/ds_tools/blob/main/tests/code_checking_dstool.py).
+=======
+>>>>>>> 2afd55e06391a95d5163bb6f3129123ad260d4f4
 
 ```python
 
@@ -92,6 +95,10 @@ print(f"Generated Mean: {np.mean(generated_data):.2f}")
 print(f"Generated Std: {np.std(generated_data):.2f}")
 
 ```
+
+
+Full code base for other function testing you can find [here](https://github.com/s-kav/ds_tools/blob/main/tests/code_checking_dstool.py).
+
 
 ## Contributing
 
