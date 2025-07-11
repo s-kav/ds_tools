@@ -38,7 +38,7 @@ jobs:
 
       - name: Run tests with pytest
         run: |
-          pytest src/ 
+          pytest src/ds_tool/ 
 
   # --- THE TASK OF COLLECTION AND PUBLICATION ---
   build-and-publish:
