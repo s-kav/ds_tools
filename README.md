@@ -104,6 +104,10 @@ Full code base for other function testing you can find [here](https://github.com
 
 Contributions are welcome! Please feel free to submit a pull request or open an issue on the GitHub repository.
 
+## DOI
+
+[![DOI](https://zenodo.org/badge/1001952407.svg)](https://doi.org/10.5281/zenodo.15864146)
+
 
 ## License
 
