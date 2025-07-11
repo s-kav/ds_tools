@@ -152,7 +152,8 @@ Please ensure your code adheres to PEP8 standards and includes appropriate docst
 # References
 
 For citing you should use:
-Sergii Kavun. (2025). s-kav/ds_tools: Version 0.9.1 (v0.9.1). Zenodo. https://doi.org/10.5281/zenodo.15864146 
+
+Sergii Kavun. (2025). s-kav/ds_tools: Version 0.9.1 (v0.9.1). Zenodo. https://doi.org/10.5281/zenodo.15864146
 
 [![DOI](https://zenodo.org/badge/1001952407.svg)](https://doi.org/10.5281/zenodo.15864146)
 
