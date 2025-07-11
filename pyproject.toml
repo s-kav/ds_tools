@@ -30,10 +30,6 @@ Documentation = "to be soon"
 Repository = "https://github.com/s-kav/ds_tools.git"
 "Source Code" = "https://github.com/s-kav/ds_tools/src"
 
-[tool.poetry.dependencies]
-python = "^3.8"
-numpy = "^1.22.0"
-
 
 [build-system]
 requires = ["setuptools>=61", "wheel"]
