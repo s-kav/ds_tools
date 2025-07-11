@@ -27,7 +27,7 @@ pip install dscience_tools
 
 Here's a simple example of how to use the library to evaluate a classification model.
 
-Ather code base for other function testing you can find [here](https://github.com/s-kav/ds_tools/blob/main/tests/code_checking_dstool.py).
+Full code base for other function testing you can find [here](https://github.com/s-kav/ds_tools/blob/main/tests/code_checking_dstool.py).
 
 ```python
 
