@@ -36,5 +36,8 @@ requires = ["setuptools>=61", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [tool.pytest.ini_options]
-addopts = "-v --cov"
+addopts = [
+    "--import-mode=importlib",
+]
+filterwarnings = "error"
 testpaths = ["tests"]
