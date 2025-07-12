@@ -1,6 +1,6 @@
 # DSTools: Data Science Tools Library
 
-[![PyPI version](https://badge.fury.io/py/ds-tools-your-username.svg)](https://badge.fury.io/py/ds-tools-Sergii-Kavun)
+[![PyPI version](https://badge.fury.io/py/dscience_tools.svg)](https://badge.fury.io/py/dscience_tools)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 # Authors
