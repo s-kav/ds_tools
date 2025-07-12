@@ -1,11 +1,27 @@
 # DSTools: Data Science Tools Library
 
-[![PyPI version](https://badge.fury.io/py/ds-tools-your-username.svg)](https://badge.fury.io/py/ds-tools-Sergii-Kavun)
+[![PyPI version](https://badge.fury.io/py/dscience_tools.svg)](https://badge.fury.io/py/dscience_tools)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+# Authors
+
+- [@sergiikavun](https://www.linkedin.com/in/sergii-kavun/)
 
 **DSTools** is a Python library designed to assist data scientists and researchers by providing a collection of helpful functions for various stages of a data science project, from data exploration and preprocessing to model evaluation and synthetic data generation.
 
-## Features
+# Table of Contents
+
+*   [Features](#features)
+*   [Installation](#installation)
+*   [Usage](#usage)
+*   [Function Overview](#function-overview)
+*   [Example](#example)
+*   [Contributing](#contributing)
+*   [References](#references)
+*   [License](#license)
+
+
+# Features
 
 - **Data Exploration:** Quickly get statistics for numerical and categorical features (`describe_numeric`, `describe_categorical`), check for missing values (`check_NINF`), and visualize correlations (`corr_matrix`).
 - **Model Evaluation:** Comprehensive classification model evaluation (`evaluate_classification`, `compute_metrics`) with clear visualizations (`plot_confusion_matrix`).
@@ -15,22 +31,36 @@
 - **Advanced Statistics:** Calculate non-parametric correlation (`chatterjee_correlation`), entropy, and KL-divergence.
 - **Utilities:** Save/load DataFrames to/from ZIP archives, generate random alphanumeric codes, and more.
 
-## Installation
 
-You can install DSTools directly from PyPI:
+# Installation
+
+## Clone the Repository
 
 ```bash
-pip install dscience_tools
+git clone https://github.com/s-kav/ds_tools.git
+
 ```
 
-## Quick Start
+## Navigate to the Project Directory
+
+```bash
+cd ds_tools
+
+```
+
+## Install Dependencies
+
+Ensure you have Python version 3.8 or higher and install the required packages:
+
+```bash
+pip install -r requirements.txt
+
+```
+
+# Usage
 
 Here's a simple example of how to use the library to evaluate a classification model.
 
-<<<<<<< HEAD
-Full code base for other function testing you can find [here](https://github.com/s-kav/ds_tools/blob/main/tests/code_checking_dstool.py).
-=======
->>>>>>> 2afd55e06391a95d5163bb6f3129123ad260d4f4
 
 ```python
 
@@ -53,7 +83,11 @@ print(f"\nROC AUC Score: {results['roc_auc']:.4f}")
 
 ```
 
-## Function Overview
+
+Full code base for other function testing you can find [here](https://github.com/s-kav/ds_tools/blob/main/tests/code_checking_dstool.py).
+
+
+# Function Overview
 
 The library provides a wide range of functions. To see a full, formatted list of available tools, you can use the function_list method:
 
@@ -66,9 +100,11 @@ tools.function_list()
 
 ```
 
-## Example: Generating a Synthetic Distribution
+# Example
 
-Need to create a dataset with specific statistical properties? generate_distribution_from_metrics can do that.
+Generating a Synthetic Distribution: need to create a dataset with specific statistical properties?
+generate_distribution_from_metrics can do that.
+
 
 ```python
 
@@ -100,11 +136,28 @@ print(f"Generated Std: {np.std(generated_data):.2f}")
 Full code base for other function testing you can find [here](https://github.com/s-kav/ds_tools/blob/main/tests/code_checking_dstool.py).
 
 
-## Contributing
+# Contributing
 
 Contributions are welcome! Please feel free to submit a pull request or open an issue on the GitHub repository.
 
+To contribute:
 
-## License
+Fork the repository.
+Create a new branch for your feature or bugfix.
+Commit your changes with clear messages.
+Push to your fork and submit a pull request.
+Please ensure your code adheres to PEP8 standards and includes appropriate docstrings and comments.
+
+
+# References
+
+For citing you should use:
+
+Sergii Kavun. (2025). s-kav/ds_tools: Version 0.9.1 (v0.9.1). Zenodo. https://doi.org/10.5281/zenodo.15864146
+
+[![DOI](https://zenodo.org/badge/1001952407.svg)](https://doi.org/10.5281/zenodo.15864146)
+
+
+# License
 
 This project is licensed under the MIT License - see the [LICENSE](https://github.com/s-kav/ds_tools/blob/main/LICENSE) file for details.
