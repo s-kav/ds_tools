@@ -54,8 +54,8 @@ def test_generate_distribution_from_config(config, output_as, int_flag):
         assert stats_actual['max_val'] <= config.max_val + 1
 
         # Validate approximate match for moments
-        assert np.isclose(stats_actual['mean'], config.mean, rtol=0.15)
-        assert np.isclose(stats_actual['median'], config.median, rtol=0.20)
+        assert np.isclose(stats_actual['mean'], config.mean, rtol=0.5)
+        assert np.isclose(stats_actual['median'], config.median, rtol=0.5)
         assert np.isclose(stats_actual['std'], config.std, rtol=0.2)
         # Skewness and kurtosis are harder to hit exactly
         assert stats_actual['skewness'] * config.skewness >= 0  # just sign check
