@@ -8,3 +8,4 @@ scikit-learn
 statsmodels
 pydantic>=2.0
 optuna
+fastparquet
