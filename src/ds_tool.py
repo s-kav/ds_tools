@@ -845,7 +845,7 @@ class DSTools:
             cols_to_process = list(set(list(categorical_cols) + all_nan_cols))
             
             if not cols_to_process:
-            return pd.DataFrame() # If there are no matching columns at all
+                return pd.DataFrame() # If there are no matching columns at all
         else:
             cols_to_process = list(categorical_cols)
         
@@ -1050,6 +1050,7 @@ class DSTools:
         # --- 1. Input Validation ---
         if not isinstance(true_labels, np.ndarray) or not isinstance(pred_probs, np.ndarray):
             raise TypeError('Inputs `true_labels` and `pred_probs` must be NumPy arrays.')
+            
         if true_labels.shape != pred_probs.shape:
             raise ValueError('Shape of true_labels and pred_probs must match.')
             
@@ -1433,6 +1434,7 @@ class DSTools:
         n = len(x_arr)
         if n != len(y_arr):
             raise ValueError('Input arrays x and y must have the same length.')
+            
         if n < 2:
             return 0.0 # Correlation is undefined for less than 2 points
 
@@ -1562,6 +1564,7 @@ class DSTools:
 
         if p_arr.shape != q_arr.shape:
             raise ValueError('Input distributions P and Q must have the same shape.')
+            
         if np.any(p_arr < 0) or np.any(q_arr < 0):
             raise ValueError('Probabilities cannot be negative.')
         
@@ -1987,6 +1990,7 @@ class DSTools:
         # Ensure min/max values are present
         if data.min() > config.min_val:
             data[np.argmin(data)] = config.min_val
+            
         if data.max() < config.max_val:
             data[np.argmax(data)] = config.max_val
             
