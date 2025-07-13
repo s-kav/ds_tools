@@ -18,7 +18,9 @@ import pandas as pd
 import seaborn as sns
 import polars as pl
 
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator, model_validator
+from pydantic_core.core_schema import ValidationInfo
+
 from scipy import stats
 from scipy.stats import rankdata
 from typing import Any, Dict, List, Optional, Tuple, Union, Literal
@@ -60,8 +62,9 @@ class CorrelationConfig(BaseModel):
     build_method: str = Field('pearson', description = 'Correlation method')
     image_size: Tuple[int, int] = Field((16, 16), description = 'Image size as tuple')
     
-    @validator('build_method')
-    def validate_method(cls, v):
+    @field_validator('build_method')
+    @classmethod
+    def validate_method(cls, v) -> str:
         valid_methods = ['pearson', 'kendall', 'spearman']
         if v not in valid_methods:
             raise ValueError(f'Method must be one of {valid_methods}')
@@ -89,8 +92,8 @@ class DistributionConfig(BaseModel):
     accuracy_threshold: float = Field(0.01, gt = 0, le = 0.1, description = 'Accuracy threshold')
     outlier_ratio: float = Field(0.025, ge = 0, le = 0.1, description = 'Proportion of outliers')
     
-    @validator('max_val')
-    def validate_max_greater_than_min(cls, v, values):
+    @model_validator(mode='after')
+    def validate_max_greater_than_min(cls, v, values) -> 'DistributionConfig':
         if 'min_val' in values and v <= values['min_val']:
             raise ValueError('max_val must be greater than min_val')
         return v
