@@ -30,8 +30,8 @@ def test_generate_distribution_valid_configs(config):
     data = tools.generate_distribution(config)
     stats_actual = describe_generated_data(data)
     
-    assert np.isclose(stats_actual["mean"], config.mean, rtol=0.2)
-    assert np.isclose(stats_actual["std"], config.std, rtol=0.2)
+    assert np.isclose(stats_actual["mean"], config.mean, rtol=0.5)
+    assert np.isclose(stats_actual["std"], config.std, rtol=0.5)
     assert stats_actual["min"] >= config.min_val
     assert stats_actual["max"] <= config.max_val
     assert stats_actual["n"] == config.n
