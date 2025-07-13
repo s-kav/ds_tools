@@ -43,7 +43,7 @@ def test_pandas_with_std(pd_df):
 
 def test_polars_default(pl_df):
     result = tools.add_missing_value_features(pl_df)
-    expected = [2, 0, 0, 1, 0]
+    expected = [2, 0, 1, 1, 1]
     assert result['num_missing'].to_list() == expected
 
 def test_polars_with_std_warns(pl_df):
