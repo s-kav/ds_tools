@@ -10,7 +10,7 @@ from src.ds_tool import DSTools
 
 # This function simulates training the model. It takes a trial object,
 # "suggests" hyperparameters, pauses, and returns the "quality" of the model.
-def objective_function(trial: optuna.trial.Trial) -> float:
+def test_objective_function(trial: optuna.trial.Trial) -> float:
     """Dummy function for optimization."""
 
     # Suggest hyperparameters
@@ -45,7 +45,7 @@ study = optuna.create_study(direction='maximize')
 # Starting 15 attempts. We expect some of them to fail.
 # Optuna will handle errors on its own, we just need to catch them so the script doesn't stop.
 try:
-    study.optimize(objective_function, n_trials=15)
+    study.optimize(test_objective_function, n_trials=15)
 except ValueError:
     print("Caught a simulated error as expected. Continue.")
 
