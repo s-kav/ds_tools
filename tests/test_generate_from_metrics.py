@@ -65,7 +65,7 @@ def test_generate_distribution_from_config(config, output_as, int_flag):
 
 def test_invalid_moments_raise_value_error():
     """Test that an impossible combination of moments triggers a ValueError."""
-    with pytest.raises(ValueError, match="Infeasible distribution moments"):
+    with pytest.raises(ValueError, match="Invalid moments. Check that std > 0 and kurtosis >= (skewness² - 2)."):
         tools.generate_distribution_from_metrics(
             n=1000,
             metrics={
@@ -76,7 +76,7 @@ def test_invalid_moments_raise_value_error():
 
 def test_pydantic_validation_raises_error():
     """Test invalid config values throw a Pydantic validation error."""
-    with pytest.raises(ValueError, match="value is not a valid float"):
+    with pytest.raises(ValueError, match="`metrics` must be a dict or a DistributionConfig instance."):
         tools.generate_distribution_from_metrics(
             n=1000,
             metrics={
