@@ -18,7 +18,7 @@ import pandas as pd
 import seaborn as sns
 import polars as pl
 
-from pydantic import BaseModel, Field, field_validator, model_validator
+from pydantic import BaseModel, Field, field_validator, model_validator, ConfigDict
 from pydantic_core.core_schema import ValidationInfo
 
 from scipy import stats
@@ -98,10 +98,10 @@ class DistributionConfig(BaseModel):
             raise ValueError('max_val must be greater than min_val')
         return v
     
-    class Config:
-        """Pydantic configuration."""
-        str_strip_whitespace = True
-        validate_assignment = True
+    model_config = ConfigDict(
+        str_strip_whitespace=True,
+        validate_assignment=True,
+    )
 
 
 class GrubbsTestResult(BaseModel):
