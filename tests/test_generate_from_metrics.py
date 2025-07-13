@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 # Import our class and its configuration
 from src.ds_tool import DSTools, DistributionConfig
 
-def analyze_and_compare(generated_data, config: DistributionConfig, title: str):
+def test_analyze_and_compare(generated_data, config: DistributionConfig, title: str):
     """A helper function for analyzing and comparing results."""
     # Convert data to a NumPy array for calculations if it is a Series
     if isinstance(generated_data, (pd.Series, pl.Series)):
@@ -56,7 +56,7 @@ mean=500, median=450, std=150, min_val=100, max_val=2000,
 skewness=1.2, kurtosis=5.0, n=5000, outlier_ratio=0.02
 )
 data_a = tools.generate_distribution_from_metrics(n=5000, metrics=config_a)
-analyze_and_compare(data_a, config_a, "Scenario A: Result")
+test_analyze_and_compare(data_a, config_a, "Scenario A: Result")
 
 # --- Scenario B: Call with dictionary and output to Pandas Series (int) ---
 print("\n" + "="*60)
@@ -76,7 +76,7 @@ print("Output type:", type(data_b))
 print("Data type in Series:", data_b.dtype)
 print(data_b.head())
 # For analysis, we pass the Series itself, the function will sort it out
-analyze_and_compare(data_b, DistributionConfig(**metrics_dict_b), "Scenario B: Result")
+test_analyze_and_compare(data_b, DistributionConfig(**metrics_dict_b), "Scenario B: Result")
 
 # --- Scenario C: Testing moment validation ---
 print("\n" + "="*60)
