@@ -22,7 +22,8 @@ def test_compute_metrics_default(classification_data):
     df = tools.compute_metrics(y_true, y_pred, y_proba)
     assert isinstance(df, np.ndarray) or hasattr(df, 'shape')
     assert df.shape[0] >= 1  # Sanity check on rows
-    assert {'threshold', 'error_rate', 'precision', 'recall'}.intersection(df.columns)
+    expected_cols = {'AV_prec_score', 'BAL_acc_score', 'Kappa_score'}
+    assert expected_cols.issubset(df.columns)
 
 def test_compute_metrics_custom_config(classification_data, capsys):
     y_true, y_pred, y_proba = classification_data
