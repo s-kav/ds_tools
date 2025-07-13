@@ -34,7 +34,6 @@ from sklearn.metrics import (
     log_loss,
     accuracy_score,
     auc,
-    average_precision_score,
     classification_report,
     confusion_matrix,
     precision_recall_curve,
