@@ -11,7 +11,7 @@ from src.ds_tool import DSTools
 data_clean = {'col1': [1, 2, 3], 'col2': [4, 5, 6]}
 data_with_nan = {'col1': [1, np.nan, 3], 'col2': [4, 5, 6]}
 data_with_inf = {'col1': [1, 2, 3], 'col2': [4, np.inf, 6]}
-data_with_both = {'col1': [1, np.nan, 3], 'col2': [np.NINF, 5, 6]} # np.NINF is -inf
+data_with_both = {'col1': [1, np.nan, 3], 'col2': [-np.inf, 5, 6]}
 
 # Create DataFrames
 df_clean = pd.DataFrame(data_clean)
