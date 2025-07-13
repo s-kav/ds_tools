@@ -25,7 +25,7 @@ def test_category_stats_city_column(capsys, sample_df):
     tools.category_stats(sample_df, 'City')
     captured = capsys.readouterr()
     assert "City" in captured.out
-    assert "Percentage" in captured.out or "%" in captured.out
+    assert "percentage" in captured.out
 
 def test_category_stats_customer_status_column(capsys, sample_df):
     tools.category_stats(sample_df, 'Customer_status')
