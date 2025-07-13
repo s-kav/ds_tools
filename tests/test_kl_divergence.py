@@ -36,9 +36,9 @@ def test_kl_normalization():
     assert np.isclose(kl_norm, kl_unnorm), "Unnormalized and normalized distributions must yield same KL"
 
 def test_kl_raises_on_length_mismatch():
-    with pytest.raises(ValueError, match="must be of the same length"):
+    with pytest.raises(ValueError, match="Input distributions P and Q must have the same shape."):
         tools.calculate_kl_divergence([0.5, 0.5], [0.3, 0.3, 0.4])
 
 def test_kl_raises_on_negative_values():
-    with pytest.raises(ValueError, match="must not contain negative values"):
+    with pytest.raises(ValueError, match="Probabilities cannot be negative."):
         tools.calculate_kl_divergence([1.5, -0.5], [0.5, 0.5])
