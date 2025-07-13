@@ -1,77 +1,56 @@
-
+import pytest
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
-
-# Import our class
 from src.ds_tool import DSTools
 
-# --- 1. Generate test data ---
+@pytest.fixture(scope="module")
+def tools():
+    return DSTools()
 
-# Set seed for reproducibility
-np.random.seed(42)
-N_SAMPLES = 500
+@pytest.fixture(scope="module")
+def sample_data():
+    np.random.seed(42)
+    n = 500
+    return {
+        "normal": pd.Series(np.random.normal(loc=50, scale=10, size=n), name='Normal_Distribution'),
+        "uniform": pd.Series(np.random.uniform(low=0, high=100, size=n), name='Uniform_Distribution'),
+        "exponential": pd.Series(np.random.exponential(scale=15, size=n), name='Exponential_Distribution'),
+    }
 
-# Scenario A: Normally distributed data (Gaussian)
-# Mean 50, standard deviation 10
-normal_data = pd.Series(np.random.normal(loc=50, scale=10, size=N_SAMPLES), name='Normal_Distribution')
+def test_normal_distribution(tools, sample_data, capsys):
+    # Expect p-value > 0.05, "Data looks Gaussian"
+    tools.stat_normal_testing(sample_data["normal"])
+    captured = capsys.readouterr()
+    assert "p-value" in captured.out
+    assert "looks Gaussian" in captured.out or "looks normal" in captured.out
 
-# Scenario B: Uniform distribution
-# All values ​​from 0 to 100 are equally likely. Obviously not normal.
-uniform_data = pd.Series(np.random.uniform(low=0, high=100, size=N_SAMPLES), name='Uniform_Distribution')
+def test_uniform_distribution(tools, sample_data, capsys):
+    # Expect p-value < 0.05, "Data does not look Gaussian"
+    tools.stat_normal_testing(sample_data["uniform"])
+    captured = capsys.readouterr()
+    assert "p-value" in captured.out
+    assert "does not look Gaussian" in captured.out or "not normal" in captured.out
 
-# Scenario B: Exponential Distribution
-# Very right skewed. Clearly not normal.
-exponential_data = pd.Series(np.random.exponential(scale=15, size=N_SAMPLES), name='Exponential_Distribution')
+def test_exponential_distribution_basic(tools, sample_data, capsys):
+    # Same expectations as uniform, p-value < 0.05 and "does not look Gaussian"
+    tools.stat_normal_testing(sample_data["exponential"])
+    captured = capsys.readouterr()
+    assert "p-value" in captured.out
+    assert "does not look Gaussian" in captured.out or "not normal" in captured.out
 
-# --- 2. Initialization and calls ---
-tools = DSTools()
+def test_exponential_distribution_with_describe_flag(tools, sample_data, capsys):
+    # With describe_flag=True, still expect same message and p-value
+    tools.stat_normal_testing(sample_data["exponential"], describe_flag=True)
+    captured = capsys.readouterr()
+    assert "p-value" in captured.out
+    assert "does not look Gaussian" in captured.out or "not normal" in captured.out
+    # Optionally check for mention of plots or additional descriptions (if printed)
+    # e.g. assert "skewness" in captured.out or "kurtosis" in captured.out
 
-# --- Scenario A: Testing on normal data ---
-print("="*60)
-print("SCENARIO A: TEST ON NORMAL DISTRIBUTION")
-print("Expected: p-value > 0.05, output 'Data looks Gaussian'")
-print("="*60)
-
-# Call the function. It will print the results and show the graph.
-# plt.show() blocks execution, so the graphs will appear one after the other.
-tools.stat_normal_testing(normal_data)
-print("\n")
-
-# --- Scenario B: Testing on Uniform Distribution ---
-print("="*60)
-print("SCENARIO B: TEST ON UNIFORM DISTRIBUTION")
-print("Expected: p-value < 0.05, output 'Data does not look Gaussian'")
-print("="*60)
-
-tools.stat_normal_testing(uniform_data)
-print("\n")
-
-# --- Scenario C: Testing on Exponential Distribution with describe_flag=True ---
-print("="*60)
-print("SCENARIO C: TEST ON EXPONENTIAL DISTRIBUTION")
-print("Expected: p-value < 0.05, output 'Data does not look Gaussian'")
-print("="*60)
-
-tools.stat_normal_testing(uniform_data)
-print("\n")
-
-# --- Scenario C: Testing on Exponential Distribution with describe_flag=True ---
-print("="*60)
-print("SCENARIO C: TEST ON EXPONENTIAL DISTRIBUTION")
-print("Expected: p-value < 0.05, output 'Data does not look Gaussian', and additional graphs")
-print("="*60)
-
-tools.stat_normal_testing(exponential_data, describe_flag=True)
-print("\n")
-
-# --- Scenario D: Testing with DataFrame ---
-print("="*60)
-print("SCENARIO D: TEST WITH A SINGLE-COLUMN DATAFRAME")
-print("Check that the function works correctly if the input is a DataFrame, not a Series")
-print("="*60)
-
-# Convert Series to DataFrame
-df_normal = pd.DataFrame(normal_data)
-tools.stat_normal_testing(df_normal)
-print("\n")
+def test_input_dataframe(tools, sample_data, capsys):
+    # Provide DataFrame instead of Series, should work equivalently
+    df = pd.DataFrame(sample_data["normal"])
+    tools.stat_normal_testing(df)
+    captured = capsys.readouterr()
+    assert "p-value" in captured.out
+    assert "looks Gaussian" in captured.out or "looks normal" in captured.out
