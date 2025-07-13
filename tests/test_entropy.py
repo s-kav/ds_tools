@@ -39,5 +39,5 @@ def test_entropy_normalization_equivalence():
 
 def test_entropy_invalid_distribution():
     dist_invalid = np.array([1.5, -0.5, 0.0])
-    with pytest.raises(ValueError, match="must be non-negative"):
+    with pytest.raises(ValueError, match="Probabilities cannot be negative"):
         tools.calculate_entropy(dist_invalid)
