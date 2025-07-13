@@ -93,10 +93,11 @@ class DistributionConfig(BaseModel):
     outlier_ratio: float = Field(0.025, ge = 0, le = 0.1, description = 'Proportion of outliers')
     
     @model_validator(mode='after')
-    def validate_max_greater_than_min(cls, v, values) -> 'DistributionConfig':
-        if 'min_val' in values and v <= values['min_val']:
-            raise ValueError('max_val must be greater than min_val')
-        return v
+    def validate_max_greater_than_min(self) -> 'DistributionConfig':
+        if self.min_val is not None and self.max_val is not None:
+            if self.max_val <= self.min_val:
+                raise ValueError('max_val must be greater than min_val')
+        return self
     
     model_config = ConfigDict(
         str_strip_whitespace=True,
