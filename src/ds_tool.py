@@ -751,6 +751,7 @@ class DSTools:
         ax.grid(True, alpha = 0.3)
         plt.tight_layout()
         plt.show()
+        plt.close(fig)
         
         # Perform Dickey-Fuller test
         adf_result = adfuller(check_object, autolag = 'AIC')
