@@ -44,9 +44,9 @@ def test_constant_data(data_constant):
     assert not result.is_outlier
 
 def test_too_few_values_raises_value_error():
-    with pytest.raises(ValueError, match="at least 3 elements"):
+    with pytest.raises(ValueError, match="Grubbs\' test requires at least 3 data points."):
         tools.grubbs_test(np.array([1, 2]))
 
 def test_invalid_input_type_raises_type_error():
-    with pytest.raises(TypeError, match="must be a numpy array or pandas Series"):
+    with pytest.raises(TypeError, match="Input data `x` must be a NumPy array or Pandas Series."):
         tools.grubbs_test("invalid_type")
