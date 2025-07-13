@@ -832,45 +832,39 @@ class DSTools:
              tools = DSTools()
              cat_stats = tools.describe_categorical(df)
         """
-        # 1. Select columns with types 'object', 'category' and 'string'
-        # This is a modern and efficient way to select categorical/text columns.
-        categorical_cols = df.select_dtypes(include=['object', 'category', 'string']).columns
+        # 1. Select columns with types 'object', 'category', 'string'
+        categorical_cols = df.select_dtypes(include=['object', 'category', 'string']).columns.tolist()
         
-        if len(categorical_cols) == 0:
-            # Also look for columns that are only NaN but have a numeric type
-            # (these won't be selected in step 1, but are worth including in the report)
-            all_nan_cols = df.columns[df.isnull().all()].tolist()
+        # 2. Find columns that ONLY consist of NaN (they can be of numeric type)
+        all_nan_cols = df.columns[df.isnull().all()].tolist()
         
-            # Merge, leaving only unique ones
-            cols_to_process = list(set(list(categorical_cols) + all_nan_cols))
-            
-            if not cols_to_process:
-                return pd.DataFrame() # If there are no matching columns at all
-        else:
-            cols_to_process = list(categorical_cols)
+        # 3. Combine both lists and remove duplicates
+        cols_to_process = sorted(list(set(categorical_cols + all_nan_cols)))
         
-        # 2. Get basic descriptive statistics for these columns
-        # describe() for 'object'/'category' types immediately gives 'unique', 'top', 'freq'
-        description = df[cols_to_process].describe()
+        if not cols_to_process:
+            return pd.DataFrame()
         
-        # 3. Calculate additional metrics
-        missing_percent = df[cols_to_process].isnull().sum() / len(df) * 100
+        # 4. Get basic descriptive statistics
+        description = df[cols_to_process].describe(include='all').T
         
-        # 4. Assemble the final DataFrame
-        # Transpose .describe() for convenient merging
-        result_df = description.T
+        # 5. Calculate the percentage of missing data
+        missing_percent = (df[cols_to_process].isnull().sum() / len(df) * 100).round(1)
         
-        # Add our custom column
-        result_df['missing (%)'] = missing_percent.round(1)
+        # 6. Assemble the final DataFrame
+        result_df = description
+        result_df['missing (%)'] = missing_percent
         
-        # Reorder columns for better readability
-        # Remove 'count', since it is not very informative in the presence of 'missing (%)'
+        # 7. Order and clear the columns
+        # Remove 'count', as it duplicates the information about missing data
+        if 'count' in result_df.columns:
+            result_df = result_df.drop(columns='count')
+        
         final_cols_order = ['missing (%)', 'unique', 'top', 'freq']
         
-        # Make sure all columns are present to avoid errors
-        final_cols_order = [col for col in final_cols_order if col in result_df.columns]
+        # Leave only those columns from our ideal list that actually exist
+        existing_cols = [col for col in final_cols_order if col in result_df.columns] 
         
-        return result_df[final_cols_order]
+        return result_df[existing_cols]
     
     
     def describe_numeric(self, df: pd.DataFrame) -> pd.DataFrame:
