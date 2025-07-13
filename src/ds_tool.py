@@ -802,21 +802,38 @@ class DSTools:
             print('Dataset has both NaN and infinite values')
     
     
-    def df_stats(self, df: pd.DataFrame) -> None:
+    def df_stats(self, df: pd.DataFrame, return_format: str = 'dict', detailed: bool = True) -> Union[dict, pd.DataFrame]:
         """
         Provide quick overview of DataFrame structure.
         
         Args:
             df: Input DataFrame
+            return_format: Format of return ('dict' or 'dataframe')
+            detailed: Include additional statistics
             
-        Usage:
-             tools = DSTools()
-             tools.df_stats(df)
+        Returns:
+            dict or DataFrame with statistics
         """
-        print(f'Columns:       \t{df.shape[1]}')
-        print(f'Rows:          \t{df.shape[0]}')
-        print(f'Missing (%):   \t{np.round(df.isnull().sum().sum() / df.size * 100, 1)}%')
-        print(f'Memory:        \t{np.round(df.memory_usage(deep = True).sum() / 10**6, 1)} MB')
+        stats = {
+            'columns': df.shape[1],
+            'rows': df.shape[0],
+            'missing_percent': np.round(df.isnull().sum().sum() / df.size * 100, 1),
+            'memory_mb': np.round(df.memory_usage(deep=True).sum() / 10**6, 1)
+        }
+        
+        if detailed:
+            stats.update({
+                'numeric_columns': df.select_dtypes(include=[np.number]).shape[1],
+                'categorical_columns': df.select_dtypes(include=['object', 'category']).shape[1],
+                'datetime_columns': df.select_dtypes(include=['datetime']).shape[1],
+                'duplicated_rows': df.duplicated().sum(),
+                'total_missing_values': df.isnull().sum().sum()
+            })
+        
+        if return_format.lower() == 'dataframe':
+            return pd.DataFrame(list(stats.items()), columns=['metric', 'value'])
+        else:
+            return stats
     
     
     def describe_categorical(self, df: pd.DataFrame) -> pd.DataFrame:
