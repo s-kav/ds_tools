@@ -832,37 +832,45 @@ class DSTools:
              tools = DSTools()
              cat_stats = tools.describe_categorical(df)
         """
-        cols_to_process = []
-        for col_name in df.columns:
-            # We consider a column categorical if its type is 'object' or 'category',
-            # OR if it consists entirely of blanks (to catch the edge case).
-            # We ignore everything else (numbers, dates).
-            is_object_or_cat = pd.api.types.is_object_dtype(df[col_name]) or \
-                               pd.api.types.is_categorical_dtype(df[col_name])
+        # 1. Select columns with types 'object', 'category' and 'string'
+        # This is a modern and efficient way to select categorical/text columns.
+        categorical_cols = df.select_dtypes(include=['object', 'category', 'string']).columns
+        
+        if len(categorical_cols) == 0:
+            # Also look for columns that are only NaN but have a numeric type
+            # (these won't be selected in step 1, but are worth including in the report)
+            all_nan_cols = df.columns[df.isnull().all()].tolist()
+        
+            # Merge, leaving only unique ones
+            cols_to_process = list(set(list(categorical_cols) + all_nan_cols))
             
-            is_all_nan = df[col_name].isnull().all()
-    
-            if is_object_or_cat or is_all_nan:
-                cols_to_process.append(col_name)
-    
-        if not cols_to_process:
-            return pd.DataFrame()
-    
-        stats_list = []
-        for col in cols_to_process:
-            description = df[col].describe()
-            stats = {
-                'column': col,
-                'missing (%)': np.round(df[col].isnull().sum() / len(df) * 100, 1),
-                'unique': description.get('unique', 0),
-                'top': description.get('top'), # .get() will return None if the key does not exist
-                'freq': description.get('freq')
-            }
-            stats_list.append(stats)
+            if not cols_to_process:
+            return pd.DataFrame() # If there are no matching columns at all
+        else:
+            cols_to_process = list(categorical_cols)
         
-        result_df = pd.DataFrame(stats_list)
+        # 2. Get basic descriptive statistics for these columns
+        # describe() for 'object'/'category' types immediately gives 'unique', 'top', 'freq'
+        description = df[cols_to_process].describe()
         
-        return result_df.set_index('column')
+        # 3. Calculate additional metrics
+        missing_percent = df[cols_to_process].isnull().sum() / len(df) * 100
+        
+        # 4. Assemble the final DataFrame
+        # Transpose .describe() for convenient merging
+        result_df = description.T
+        
+        # Add our custom column
+        result_df['missing (%)'] = missing_percent.round(1)
+        
+        # Reorder columns for better readability
+        # Remove 'count', since it is not very informative in the presence of 'missing (%)'
+        final_cols_order = ['missing (%)', 'unique', 'top', 'freq']
+        
+        # Make sure all columns are present to avoid errors
+        final_cols_order = [col for col in final_cols_order if col in result_df.columns]
+        
+        return result_df[final_cols_order]
     
     
     def describe_numeric(self, df: pd.DataFrame) -> pd.DataFrame:
