@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 # Import our class and its configuration
 from src.ds_tool import DSTools, DistributionConfig
 
-def analyze_and_compare(generated_data: np.ndarray, config: DistributionConfig):
+def test_analyze_and_compare(generated_data: np.ndarray, config: DistributionConfig):
     """A helper function for analyzing and comparing results."""
 
     # Calculate the actual statistics of the generated data
@@ -51,7 +51,7 @@ try:
     skewness=0.8, kurtosis=4.0, n=2000, outlier_ratio=0.01
     )
     generated_data_a = tools.generate_distribution(config_a)
-    analyze_and_compare(generated_data_a, config_a)
+    test_analyze_and_compare(generated_data_a, config_a)
 except ValueError as e:
     print(f"An unexpected error occurred: {e}")
 
@@ -65,7 +65,7 @@ try:
     skewness=1.5, kurtosis=8.0, n=2000, outlier_ratio=0.03
     )
     generated_data_b = tools.generate_distribution(config_b)
-    analyze_and_compare(generated_data_b, config_b)
+    test_analyze_and_compare(generated_data_b, config_b)
 except ValueError as e:
     print(f"An unexpected error occurred: {e}")
 
