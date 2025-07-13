@@ -2,7 +2,7 @@
 import numpy as np
 
 # Import our class
-from ds_tool import DSTools
+from src.ds_tool import DSTools
 
 # --- 1. Generate test data (probability distributions) ---
 
@@ -83,12 +83,12 @@ print("SCENARIO E: Testing Error Handling")
 print("="*60)
 print("\nAttempt to pass distributions of different lengths:")
 try:
-tools.calculate_kl_divergence([0.5, 0.5], [0.3, 0.3, 0.4])
+    tools.calculate_kl_divergence([0.5, 0.5], [0.3, 0.3, 0.4])
 except ValueError as e:
-print(f"-> SUCCESS: Caught error: {e}")
+    print(f"-> SUCCESS: Caught error: {e}")
 
 print("\nAttempt to pass distributions with negative values:")
 try:
-tools.calculate_kl_divergence([1.5, -0.5], [0.5, 0.5])
+    tools.calculate_kl_divergence([1.5, -0.5], [0.5, 0.5])
 except ValueError as e:
-print(f"-> SUCCESS: Caught error: {e}")
+    print(f"-> SUCCESS: Caught error: {e}")

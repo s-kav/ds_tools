@@ -3,7 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 # Import our class and its configuration
-from ds_tool import DSTools, CorrelationConfig
+from src.ds_tool import DSTools, CorrelationConfig
 
 # --- 1. Generate test data ---
 
@@ -76,8 +76,8 @@ print("\n--- Scenario C: Testing validation ---")
 print("Attempt to create a configuration with an invalid method. Expecting to see a ValueError.")
 
 try:
-invalid_config = CorrelationConfig(build_method='invalid_method')
+    invalid_config = CorrelationConfig(build_method='invalid_method')
 except ValueError as e:
-print(f"\nSuccessfully caught the expected error: {e}")
+    print(f"\nSuccessfully caught the expected error: {e}")
 
 print("-" * 50)

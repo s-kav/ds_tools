@@ -4,7 +4,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 # Import our class
-from ds_tool import DSTools
+from src.ds_tool import DSTools
 
 # --- 1. Generate test data ---
 # This data is identical to what we generated for compute_metrics,
@@ -79,7 +79,7 @@ print("Expecting ValueError.")
 print("="*60)
 
 try:
-y_true_short = y_true[:-10] # Shorten one of the arrays
-tools.evaluate_classification(y_true_short, y_predict_proba)
+    y_true_short = y_true[:-10] # Shorten one of the arrays
+    tools.evaluate_classification(y_true_short, y_predict_proba)
 except ValueError as e:
-print(f"SUCCESSFULLY caught expected error: {e}")
+    print(f"SUCCESSFULLY caught expected error: {e}")

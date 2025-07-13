@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 
 # Import our class
-from ds_tool import DSTools
+from src.ds_tool import DSTools
 
 # --- 1. Generate test data ---
 
@@ -14,7 +14,7 @@ np.random.seed(42)
 data = {
 'user_id': range(1, 101),
 'age': np.random.randint(18, 65, size=100),
-'city': np.random.choice(['Moscow', 'Kazan', 'Sochi', np.nan], size=100, p=[0.5, 0.3, 0.15, 0.05]),
+'city': np.random.choice(['Kyiv', 'Kharkiv', 'Sumy', np.nan], size=100, p=[0.5, 0.3, 0.15, 0.05]),
 'balance': np.random.uniform(0, 10000, size=100),
 'registration_date': pd.to_datetime(pd.date_range(start='2022-01-01', periods=100, freq='D'))
 }

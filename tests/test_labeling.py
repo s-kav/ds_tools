@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 
 # Import our class
-from ds_tool import DSTools
+from src.ds_tool import DSTools
 
 # --- 1. Generate test data ---
 
@@ -69,6 +69,6 @@ print("--- Scenario B: Attempting to call on non-existent column ---")
 print("Expecting to see ValueError.")
 
 try:
-tools.labeling(df, 'non_existent_column')
+    tools.labeling(df, 'non_existent_column')
 except ValueError as e:
-print(f"\nSuccessfully caught expected error: {e}")
+    print(f"\nSuccessfully caught expected error: {e}")

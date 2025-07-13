@@ -4,7 +4,7 @@ import pandas as pd
 import polars as pl
 
 # Import our class
-from ds_tool import DSTools
+from src.ds_tool import DSTools
 
 # --- 1. Generate test data ---
 data_dict = {
@@ -79,6 +79,6 @@ print("-> SUCCESS: Warning printed, program did not crash.\n")
 
 print("Trying to pass list (expecting TypeError):")
 try:
-tools.min_max_scale([1, 2, 3])
+    tools.min_max_scale([1, 2, 3])
 except TypeError as e:
-print(f"-> SUCCESS: Expected error caught: {e}")
+    print(f"-> SUCCESS: Expected error caught: {e}")

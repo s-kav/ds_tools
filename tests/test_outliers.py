@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 
 # Import our class and its configuration
-from ds_tool import DSTools, OutlierConfig
+from src.ds_tool import DSTools, OutlierConfig
 
 # --- 1. Generate test data ---
 
@@ -81,7 +81,8 @@ print("\n" + "="*50 + "\n")
 
 # --- Scenario D: Testing error handling ---
 print("--- Scenario D: Attempting to call on a non-existent column ---")
+
 try:
-tools.remove_outliers_iqr(df, 'non_existent_column')
+    tools.remove_outliers_iqr(df, 'non_existent_column')
 except ValueError as e:
-print(f"\nExpected error successfully caught: {e}")
+    print(f"\nExpected error successfully caught: {e}")

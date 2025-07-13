@@ -4,7 +4,7 @@ import pandas as pd
 import polars as pl
 
 # Import our class
-from ds_tool import DSTools
+from src.ds_tool import DSTools
 
 # --- 1. Generate test data ---
 # Create data that will be used for both DataFrame types
@@ -77,6 +77,6 @@ print("\n" + "="*60 + "\n")
 print("--- SCENARIO E: Testing error handling errors ---")
 print("Expecting TypeError when passing list.")
 try:
-tools.add_missing_value_features([1, 2, 3])
+    tools.add_missing_value_features([1, 2, 3])
 except TypeError as e:
-print(f"-> SUCCESS: Caught expected error: {e}")
+    print(f"-> SUCCESS: Caught expected error: {e}")

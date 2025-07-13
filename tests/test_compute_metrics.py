@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 
 # Import our class and its configuration
-from ds_tool import DSTools, MetricsConfig
+from src.ds_tool import DSTools, MetricsConfig
 
 # --- 1. Generate test data ---
 

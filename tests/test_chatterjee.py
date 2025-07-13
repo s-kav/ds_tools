@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 
 # Import our class
-from ds_tool import DSTools
+from src.ds_tool import DSTools
 
 # --- 1. Generate test data ---
 
@@ -81,7 +81,8 @@ print("="*60)
 print("SCENARIO E: Testing Error Handling (Arrays of Different Lengths)")
 print("Expecting: ValueError")
 print("="*60)
+
 try:
-tools.chatterjee_correlation(x[:-1], y_linear)
+    tools.chatterjee_correlation(x[:-1], y_linear)
 except ValueError as e:
-print(f"SUCCESSFULLY caught expected error: {e}")
+    print(f"SUCCESSFULLY caught expected error: {e}")

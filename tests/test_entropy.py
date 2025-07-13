@@ -2,7 +2,7 @@
 import numpy as np
 
 # Import our class
-from ds_tool import DSTools
+from src.ds_tool import DSTools
 
 # --- 1. Generate test data (probability distributions) ---
 
@@ -79,7 +79,7 @@ print("SCENARIO D: Testing error handling (negative probabilities)")
 print("Expecting: ValueError")
 print("="*60)
 try:
-invalid_dist = np.array([1.5, -0.5, 0.0])
-tools.calculate_entropy(invalid_dist)
+    invalid_dist = np.array([1.5, -0.5, 0.0])
+    tools.calculate_entropy(invalid_dist)
 except ValueError as e:
-print(f"SUCCESSFULLY caught expected error: {e}")
+    print(f"SUCCESSFULLY caught expected error: {e}")

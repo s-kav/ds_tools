@@ -1,4 +1,8 @@
 
+import numpy as np
+import pandas as pd
+from src.ds_tool import DSTools
+
 np.random.seed(42)
 N_SAMPLES = 100
 
@@ -20,7 +24,7 @@ p=[0.7, 0.2, 0.1] # Sum of probabilities is now 1.0
 
 # Categorical column without gaps
 'country': np.random.choice(
-['Russia', 'Belarus', 'Kazakhstan', 'Armenia', 'Uzbekistan'],
+['Ukraine', 'Belarus', 'Kazakhstan', 'Armenia', 'Uzbekistan'],
 size=N_SAMPLES
 ),
 

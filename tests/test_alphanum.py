@@ -3,7 +3,7 @@ import numpy as np
 import re
 
 # Import our class
-from ds_tool import DSTools
+from src.ds_tool import DSTools
 
 # --- Initialize the toolkit ---
 tools = DSTools()
@@ -78,12 +78,11 @@ print("SCENARIO D: Testing error handling (negative values)")
 print("="*60)
 print("Attempt to pass n = -1 (expecting ValueError):")
 try:
-tools.generate_alphanum_codes(n=-1)
+    tools.generate_alphanum_codes(n=-1)
 except ValueError as e:
-print(f"-> SUCCESS: Expected error caught: {e}\n")
-
-print("Attempt to pass length = -5 (expecting ValueError):")
+    print(f"-> SUCCESS: Expected error caught: {e}\n")
+    print("Attempt to pass length = -5 (expecting ValueError):")
 try:
-tools.generate_alphanum_codes(n=10, length=-5)
+    tools.generate_alphanum_codes(n=10, length=-5)
 except ValueError as e:
-print(f"-> SUCCESS: Expected error caught: {e}")
+    print(f"-> SUCCESS: Expected error caught: {e}")

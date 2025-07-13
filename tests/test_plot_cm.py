@@ -4,7 +4,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 # Import our class
-from ds_tool import DSTools
+from src.ds_tool import DSTools
 
 # --- 1. Generate test data ---
 
@@ -67,11 +67,12 @@ print("\n" + "="*60)
 print("SCENARIO D: Testing Error Handling (Invalid Number of Labels)")
 print("Expecting: ValueError.")
 print("="*60)
+
 try:
-tools.plot_confusion_matrix(
-y_true_binary,
-y_pred_binary,
-class_labels=['One label'] # Pass 1 label for 2 classes
-)
+    tools.plot_confusion_matrix(
+    y_true_binary,
+    y_pred_binary,
+    class_labels=['One label'] # Pass 1 label for 2 classes
+    )
 except ValueError as e:
-print(f"SUCCESSFULLY caught expected error: {e}")
+    print(f"SUCCESSFULLY caught expected error: {e}")

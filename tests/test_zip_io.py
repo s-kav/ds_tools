@@ -5,7 +5,7 @@ import pandas as pd
 import polars as pl
 
 # Import our class
-from ds_tool import DSTools
+from src.ds_tool import DSTools
 
 # --- 1. Generate test data ---
 print("--- 1. Generate test DataFrame ---")

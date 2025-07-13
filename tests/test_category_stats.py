@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 
 # Import our class
-from ds_tool import DSTools
+from src.ds_tool import DSTools
 
 # --- 1. Generate test data ---
 
@@ -49,8 +49,8 @@ print("--- Scenario C: Attempting to call for a non-existent column ---")
 print("Expecting to see ValueError.")
 
 try:
-tools.category_stats(df, 'Non-existent_column')
+    tools.category_stats(df, 'Non-existent_column')
 except ValueError as e:
-print(f"\nExpected error successfully caught: {e}")
+    print(f"\nExpected error successfully caught: {e}")
 
 print("\n" + "="*50)

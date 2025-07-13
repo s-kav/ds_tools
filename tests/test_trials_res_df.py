@@ -4,37 +4,37 @@ import pandas as pd
 import numpy as np
 
 # Import our class
-from ds_tool import DSTools
+from src.ds_tool import DSTools
 
 # --- 1. Create a dummy objective function for Optuna ---
 
 # This function simulates training the model. It takes a trial object,
 # "suggests" hyperparameters, pauses, and returns the "quality" of the model.
 def objective_function(trial: optuna.trial.Trial) -> float:
-"""Dummy function for optimization."""
+    """Dummy function for optimization."""
 
-# Suggest hyperparameters
-x = trial.suggest_float('x', -10, 10)
-y = trial.suggest_int('y', 0, 20)
-category = trial.suggest_categorical('category', ['A', 'B', 'C'])
+    # Suggest hyperparameters
+    x = trial.suggest_float('x', -10, 10)
+    y = trial.suggest_int('y', 0, 20)
+    category = trial.suggest_categorical('category', ['A', 'B', 'C'])
 
-# Simulate a "failed" trial (e.g., parameters are incompatible)
-if trial.number == 3:
-raise ValueError("Simulating error in trial #3")
+    # Simulate a "failed" trial (e.g., parameters are incompatible)
+    if trial.number == 3:
+        raise ValueError("Simulating error in trial #3")
 
-# Simulate a "pruned" trial if y < 5
-# Optuna can abort a pruned trial before it completes
-if y < 5:
-raise optuna.exceptions.TrialPruned("Simulating abort (y < 5)")
+    # Simulate a "pruned" trial if y < 5
+    # Optuna can abort a pruned trial before it completes
+    if y < 5:
+        raise optuna.exceptions.TrialPruned("Simulating abort (y < 5)")
 
-# Simulating the training process
-time.sleep(np.random.uniform(0.1, 0.3))
+    # Simulating the training process
+    time.sleep(np.random.uniform(0.1, 0.3))
 
-# Calculating the "quality" of the model using a made-up formula
-# Just to make the results different
-score = (100 - x**2) + y - (5 if category == 'C' else 0)
+    # Calculating the "quality" of the model using a made-up formula
+    # Just to make the results different
+    score = (100 - x**2) + y - (5 if category == 'C' else 0)
 
-return score
+    return score
 
 # --- 2. Starting an Optuna optimization session ---
 
@@ -45,9 +45,9 @@ study = optuna.create_study(direction='maximize')
 # Starting 15 attempts. We expect some of them to fail.
 # Optuna will handle errors on its own, we just need to catch them so the script doesn't stop.
 try:
-study.optimize(objective_function, n_trials=15)
+    study.optimize(objective_function, n_trials=15)
 except ValueError:
-print("Caught a simulated error as expected. Continue.")
+    print("Caught a simulated error as expected. Continue.")
 
 print("\nOptimization completed.")
 print(f"Total number of trials started: {len(study.trials)}")
