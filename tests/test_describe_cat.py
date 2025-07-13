@@ -57,7 +57,7 @@ def test_notes_column_extreme_case(sample_dataframe):
     result = tools.describe_categorical(sample_dataframe)
 
     assert result.loc['notes', 'missing (%)'] == 100.0
-    assert result.loc['notes', 'unique'] == 0
+    assert pd.isna(result.loc['notes', 'unique'])
 
 def test_numeric_only_dataframe_returns_empty():
     df_numeric = pd.DataFrame({
