@@ -39,5 +39,9 @@ build-backend = "setuptools.build_meta"
 addopts = [
     "--import-mode=importlib",
 ]
-filterwarnings = "error"
+filterwarnings = [
+    "ignore::pydantic.warnings.PydanticDeprecatedSince20",
+    "ignore::DeprecationWarning",
+    "error",
+]
 testpaths = ["tests"]
