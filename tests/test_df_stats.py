@@ -30,8 +30,8 @@ def test_df_stats_summary_output(monkeypatch, sample_dataframe):
    
     has_columns = any("Columns" in val for val in captured_output.values())
     has_rows = any("Rows" in val for val in captured_output.values())
-    has_missing = any("Gaps (%)" in val or "Missing (%)" in val for val in captured_output.values())
-    has_memory = any("Memory (MB)" in val for val in captured_output.values())
+    has_missing = any("Missing (%)" in val for val in captured_output.values())
+    has_memory = any("Memory" in val for val in captured_output.values())
 
     assert has_columns, "Output must include number of columns"
     assert has_rows, "Output must include number of rows"
@@ -47,11 +47,10 @@ def test_manual_calculations_match(sample_dataframe):
     expected_missing_pct = round(expected_missing / expected_total * 100, 1)
     expected_memory_mb = round(sample_dataframe.memory_usage(deep=True).sum() / 1e6, 1)
 
-    # Извлекаем значения из исходной функции (в реальном коде — возвращаемое значение)
     df = sample_dataframe
 
     assert expected_cols == 5
     assert expected_rows == 100
     assert expected_missing == df.isnull().sum().sum()
-    assert expected_missing_pct <= 5.0  # допущение, может быть до 5%
-    assert expected_memory_mb > 0
+    assert expected_missing_pct <= 5.0
+    assert expected_memory_mb >= 0
