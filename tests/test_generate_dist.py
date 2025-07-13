@@ -41,7 +41,7 @@ def test_generate_distribution_invalid_moments():
         mean=100, median=100, std=15, min_val=50, max_val=150,
         skewness=2.0, kurtosis=1.0, n=1000  # Invalid: kurt < skew² - 2
     )
-    with pytest.raises(ValueError, match="Invalid moments. Check that std > 0 and kurtosis >= (skewness² - 2)."):
+    with pytest.raises(ValueError, match="Invalid statistical moments. Check that std > 0 and kurtosis >= (skewness² - 2)."):
         tools.generate_distribution(config_invalid)
 
 # def test_distribution_config_pydantic_validation():
