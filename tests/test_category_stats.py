@@ -39,9 +39,9 @@ tools.category_stats(df, 'City')
 print("\n" + "="*50 + "\n")
 
 # --- Scenario B: Call for the 'Customer_Status' column (with gaps) ---
-print("--- Scenario B: Statistics for the 'Customer_Status' column ---")
+print("--- Scenario B: Statistics for the 'Customer_status' column ---")
 print("Note that missing values ​​(NaN) are not taken into account in the calculations.")
-tools.category_stats(df, 'Customer_Status')
+tools.category_stats(df, 'Customer_status')
 print("\n" + "="*50 + "\n")
 
 # --- Scenario C: Testing error handling ---
