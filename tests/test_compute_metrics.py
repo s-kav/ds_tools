@@ -30,5 +30,5 @@ def test_compute_metrics_custom_config(classification_data, capsys):
     config = MetricsConfig(error_vis=False, print_values=True)
     df = tools.compute_metrics(y_true, y_pred, y_proba, config=config)
     captured = capsys.readouterr()
-    assert "Accuracy" in captured.out or "F1" in captured.out or "ROC AUC" in captured.out
+    assert "AV_prec_score" in captured.out and "BAL_acc_score" in captured.out
     assert df.shape[0] >= 1
