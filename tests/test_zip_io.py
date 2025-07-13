@@ -41,7 +41,7 @@ def test_save_and_load_dataframes(dfs_to_save, tools, format_, zip_filename):
             backend='polars'
         )
         # Check polars DataFrame equality
-        assert loaded_polars['polars_data'].frame_equal(dfs_to_save['polars_data'], 
+        assert loaded_polars['polars_data'].equals(dfs_to_save['polars_data'], 
                                                         null_equal=True), "Polars data must match after reload"
 
     # Read back with pandas
