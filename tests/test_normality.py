@@ -21,7 +21,7 @@ def test_normal_distribution(tools, sample_data, capsys):
     # Expect p-value > 0.05, "Data looks Gaussian"
     tools.stat_normal_testing(sample_data["normal"])
     captured = capsys.readouterr()
-    assert "p-value" in captured.out
+    assert "p =" in captured.out
     assert "looks Gaussian" in captured.out or "looks normal" in captured.out
 
 def test_uniform_distribution(tools, sample_data, capsys):
