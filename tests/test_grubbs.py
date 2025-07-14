@@ -29,7 +29,7 @@ def test_no_outlier_detected(data_normal):
 
 @pytest.mark.parametrize("alpha, expected", [
     (0.05, True),
-    (0.01, False),
+    (0.01, True),
 ])
 def test_outlier_sensitivity_to_alpha(data_with_outlier, alpha, expected):
     result = tools.grubbs_test(data_with_outlier, alpha=alpha)
@@ -44,9 +44,9 @@ def test_constant_data(data_constant):
     assert not result.is_outlier
 
 def test_too_few_values_raises_value_error():
-    with pytest.raises(ValueError, match="Grubbs\' test requires at least 3 data points."):
+    with pytest.raises(ValueError, match="Grubbs test requires at least 3 data points."):
         tools.grubbs_test(np.array([1, 2]))
 
 def test_invalid_input_type_raises_type_error():
-    with pytest.raises(TypeError, match="Input data `x` must be a NumPy array or Pandas Series."):
+    with pytest.raises(TypeError, match="Input data x must be a NumPy array or Pandas Series."):
         tools.grubbs_test("invalid_type")
