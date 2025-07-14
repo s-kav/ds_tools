@@ -33,7 +33,7 @@ dynamic = []
 Homepage = "https://github.com/s-kav/ds_tools"
 Documentation = "https://github.com/s-kav/ds_tools"
 Repository = "https://github.com/s-kav/ds_tools.git"
-"Source Code" = "https://github.com/s-kav/ds_tools/src"
+"Source Code" = "https://github.com/s-kav/ds_tools/tree/main/tests"
 
 
 [build-system]
