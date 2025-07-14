@@ -19,7 +19,7 @@ def test_evaluate_classification_structure(synthetic_data):
     result = tools.evaluate_classification(true_labels=y_true, pred_probs=y_probs, threshold=0.5)
     
     assert isinstance(result, dict), "The return value must be a dictionary."
-    required_keys = {'accuracy', 'precision', 'recall', 'f1_score', 'roc_auc'}
+    required_keys = {'accuracy', 'roc_auc', 'average_precision', 'Kolmogorov-Smirnov', 'classification_report'}
     assert required_keys.issubset(result.keys()), "Mandatory metrics are missing"
     assert 0.0 <= result['roc_auc'] <= 1.0, "ROC AUC should be in the range [0, 1]"
 
