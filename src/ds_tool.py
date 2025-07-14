@@ -550,7 +550,7 @@ class DSTools:
 
         for col in df_results.columns:
             if col not in [metric, 'Duration']:
-                df_results[col] = pd.to_numeric(df_results[col], errors='ignore')
+                df_results[col] = pd.to_numeric(df_results[col], errors='coerce')
                 
         return df_results
     
