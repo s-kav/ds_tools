@@ -22,7 +22,7 @@ def test_compute_metrics_default(classification_data):
     df = tools.compute_metrics(y_true, y_pred, y_proba)
     assert isinstance(df, np.ndarray) or hasattr(df, 'shape')
     assert df.shape[0] >= 1  # Sanity check on rows
-    expected_cols = {'AV_prec_score', 'BAL_acc_score', 'Kappa_score'}
+    expected_cols = {'Average_precision', 'Balanced_accuracy', 'Kappa_score'}
     assert expected_cols.issubset(df.columns)
 
 def test_compute_metrics_custom_config(classification_data, capsys):
@@ -30,5 +30,5 @@ def test_compute_metrics_custom_config(classification_data, capsys):
     config = MetricsConfig(error_vis=False, print_values=True)
     df = tools.compute_metrics(y_true, y_pred, y_proba, config=config)
     captured = capsys.readouterr()
-    assert "AV_prec_score" in captured.out and "BAL_acc_score" in captured.out
+    assert "Average_precision" in captured.out and "Balanced_accuracy" in captured.out
     assert df.shape[0] >= 1
