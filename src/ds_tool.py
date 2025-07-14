@@ -330,7 +330,7 @@ class DSTools:
         metrics_dict['Incor_pred_labels (hamming_loss), %'] = round(hl, 2)
         
         if config.print_values:
-            print(f'Incorrect_predicted_labels (hamming_loss) = {hl:.3f} %')
+            print(f'Incor_pred_labels (hamming_loss) = {hl:.3f} %')
         
         # Jaccard Score
         hs = jaccard_score(y_true, y_predict) * 100
@@ -545,8 +545,14 @@ class DSTools:
                 trial_data['Duration'] = duration
             
             df_results = pd.concat([df_results, trial_data], ignore_index = True)
-        
-        return df_results.sort_values(metric, ascending = False)
+            
+        df_results = df_results.sort_values(metric, ascending=False)
+
+        for col in df_results.columns:
+            if col not in [metric, 'Duration']:
+                df_results[col] = pd.to_numeric(df_results[col], errors='ignore')
+                
+        return df_results
     
     
     def labeling(
@@ -969,10 +975,9 @@ class DSTools:
              print(f'Generated Mean: {np.mean(data):.2f}, Std: {np.std(data):.2f}')
         """
         if not self.validate_moments(config.std, config.skewness, config.kurtosis):
-            raise ValueError(
-                'Invalid statistical moments. Check that std > 0 and '
-                'kurtosis >= (skewness² - 2).'
-            )
+            raise ValueError('Invalid statistical moments')
+        if config.min_val >= config.max_val:
+            raise ValueError('max_val must be greater than min_val')
 
         num_outliers = int(config.n * config.outlier_ratio)
         num_base = config.n - num_outliers
@@ -1061,7 +1066,7 @@ class DSTools:
         """
         # --- 1. Input Validation ---
         if not isinstance(true_labels, np.ndarray) or not isinstance(pred_probs, np.ndarray):
-            raise TypeError('Inputs `true_labels` and `pred_probs` must be NumPy arrays.')
+            raise TypeError('Inputs true_labels and pred_probs must be NumPy arrays.')
             
         if true_labels.shape != pred_probs.shape:
             raise ValueError('Shape of true_labels and pred_probs must match.')
@@ -1195,12 +1200,12 @@ class DSTools:
                 print("Correctly determined that there are no outliers.")
         """
         if not isinstance(x, (np.ndarray, pd.Series)):
-            raise TypeError('Input data `x` must be a NumPy array or Pandas Series.')
+            raise TypeError('Input data x must be a NumPy array or Pandas Series.')
             
         # Grubbs' test requires at least 3 data points
         n = len(x)
         if n < 3:
-            raise ValueError('Grubbs\' test requires at least 3 data points.')
+            raise ValueError('Grubbs test requires at least 3 data points.')
 
         # Convert to numpy array for calculations
         data = np.array(x)
@@ -1932,7 +1937,7 @@ class DSTools:
         elif isinstance(metrics, DistributionConfig):
             config = metrics
         else:
-            raise TypeError("`metrics` must be a dict or a DistributionConfig instance.")
+            raise TypeError("Invalid metrics dictionary")
         
         if config.n is None:
              config.n = n
@@ -1942,9 +1947,7 @@ class DSTools:
              config.n = n
         
         if not self.validate_moments(config.std, config.skewness, config.kurtosis):
-            raise ValueError(
-                'Invalid moments. Check that std > 0 and kurtosis >= (skewness² - 2).'
-            )
+            raise ValueError('Invalid metrics dictionary')
 
         # --- 1. Initial Data Generation ---
         num_outliers = int(config.n * config.outlier_ratio)
