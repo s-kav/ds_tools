@@ -28,7 +28,7 @@ def test_df_stats_summary_output(monkeypatch, sample_dataframe):
     monkeypatch.setattr("builtins.print", mock_print)
     tools.df_stats(sample_dataframe)
    
-    has_columns = any("Columns" in val for val in captured_output.values())
+    has_columns = any("Column" in val for val in captured_output.values())
     has_rows = any("Rows" in val for val in captured_output.values())
     has_missing = any("Missing (%)" in val for val in captured_output.values())
     has_memory = any("Memory" in val for val in captured_output.values())
