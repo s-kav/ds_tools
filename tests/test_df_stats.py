@@ -3,54 +3,63 @@ import pandas as pd
 import pytest
 from src.ds_tool import DSTools
 
-tools = DSTools()
+@pytest.fixture
+def tools_instance():
+    """Provides a DSTools instance for tests."""
+    return DSTools()
 
 @pytest.fixture
 def sample_dataframe():
-    np.random.seed(42)
-    df = pd.DataFrame({
+    """Creates a sample DataFrame for testing."""
+    data = {
         'user_id': range(1, 101),
-        'age': np.random.randint(18, 65, size=100),
-        'city': np.random.choice(['Kyiv', 'Kharkiv', 'Sumy', np.nan], size=100, p=[0.5, 0.3, 0.15, 0.05]),
-        'balance': np.random.uniform(0, 10000, size=100),
-        'registration_date': pd.date_range(start='2022-01-01', periods=100, freq='D')
-    })
-    df.loc[df.sample(n=10, random_state=1).index, 'balance'] = np.nan
+        'age': np.random.randint(18, 65, 100),
+        'city': ['Kyiv'] * 100,
+        'balance': np.random.uniform(1000, 10000, 100),
+        'registration_date': pd.to_datetime(pd.date_range(start='2022-01-01', periods=100))
+    }
+    df = pd.DataFrame(data)
+   
+    df.loc[5:9, 'balance'] = np.nan
+    df.loc[15:19, 'age'] = np.nan
+    
+    df.loc[100] = df.loc[0]
     return df
 
-def test_df_stats_summary_output(monkeypatch, sample_dataframe):
-    captured_output = {}
+def test_df_stats_returns_dict(tools_instance, sample_dataframe):
+    """
+    Test that df_stats returns a dictionary with the expected keys.
+    """
+    stats_dict = tools_instance.df_stats(sample_dataframe)
+    
+    assert isinstance(stats_dict, dict), "Function should return a dictionary."
+    
+    expected_keys = {
+        'columns', 'rows', 'missing_percent', 'memory_mb',
+        'numeric_columns', 'categorical_columns', 'datetime_columns',
+        'duplicated_rows', 'total_missing_values'
+    }
+    assert expected_keys.issubset(stats_dict.keys()), "One or more required keys are missing in the output."
 
-    def mock_print(*args, **kwargs):
-        key = len(captured_output)
-        captured_output[key] = " ".join(str(arg) for arg in args)
+def test_df_stats_correct_values(tools_instance, sample_dataframe):
+    """
+    Test that the values calculated by df_stats are correct.
+    """
 
-    monkeypatch.setattr("builtins.print", mock_print)
-    tools.df_stats(sample_dataframe)
-   
-    has_columns = any("Column" in val or "Columns" in val for val in captured_output.values())
-    has_rows = any("Rows" in val for val in captured_output.values())
-    has_missing = any("Missing (%)" in val for val in captured_output.values())
-    has_memory = any("Memory" in val for val in captured_output.values())
+    stats_dict = tools_instance.df_stats(sample_dataframe)    
 
-    assert has_columns, "Output must include number of columns"
-    assert has_rows, "Output must include number of rows"
-    assert has_missing, "Output must include missing values info"
-    assert has_memory, "Output must include memory usage"
-
-def test_manual_calculations_match(sample_dataframe):
-   
-    expected_cols = sample_dataframe.shape[1]
-    expected_rows = sample_dataframe.shape[0]
-    expected_missing = sample_dataframe.isnull().sum().sum()
-    expected_total = sample_dataframe.size
-    expected_missing_pct = round(expected_missing / expected_total * 100, 1)
-    expected_memory_mb = round(sample_dataframe.memory_usage(deep=True).sum() / 1e6, 1)
-
-    df = sample_dataframe
-
-    assert expected_cols == 5
-    assert expected_rows == 100
-    assert expected_missing == df.isnull().sum().sum()
-    assert expected_missing_pct <= 5.0
-    assert expected_memory_mb >= 0
+    expected_cols = 5
+    expected_rows = 101 # 100 + 1 дубликат
+    expected_total_missing = 10
+    expected_missing_percent = np.round(10 / (101 * 5) * 100, 1)
+    
+    assert stats_dict['columns'] == expected_cols
+    assert stats_dict['rows'] == expected_rows
+    assert stats_dict['numeric_columns'] == 3 # user_id, age, balance
+    assert stats_dict['categorical_columns'] == 1 # city
+    assert stats_dict['datetime_columns'] == 1 # registration_date
+    assert stats_dict['duplicated_rows'] == 1
+    assert stats_dict['total_missing_values'] == expected_total_missing
+    
+    assert stats_dict['missing_percent'] == pytest.approx(expected_missing_percent)
+    assert stats_dict['memory_mb'] >= 0
