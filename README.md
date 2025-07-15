@@ -1,6 +1,6 @@
 # DSTools: Data Science Research Toolkit
 
-[![Tests](https://github.com/s-kav/ds_tools/actions/workflows/main.yml/badge.svg)](https://github.com/s-kav/ds_tools/actions)
+[![Tests](https://github.com/s-kav/ds_tools/actions/workflows/python-publish.yml/badge.svg)](https://github.com/s-kav/ds_tools/actions)
 [![PyPI version](https://badge.fury.io/py/dscience-tools.svg)](https://badge.fury.io/py/dscience-tools)
 [![codecov](https://codecov.io/gh/s-kav/ds_tools/branch/main/graph/badge.svg)](https://codecov.io/gh/s-kav/ds_tools)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
