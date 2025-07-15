@@ -40,7 +40,7 @@ This toolkit is built on top of popular libraries like Pandas, Polars, Scikit-le
 -   **Data Exploration:** Quickly get statistics for numerical and categorical features (`describe_numeric`, `describe_categorical`), check for missing values (`check_NINF`), and visualize correlations (`corr_matrix`).
 -   **Model Evaluation:** Comprehensive classification model evaluation (`evaluate_classification`, `compute_metrics`) with clear visualizations (`plot_confusion_matrix`).
 -   **Data Preprocessing:** Encode categorical variables (`labeling`), handle outliers (`remove_outliers_iqr`), and scale features (`min_max_scale`).
--   **Time Series Analysis:** Test for stationarity using the Dickey-Fuller test (`test_stationarity
+-   **Time Series Analysis:** Test for stationarity using the Dickey-Fuller test (`test_stationarity`).
 -   **Advanced Statistics:** Calculate non-parametric correlation (`chatterjee_correlation`), entropy, and KL-divergence.
 -   **Utilities:** Save/load DataFrames to/from ZIP archives, generate random alphanumeric codes, and more.
 
