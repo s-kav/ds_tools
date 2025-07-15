@@ -19,9 +19,8 @@ This toolkit is built on top of popular libraries like Pandas, Polars, Scikit-le
 
 *   [Key Features](#key-features)
 *   [Installation](#installation)
-*   [Usage](#usage)
 *   [Function Overview](#function-overview)
-*   [Example](#example)
+*   [Examples of usage](#examples-of-usage)
 *   [Available Tools](#available-tools)
 *   [Contributing](#contributing)
 *   [References](#references)
@@ -77,10 +76,26 @@ pip install -r requirements.txt
 
 ```
 
-# Usage
+# Function Overview
 
-Here's a simple example of how to use the library to evaluate a classification model.
+The library provides a wide range of functions. To see a full, formatted list of available tools, you can use the function_list method:
 
+```python
+
+from ds_tools import DSTools
+
+tools = DSTools()
+tools.function_list()
+
+```
+
+# Examples of usage
+
+Here're some simple examples of how to use this library.
+
+## Evaluate a classification model.
+
+Tired of writing boilerplate code to see your model's performance? Use `evaluate_classification` for a complete summary.
 
 ```python
 
@@ -103,28 +118,16 @@ print(f"\nROC AUC Score: {results['roc_auc']:.4f}")
 
 ```
 
+This will produce:
+- A detailed printout of key metrics (Accuracy, ROC AUC, Average Precision, etc.).
+- A full classification report.
+- A confusion matrix.
+- Beautifully plotted ROC and Precision-Recall curves.
+  
 
-Full code base for other function testing you can find [here](https://github.com/s-kav/ds_tools/blob/main/tests/).
+## Generating a Synthetic Distribution.
 
-
-# Function Overview
-
-The library provides a wide range of functions. To see a full, formatted list of available tools, you can use the function_list method:
-
-```python
-
-from ds_tools import DSTools
-
-tools = DSTools()
-tools.function_list()
-
-```
-
-# Example
-
-Generating a Synthetic Distribution: need to create a dataset with specific statistical properties?
-generate_distribution_from_metrics can do that.
-
+Need to create a dataset with specific statistical properties? - generate_distribution_from_metrics can do that.
 
 ```python
 
@@ -152,6 +155,50 @@ print(f"Generated Std: {np.std(generated_data):.2f}")
 
 ```
 
+## Correlation Matrix Heatmap
+
+Visualize the relationships in your data with a highly customizable correlation matrix.
+
+```python
+# --- Sample Data ---
+data = {
+    'feature_a': np.random.rand(100) * 100,
+    'feature_b': np.random.rand(100) * 50 + 25,
+    'feature_c': np.random.rand(100) * -80,
+}
+df = pd.DataFrame(data)
+df['feature_d'] = df['feature_a'] * 1.5 + np.random.normal(0, 10, 100)
+
+# --- Generate a Spearman correlation matrix ---
+config = CorrelationConfig(build_method='spearman', font_size=12)
+tools.corr_matrix(df, config=config)
+```
+
+This will display a publication-quality heatmap, masked to show only the lower triangle for clarity, using the Spearman correlation method.
+
+## Detailed Categorical Analysis.
+
+Quickly understand the distribution of your categorical features.
+
+```python
+# --- Sample Data ---
+data = {
+    'city': ['London', 'Paris', 'London', 'New York', 'Paris', 'London'],
+    'status': ['Active', 'Inactive', 'Active', 'Active', 'Inactive', 'Active']
+}
+df = pd.DataFrame(data)
+
+# --- Get stats for a column ---
+tools.category_stats(df, 'city')
+
+=========================== output
+           city
+     uniq_names amount_values  percentage
+0        London             3       50.00
+1         Paris             2       33.33
+2      New York             1       16.67
+
+```
 
 Full code base for other function testing you can find [here](https://github.com/s-kav/ds_tools/blob/main/tests/).
 
