@@ -4,6 +4,7 @@
 [![PyPI version](https://img.shields.io/pypi/v/dscience-tools.svg)](https://pypi.org/project/dscience-tools/)
 [![codecov](https://codecov.io/gh/s-kav/ds_tools/branch/main/graph/badge.svg)](https://codecov.io/gh/s-kav/ds_tools)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![PyPI Downloads](https://static.pepy.tech/badge/dscience-tools)](https://pepy.tech/projects/dscience-tools)
 
 # Authors
 
