@@ -10,11 +10,19 @@
 
 - [@sergiikavun](https://www.linkedin.com/in/sergii-kavun/)
 
+# Short intro
+
 **DSTools** is a Python library designed to assist data scientists and researchers by providing a collection of helpful functions for various stages of a data science project, from data exploration and preprocessing to model evaluation and synthetic data generation.
 
-This comprehensive library with helper functions to accelerate and simplify various stages of the data science research cycle.
+The library is built upon the author's extensive multi-decade experience (30+ years) in data science, statistical modeling, and enterprise software development. Drawing from real-world challenges encountered across diverse industries including finance, banking, healthcare, insurance, and e-commerce, this toolkit addresses common pain points that practitioners face daily in their analytical workflows.
 
-This toolkit is built on top of popular libraries like Pandas, Polars, Scikit-learn, and Matplotlib, providing a higher-level API for common tasks in Exploratory Data Analysis (EDA), feature preprocessing, model evaluation, and synthetic data generation. It is designed for data scientists, analysts, and researchers who want to write cleaner, more efficient, and more reproducible code.
+The development philosophy emphasizes practical utility over theoretical complexity, incorporating battle-tested patterns and methodologies that have proven effective in production environments. Each function and module reflects lessons learned from managing large-scale data projects, optimizing computational performance, and ensuring code maintainability in collaborative team settings.
+
+The library encapsulates best practices developed through years of consulting work, academic research collaborations, and hands-on problem-solving in high-stakes business environments. It represents a distillation of proven techniques, streamlined workflows, and robust error-handling approaches that have evolved through countless iterations and real-world applications.
+
+This comprehensive toolkit serves as a bridge between theoretical data science concepts and practical implementation needs, offering developers and researchers a reliable foundation built on decades of field-tested expertise and continuous refinement based on community feedback and emerging industry requirements. This library with helper functions to accelerate and simplify various stages of the data science research cycle.
+
+This toolkit is built on top of popular libraries like Pandas, Polars, Scikit-learn, Optuna, and Matplotlib, providing a higher-level API for common tasks in Exploratory Data Analysis (EDA), feature preprocessing, model evaluation, and synthetic data generation. It is designed for data scientists, analysts, and researchers who want to write cleaner, more efficient, and more reproducible code.
 
 # Table of Contents
 
@@ -124,7 +132,15 @@ This will produce:
 - A full classification report.
 - A confusion matrix.
 - Beautifully plotted ROC and Precision-Recall curves.
-  
+
+**Example of classification metrics, report, and confusion matrix (at threshold = 0.7)**
+![](tests_figures/eval_class_1.png)
+
+**Example of precision vs recall and ROC (TPR vs FPR) curves**
+![](tests_figures/eval_class_2.png)
+
+**Example of classification metrics, report, and confusion matrix (at threshold = 0.5, for comparison)**
+![](tests_figures/eval_class_3.png)
 
 ## Generating a Synthetic Distribution.
 
@@ -156,6 +172,13 @@ print(f"Generated Std: {np.std(generated_data):.2f}")
 
 ```
 
+**Comparative analysis of target statistical parameters against actual generated data results (scenario A)**
+![](tests_figures/generate_distr_from_metrics_1.png)
+
+**Comparative analysis of target statistical parameters against actual generated data results (scenario B)**
+![](tests_figures/generate_distr_from_metrics_2.png)
+
+
 ## Correlation Matrix Heatmap
 
 Visualize the relationships in your data with a highly customizable correlation matrix.
@@ -176,6 +199,13 @@ tools.corr_matrix(df, config=config)
 ```
 
 This will display a publication-quality heatmap, masked to show only the lower triangle for clarity, using the Spearman correlation method.
+
+**Example of correlation matrix (by Pearson)**
+![](tests_figures/corr_pearson_example.png)
+
+**Example of correlation matrix (by Spearman)**
+![](tests_figures/corr_spearman_example.png)
+
 
 ## Detailed Categorical Analysis.
 
@@ -200,6 +230,36 @@ tools.category_stats(df, 'city')
 2      New York             1       16.67
 
 ```
+
+## Plot confusion matrix.
+
+Helps to plot confusion matrix in graphical kind, especially for calssification tasks.
+
+
+```python
+np.random.seed(42)
+N_SAMPLES = 1500
+
+y_true_multi = np.random.randint(0, 3, size=N_SAMPLES)
+correct_preds = np.random.rand(N_SAMPLES) < 0.75
+y_pred_multi = np.where(correct_preds, y_true_multi, (y_true_multi + random_errors) % 3)
+
+plot_confusion_matrix(
+y_true_multi,
+y_pred_multi,
+class_labels=['Cat', 'Dog', 'Bird'],
+title='Multi-Class Classification (Animals)',
+cmap='YlGnBu'
+)
+```
+
+**Example of confusion matrix plotting (for binary classification)**
+![](tests_figures/bin_classification.png)
+
+
+**Example of confusion matrix plotting (for multiclass classification)**
+![](tests_figures/multiclass_classification.png)
+
 
 Full code base for other function testing you can find [here](https://github.com/s-kav/ds_tools/blob/main/tests/).
 
