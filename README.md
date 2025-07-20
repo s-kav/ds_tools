@@ -10,6 +10,19 @@
 
 - [@sergiikavun](https://www.linkedin.com/in/sergii-kavun/)
 
+# Table of Contents
+
+*   [Short intro](#short-intro)
+*   [Key Features](#key-features)
+*   [Installation](#installation)
+*   [Function Overview](#function-overview)
+*   [Examples of usage](#examples-of-usage)
+*   [Available Tools](#available-tools)
+*   [Contributing](#contributing)
+*   [References](#references)
+*   [License](#license)
+
+
 # Short intro
 
 **DSTools** is a Python library designed to assist data scientists and researchers by providing a collection of helpful functions for various stages of a data science project, from data exploration and preprocessing to model evaluation and synthetic data generation.
@@ -23,17 +36,6 @@ The library encapsulates best practices developed through years of consulting wo
 This comprehensive toolkit serves as a bridge between theoretical data science concepts and practical implementation needs, offering developers and researchers a reliable foundation built on decades of field-tested expertise and continuous refinement based on community feedback and emerging industry requirements. This library with helper functions to accelerate and simplify various stages of the data science research cycle.
 
 This toolkit is built on top of popular libraries like Pandas, Polars, Scikit-learn, Optuna, and Matplotlib, providing a higher-level API for common tasks in Exploratory Data Analysis (EDA), feature preprocessing, model evaluation, and synthetic data generation. It is designed for data scientists, analysts, and researchers who want to write cleaner, more efficient, and more reproducible code.
-
-# Table of Contents
-
-*   [Key Features](#key-features)
-*   [Installation](#installation)
-*   [Function Overview](#function-overview)
-*   [Examples of usage](#examples-of-usage)
-*   [Available Tools](#available-tools)
-*   [Contributing](#contributing)
-*   [References](#references)
-*   [License](#license)
 
 
 # Key Features
