@@ -1,5 +1,5 @@
 # src/ds_tool/ds_tools.py
-# version 0.9.2 - Refactored and optimized
+# version 1.0.6
 
 
 # Library consisting of additional & helpful functions for data science research stages.
@@ -139,63 +139,91 @@ class DSTools:
 
     Agenda:
     -------
+
     function_list:
         Prints the list of available tools
+
     compute_metrics:
         Calculate main pre-selected classification metrics
+
     corr_matrix:
         Calculate and visualize correlation matrix
+
     category_stats:
         Calculate and print categorical statistics (unique values analysis)
+
     sparse_calc:
         Calculate sparsity level as coefficient
+
     trials_res_df:
         Aggregate Optuna optimization trials as DataFrame
+
     labeling:
         Encode categorical variables with optional ordering
+
     remove_outliers_iqr:
         Remove outliers using IQR method
+
     stat_normal_testing:
         Perform D'Agostino's K² test for normality
+
     test_stationarity:
         Perform Dickey-Fuller test for stationarity
+
     check_NINF:
         Check for NaN and infinite values in DataFrame
+
     df_stats:
         Quick overview of DataFrame structure
+
     describe_categorical:
         Detailed description of categorical columns
+
     describe_numeric:
         Detailed description of numerical columns
+
     generate_distribution:
         Generate synthetic numerical distribution with specific statistical properties
+
     validate_moments:
         Helper method to check if the requested statistical moments are physically possible
+
     evaluate_classification:
         Calculates, prints, and visualizes metrics for a binary classification model
+
     grubbs_test:
         Performs Grubbs' test to identify a single outlier in a dataset
+
     plot_confusion_matrix:
         Plots a clear and readable confusion matrix using seaborn
+
     add_missing_value_features:
         Adds features based on the count of missing values per row
+
     chatterjee_correlation:
         Calculates Chatterjee's rank correlation coefficient (Xi) between two variables.
+
     calculate_entropy:
         Calculates the Shannon entropy of a probability distribution.
+
     calculate_kl_divergence:
-        Calculates the Kullback-Leibler (KL) divergence between two
-        probability distributions.
+        Calculates the Kullback-Leibler (KL) divergence between two probability distributions.
+
     min_max_scale:
         Scales specified columns of a DataFrame to the range [0, 1].
+
     save_dataframes_to_zip:
         Saves one or more Pandas/Polars DataFrames into a single ZIP archive.
+
     read_dataframes_from_zip:
         Reads one or more Pandas/Polars DataFrames from a ZIP archive.
+
     generate_alphanum_codes:
         Generates an array of random alphanumeric codes of a specified length.
+
     generate_distribution_from_metrics:
         Generates a synthetic distribution of numbers matching given statistical metrics.
+
     """
 
     def __init__(self):

@@ -7,7 +7,7 @@ from src.ds_tool import DSTools
 
 tools = DSTools()
 
-# --- Fixtures for test data ---
+# Fixtures for test data
 @pytest.fixture
 def pd_df():
     return pd.DataFrame(
@@ -33,9 +33,7 @@ def pl_df():
     )
 
 
-# --- Pandas tests ---
-
-
+# Pandas tests
 def test_pandas_default(pd_df):
     result = tools.add_missing_value_features(pd_df)
     expected = [2, 0, 1, 1, 1]
@@ -49,9 +47,7 @@ def test_pandas_with_std(pd_df):
     assert "num_missing_std" in result.columns
 
 
-# --- Polars tests ---
-
-
+# Polars tests
 def test_polars_default(pl_df):
     result = tools.add_missing_value_features(pl_df)
     expected = [2, 0, 1, 1, 1]
@@ -63,9 +59,7 @@ def test_polars_with_std_warns(pl_df):
     assert "num_missing" in result.columns
 
 
-# --- Error handling ---
-
-
+# Error handling
 def test_invalid_input_type():
     with pytest.raises(TypeError):
         tools.add_missing_value_features([1, 2, 3])
