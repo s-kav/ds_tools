@@ -6,10 +6,12 @@ __pycache__/
 .Python
 env/
 venv/
+src_old/
 pip-selfcheck.json
 
 # Build artifacts
 build/
+src_old/
 dist/
 *.egg-info/
 /site
