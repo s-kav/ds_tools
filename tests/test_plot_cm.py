@@ -1,6 +1,9 @@
 import pytest
 import numpy as np
+import matplotlib
 from src.ds_tool import DSTools
+
+matplotlib.use("Agg")
 
 
 @pytest.fixture(scope="module")
@@ -26,12 +29,6 @@ def multiclass_data():
     random_errors = np.random.randint(1, 3, size=n)
     y_pred = np.where(correct_preds, y_true, (y_true + random_errors) % 3)
     return y_true, y_pred
-
-
-# Helper to suppress plotting during tests
-import matplotlib
-
-matplotlib.use("Agg")
 
 
 def test_plot_confusion_matrix_binary_default_labels(tools, binary_data):

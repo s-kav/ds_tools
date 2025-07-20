@@ -1,7 +1,10 @@
 import pytest
 import numpy as np
 import pandas as pd
+import matplotlib
 from src.ds_tool import DSTools
+
+matplotlib.use("Agg")
 
 
 @pytest.fixture(scope="module")
@@ -37,12 +40,6 @@ def time_series_data():
         "non_stationary_trend": non_stationary_trend,
         "non_stationary_seasonal": non_stationary_seasonal,
     }
-
-
-# Use matplotlib non-interactive backend to prevent blocking
-import matplotlib
-
-matplotlib.use("Agg")
 
 
 def test_stationarity_stationary_series(tools, time_series_data, capsys):

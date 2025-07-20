@@ -75,7 +75,7 @@ def test_generate_distribution_from_config(config, output_as, int_flag):
         assert np.isclose(stats_actual["std"], config.std, rtol=5.0)
         # Skewness and kurtosis are harder to hit exactly
         assert stats_actual["skewness"] * config.skewness >= 0  # just sign check
-    except Exception as e:
+    except Exception:
         # Let the test fail normally for unexpected errors
         raise AssertionError("Invalid metrics dictionary")
 

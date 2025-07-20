@@ -22,18 +22,8 @@ def test_labeling_order_flag_true(sample_df, tools):
     target_column = "product_category"
     df_ordered = tools.labeling(df, target_column, order_flag=True)
 
-    mapping = (
-        df_ordered[[target_column]].drop_duplicates().sort_values(by=target_column)
-    )
-
-    mapping = df_ordered[[target_column]].drop_duplicates()
     codes = df_ordered[[target_column]].drop_duplicates().copy()
     codes["code"] = df_ordered[target_column].drop_duplicates().values
-
-    dict_cat_code = dict(zip(df_ordered["product_category"], df_ordered[target_column]))
-
-    freq = df["product_category"].value_counts()
-    unique_pairs = df_ordered[[target_column]].drop_duplicates()
 
     cat_code_pairs = (
         pd.DataFrame(

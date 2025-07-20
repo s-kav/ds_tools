@@ -10,7 +10,6 @@ import re
 import os
 import zipfile
 import tempfile
-import fastparquet
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -19,7 +18,6 @@ import seaborn as sns
 import polars as pl
 
 from pydantic import BaseModel, Field, field_validator, model_validator, ConfigDict
-from pydantic_core.core_schema import ValidationInfo
 
 from scipy import stats
 from scipy.stats import rankdata
