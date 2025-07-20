@@ -7,6 +7,7 @@ tools = DSTools()
 N_SAMPLES = 200
 THRESHOLD = 0.5
 
+
 @pytest.fixture(scope="module")
 def classification_data():
     np.random.seed(42)
@@ -17,13 +18,21 @@ def classification_data():
     y_predict = (y_predict_proba >= THRESHOLD).astype(int)
     return y_true, y_predict, y_predict_proba
 
+
 def test_compute_metrics_default(classification_data):
     y_true, y_pred, y_proba = classification_data
     df = tools.compute_metrics(y_true, y_pred, y_proba)
-    assert isinstance(df, np.ndarray) or hasattr(df, 'shape')
+    assert isinstance(df, np.ndarray) or hasattr(df, "shape")
     assert df.shape[0] >= 1  # Sanity check on rows
-    expected_cols = {'Average_precision, %', 'Balanced_accuracy, %', 'Likelihood_ratios+', 'Likelihood_ratios-', 'Kappa_score, %'}
+    expected_cols = {
+        "Average_precision, %",
+        "Balanced_accuracy, %",
+        "Likelihood_ratios+",
+        "Likelihood_ratios-",
+        "Kappa_score, %",
+    }
     assert expected_cols.issubset(df.columns)
+
 
 def test_compute_metrics_custom_config(classification_data, capsys):
     y_true, y_pred, y_proba = classification_data
