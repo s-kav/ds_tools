@@ -51,6 +51,7 @@ jobs:
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }} 
 
+
   # --- LINTING TASK ---
   lint:
     runs-on: ubuntu-latest
@@ -67,7 +68,31 @@ jobs:
         run: ruff check .
 
 
-  # --- THE TASK OF COLLECTION AND PUBLICATION ---
+  # --- DOCUMENTATION DEPLOYMENT TASK ---
+  deploy-docs:
+    runs-on: ubuntu-latest
+    # Launch after successful testing and linting
+    needs: [test, lint]
+    permissions:
+      contents: write # Needed for publication on gh-pages
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+      - name: Install documentation dependencies
+        run: |
+          pip install -r docs/requirements.txt
+          pip install -e .
+      - name: Build and deploy documentation
+        # This command will automatically build the site and push it to the gh-pages branch
+        run: mkdocs gh-deploy --force --clean
+
+
+  # --- COLLECTION AND PUBLICATION TASK ---
   build-and-publish:
     runs-on: ubuntu-latest
     # The publication will be triggered ONLY when the release is created
@@ -88,7 +113,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: '3.11'
 
       - name: Install build dependencies
         run: |
