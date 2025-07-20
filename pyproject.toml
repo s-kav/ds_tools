@@ -33,8 +33,10 @@ dynamic = []
 Homepage = "https://github.com/s-kav/ds_tools"
 Documentation = "https://github.com/s-kav/ds_tools"
 Repository = "https://github.com/s-kav/ds_tools.git"
-"Source Code" = "https://github.com/s-kav/ds_tools/tests"
+Source Code = "https://github.com/s-kav/ds_tools"
 
+[tool.black]
+line-length = 88
 
 [build-system]
 requires = ["setuptools>=61", "wheel"]
