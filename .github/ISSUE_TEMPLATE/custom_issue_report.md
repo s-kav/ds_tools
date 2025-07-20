@@ -1,3 +1,10 @@
+---
+name: Custom Issue Report
+description: Use this template for any other issues or questions.
+title: "[ISSUE]: "
+labels: [question, needs-triage]
+---
+
 <!-- 
 Thank you for contributing! 
 Please provide as much detail as possible.
