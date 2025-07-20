@@ -1,0 +1,53 @@
+# Project information
+site_name: DS-Tools Documentation
+site_url: https://github.com/s-kav/ds_tools
+site_author: Sergii Kavun
+site_description: >-
+  A comprehensive Python library with helper functions to accelerate 
+  and simplify various stages of the data science research cycle.
+
+# Repository
+repo_name: s-kav/ds_tools
+repo_url: https://github.com/s-kav/ds_tools
+
+# Copyright
+copyright: Copyright © 2025 Sergii Kavun
+
+# Configuration
+theme:
+  name: material
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - content.tabs.link
+    - content.code.annotation
+    - content.code.copy
+  language: en
+  palette:
+    - scheme: default
+      toggle:
+        icon: material/toggle-switch-off-outline
+        name: Switch to dark mode
+    - scheme: slate
+      toggle:
+        icon: material/toggle-switch
+        name: Switch to light mode
+
+# Plugins
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [src]
+          options:
+            show_source: true # Show/hide source code button
+
+# Page tree
+nav:
+  - 'Home': 'index.md'
+  - 'API Reference':
+    - 'Main Toolkit': 'api/ds_tool.md'
