@@ -6,7 +6,7 @@
 # separate terms of service, privacy policy, and support
 # documentation.
 
-name: Test, Lint, and Publish Python Package to PyPI
+name: Processing Package
 
 on:
   push:
