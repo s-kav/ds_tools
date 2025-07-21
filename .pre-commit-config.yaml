@@ -1,0 +1,15 @@
+# This will work about 2x as fast as using the hooks in this repository
+repos:
+  - repo: https://github.com/psf/black
+    rev: 25.1.0
+    hooks:
+      - id: black
+        language_version: python3
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.12.4
+    hooks:
+      - id: ruff-check # Run the linter
+        types_or: [ python, pyi ]
+        args: [--fix]  # optional: autofix
+        language_version: python3
