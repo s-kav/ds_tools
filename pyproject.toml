@@ -31,7 +31,7 @@ dynamic = []
 
 [project.urls]
 Homepage = "https://github.com/s-kav/ds_tools"
-Documentation = "https://github.com/s-kav/ds_tools"
+Documentation = "https://s-kav.github.io/ds_tools/"
 Repository = "https://github.com/s-kav/ds_tools.git"
 "Source Code" = "https://github.com/s-kav/ds_tools"
 
