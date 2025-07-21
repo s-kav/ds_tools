@@ -38,6 +38,12 @@ Repository = "https://github.com/s-kav/ds_tools.git"
 [tool.black]
 line-length = 88
 
+[tool.ruff]
+line-length = 88
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]
+
 [build-system]
 requires = ["setuptools>=61", "wheel"]
 build-backend = "setuptools.build_meta"
