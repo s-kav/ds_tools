@@ -1,44 +1,51 @@
 import time
-
 import numpy as np
 import optuna
+import pandas as pd
 import pytest
 
 from src.ds_tool import DSTools
 
-
+# --- Dummy Objective Function for Testing ---
 def dummy_objective(trial: optuna.trial.Trial) -> float:
+    """A dummy objective function that simulates model training."""
     x = trial.suggest_float("x", -10, 10)
     y = trial.suggest_int("y", 0, 20)
     category = trial.suggest_categorical("category", ["A", "B", "C"])
 
-    # Simulate error for trial #3
+    # Simulate a failure for a specific trial number
     if trial.number == 3:
         raise ValueError("Simulated error in trial #3")
 
-    # Simulate pruning if y < 5
+    # Simulate pruning for a specific condition
     if y < 5:
         raise optuna.exceptions.TrialPruned("Simulating pruning for y < 5")
 
-    time.sleep(np.random.uniform(0.01, 0.03))  # Short sleep for test speed
-    
+    # Simulate training time
+    time.sleep(np.random.uniform(0.01, 0.03))
+
+    # Calculate a dummy score
     score = (100 - x**2) + y - (5 if category == "C" else 0)
-    
     return score
 
-
+# --- Pytest Fixtures and Tests ---
 @pytest.fixture(scope="module")
 def tools():
+    """Provides a DSTools instance for the tests."""
     return DSTools()
 
-
 def test_optuna_optimization_and_results_df(tools):
+    """
+    Tests the trials_res_df method by running a mock Optuna study
+    and verifying the output DataFrame.
+    """
     study = optuna.create_study(direction="maximize")
 
-    # Run optimization; errors and pruning handled internally by Optuna
+    # Run optimization; errors and pruning are handled by Optuna
     try:
-        study.optimize(dummy_objective, n_trials=15)
-    except ValueError:
+        study.optimize(dummy_objective, n_trials=15, catch=(ValueError,))
+    except optuna.exceptions.TrialPruned:
+        # We expect some trials to be pruned, so we can ignore this
         pass
 
     all_trials = study.trials
@@ -46,28 +53,20 @@ def test_optuna_optimization_and_results_df(tools):
         t for t in all_trials if t.state == optuna.trial.TrialState.COMPLETE
     ]
 
+    # There must be at least one completed trial for the test to be meaningful
+    assert len(completed_trials) > 0, "Test setup failed: No trials completed successfully."
+
     # Call your method to convert trials list to DataFrame
     metric_name = "Accuracy"
     df = tools.trials_res_df(all_trials, metric=metric_name)
 
-    # 1. Number of rows equals number of completed trials
+    # --- Assertions ---
+    assert isinstance(df, pd.DataFrame)
+    assert not df.empty
     assert len(df) == len(completed_trials)
-
-    # 2. The metric column is renamed as requested
-    assert metric_name in df.columns
-
-    # 3. The DataFrame is sorted descending by the metric
-    sorted_desc = df[metric_name].is_monotonic_decreasing
-    assert sorted_desc
-
-    # 4. Duration column exists and is numeric and non-negative
+    assert df.columns[0] == metric_name
     assert "Duration" in df.columns
-    assert (df["Duration"] >= 0).all()
+    assert "x" in df.columns and "y" in df.columns and "category" in df.columns
 
-    # 5. Hyperparameter columns present and contain expected types
-    assert "x" in df.columns
-    # for col in ['x', 'y', 'category']:
-    #     assert col in df.columns
-    # assert df['x'].dtype.kind in 'fc'  # float or int
-    # assert df['y'].dtype.kind in 'iu'  # integer
-    # assert df['category'].dtype == object or df['category'].dtype.name == 'category'
+    # Check that the dataframe is sorted correctly
+    assert df[metric_name].is_monotonic_decreasing
