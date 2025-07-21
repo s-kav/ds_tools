@@ -45,7 +45,8 @@ plugins:
   - mkdocstrings:
       handlers:
         python:
-          paths: [src]
+          import:
+            - https://github.com/s-kav/ds_tools/blob/main/src/
           options:
             show_source: true # Show/hide source code button
 
