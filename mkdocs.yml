@@ -45,6 +45,7 @@ plugins:
   - mkdocstrings:
       handlers:
         python:
+          paths: ['src']
           options:
             show_source: true # Show/hide source code button
 
