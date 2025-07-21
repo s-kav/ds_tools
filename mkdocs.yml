@@ -45,12 +45,11 @@ plugins:
   - mkdocstrings:
       handlers:
         python:
-          paths: [src]
+          paths: ['src']
           options:
             show_source: true # Show/hide source code button
 
 # Page tree
 nav:
-  - 'Home': 'index.html'
-  - 'API Reference':
-    - 'Main Toolkit': 'api/index.html'
+  - 'Home': 'index.md'
+  - 'API Reference': 'api/index.md'

@@ -91,7 +91,7 @@ jobs:
           pip install -e .
       - name: Build and deploy documentation
         # This command will automatically build the site and push it to the gh-pages branch
-        run: mkdocs gh-deploy --force --clean
+        run: PYTHONPATH=src mkdocs gh-deploy --force --clean
 
 
   # --- COLLECTION AND PUBLICATION TASK ---
