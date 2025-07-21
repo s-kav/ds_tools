@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import pytest
+
 from src.ds_tool import DSTools
 
 
@@ -32,9 +33,7 @@ def sample_dataframe():
 
 
 def test_df_stats_returns_dict(tools_instance, sample_dataframe):
-    """
-    Test that df_stats returns a dictionary with the expected keys.
-    """
+    """Test that df_stats returns a dictionary with the expected keys."""
     stats_dict = tools_instance.df_stats(sample_dataframe)
 
     assert isinstance(stats_dict, dict), "Function should return a dictionary."
@@ -56,10 +55,7 @@ def test_df_stats_returns_dict(tools_instance, sample_dataframe):
 
 
 def test_df_stats_correct_values(tools_instance, sample_dataframe):
-    """
-    Test that the values calculated by df_stats are correct.
-    """
-
+    """Test that the values calculated by df_stats are correct."""
     stats_dict = tools_instance.df_stats(sample_dataframe)
 
     expected_cols = 5

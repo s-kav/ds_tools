@@ -1,9 +1,10 @@
 import numpy as np
-import pytest
-from scipy import stats
 import pandas as pd
 import polars as pl
-from src.ds_tool import DSTools, DistributionConfig
+import pytest
+from scipy import stats
+
+from src.ds_tool import DistributionConfig, DSTools
 
 tools = DSTools()
 

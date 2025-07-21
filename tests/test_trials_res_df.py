@@ -1,7 +1,9 @@
-import pytest
 import time
-import optuna
+
 import numpy as np
+import optuna
+import pytest
+
 from src.ds_tool import DSTools
 
 

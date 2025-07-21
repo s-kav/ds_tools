@@ -1,7 +1,8 @@
-import sys
 import os
-import pytest
+import sys
+
 import matplotlib.pyplot as plt
+import pytest
 
 
 @pytest.fixture(autouse=True)

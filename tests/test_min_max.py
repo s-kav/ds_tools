@@ -1,6 +1,7 @@
-import pytest
 import pandas as pd
 import polars as pl
+import pytest
+
 from src.ds_tool import DSTools
 
 

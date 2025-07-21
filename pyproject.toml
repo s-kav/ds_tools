@@ -44,6 +44,9 @@ line-length = 88
 [tool.ruff.lint]
 select = ["E", "F", "I"]
 
+[per-file-ignores]
+"tests/*.py" = ["D100", "D103", "D104", "D105"]
+
 [build-system]
 requires = ["setuptools>=61", "wheel"]
 build-backend = "setuptools.build_meta"

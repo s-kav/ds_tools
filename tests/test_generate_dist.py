@@ -1,7 +1,8 @@
 import numpy as np
 import pytest
 from scipy import stats
-from src.ds_tool import DSTools, DistributionConfig
+
+from src.ds_tool import DistributionConfig, DSTools
 
 tools = DSTools()
 

@@ -2,5 +2,5 @@
 
 line-length = 88
 target-version = "py311"
-extend-select = ["I", "E", "F", "B", "W", "C", "D"]
+extend-select = ["E", "F", "I"]
 ignore = ["E501"] 

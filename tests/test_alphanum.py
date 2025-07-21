@@ -1,5 +1,6 @@
-import numpy as np
 import re
+
+import numpy as np
 import pytest
 
 from src.ds_tool import DSTools

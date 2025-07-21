@@ -1,6 +1,7 @@
-import pytest
-import numpy as np
 import matplotlib
+import numpy as np
+import pytest
+
 from src.ds_tool import DSTools
 
 matplotlib.use("Agg")

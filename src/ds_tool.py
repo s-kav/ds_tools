@@ -5,43 +5,39 @@
 # Library consisting of additional & helpful functions for data science research stages.
 
 
+import os
 import random
 import re
-import os
-import zipfile
 import tempfile
+import zipfile
+from typing import Any, Dict, List, Literal, Optional, Tuple, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import seaborn as sns
 import polars as pl
-
-from pydantic import BaseModel, Field, field_validator, model_validator, ConfigDict
-
+import seaborn as sns
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 from scipy import stats
 from scipy.stats import rankdata
-from typing import Any, Dict, List, Optional, Tuple, Union, Literal
-
 from sklearn.metrics import (
+    accuracy_score,
+    auc,
     average_precision_score,
     balanced_accuracy_score,
     class_likelihood_ratios,
+    classification_report,
     cohen_kappa_score,
+    confusion_matrix,
     det_curve,
     hamming_loss,
     jaccard_score,
     log_loss,
-    accuracy_score,
-    auc,
-    classification_report,
-    confusion_matrix,
     precision_recall_curve,
     roc_curve,
 )
 from sklearn.preprocessing import OrdinalEncoder
 from statsmodels.tsa.stattools import adfuller
-
 
 EPSILON = 1e-8  # A small constant to avoid log(0) or division by zero
 
@@ -111,9 +107,7 @@ class DistributionConfig(BaseModel):
 
 
 class GrubbsTestResult(BaseModel):
-    """
-    Pydantic model for storing the results of Grubbs' test for outliers.
-    """
+    """Pydantic model for storing the results of Grubbs' test for outliers."""
 
     is_outlier: bool = Field(
         ..., description="True if an outlier is detected, False otherwise."
@@ -226,7 +220,6 @@ class DSTools:
 
     def __init__(self):
         """Initialize the DSTools class with default configurations."""
-
         plt.rcParams["figure.figsize"] = (15, 9)
         pd.options.display.float_format = "{:.2f}".format
         np.set_printoptions(suppress=True, precision=4)
@@ -240,8 +233,7 @@ class DSTools:
         self.plotly_theme = "plotly_dark"
 
     def function_list(self) -> pd.DataFrame:
-        """
-        Parses the list of available tools (the 'Agenda') from the class
+        """Parses the list of available tools (the 'Agenda') from the class
         docstring as a formatted table (Pandas DataFrame).
 
         Returns:
@@ -253,6 +245,7 @@ class DSTools:
             pd.set_option('display.max_colwidth', 200)
             tools = DSTools()
             tools.function_list()
+
         """
         # 1. Get the main docstring of the class
         doc = self.__class__.__doc__
@@ -323,8 +316,7 @@ class DSTools:
         y_predict_proba: np.ndarray,
         config: Optional[MetricsConfig] = None,
     ) -> pd.DataFrame:
-        """
-        Calculate main pre-selected classification metrics.
+        """Calculate main pre-selected classification metrics.
 
         Args:
             y_true: True labels
@@ -339,6 +331,7 @@ class DSTools:
             from ds_tool import DSTools, MetricsConfig
             tools = DSTools()
             metrics = tools.compute_metrics(y_test, y_pred, y_pred_proba)
+
         """
         if config is None:
             config = MetricsConfig()
@@ -421,8 +414,7 @@ class DSTools:
     def corr_matrix(
         self, df: pd.DataFrame, config: Optional[CorrelationConfig] = None
     ) -> None:
-        """
-        Calculate and visualize correlation matrix.
+        """Calculate and visualize correlation matrix.
 
         Args:
             df: Input DataFrame with numerical columns
@@ -432,6 +424,7 @@ class DSTools:
              from ds_tool import DSTools, CorrelationConfig
              tools = DSTools()
              tools.corr_matrix(df, CorrelationConfig(font_size=12))
+
         """
         if config is None:
             config = CorrelationConfig()
@@ -516,8 +509,7 @@ class DSTools:
         plt.show()
 
     def category_stats(self, df: pd.DataFrame, col_name: str) -> None:
-        """
-        Calculate and print categorical statistics for unique values analysis.
+        """Calculate and print categorical statistics for unique values analysis.
 
         Args:
             df: Input DataFrame
@@ -526,6 +518,7 @@ class DSTools:
         Usage:
              tools = DSTools()
              tools.category_stats(df, 'category_column')
+
         """
         if col_name not in df.columns:
             raise ValueError(f"Column {col_name} not found in DataFrame")
@@ -547,8 +540,7 @@ class DSTools:
         print(aggr_stats)
 
     def sparse_calc(self, df: pd.DataFrame) -> float:
-        """
-        Calculate sparsity level as coefficient.
+        """Calculate sparsity level as coefficient.
 
         Args:
             df: Input DataFrame
@@ -559,6 +551,7 @@ class DSTools:
         Usage:
              tools = DSTools()
              sparsity = tools.sparse_calc(df)
+
         """
         sparse_coef = round(df.apply(pd.arrays.SparseArray).sparse.density * 100, 2)
         print(f"Level of sparsity = {sparse_coef} %")
@@ -566,8 +559,7 @@ class DSTools:
         return sparse_coef
 
     def trials_res_df(self, study_trials: List[Any], metric: str) -> pd.DataFrame:
-        """
-        Aggregate Optuna optimization trials as DataFrame.
+        """Aggregate Optuna optimization trials as DataFrame.
 
         Args:
             study_trials: List of Optuna trials (study.trials)
@@ -579,6 +571,7 @@ class DSTools:
         Usage:
              tools = DSTools()
              results = tools.trials_res_df(study.trials, 'MCC')
+
         """
         df_results = pd.DataFrame()
 
@@ -608,8 +601,7 @@ class DSTools:
     def labeling(
         self, df: pd.DataFrame, col_name: str, order_flag: bool = True
     ) -> pd.DataFrame:
-        """
-        Encode categorical variables with optional ordering.
+        """Encode categorical variables with optional ordering.
 
         Args:
             df: Input DataFrame
@@ -622,13 +614,14 @@ class DSTools:
         Usage:
              tools = DSTools()
              df = tools.labeling(df, 'category_column', True)
+
         """
         if col_name not in df.columns:
             raise ValueError(f"Column {col_name} not found in DataFrame")
 
         df_copy = df.copy()
         unique_values = df_copy[col_name].unique()
-        value_index = dict(zip(unique_values, range(len(unique_values))))
+        value_index = dict(zip(unique_values, range(len(unique_values)), strict=False))
         print(f"Set of unique indexes for <{col_name}>:\n{value_index}")
 
         if order_flag:
@@ -649,8 +642,7 @@ class DSTools:
     def remove_outliers_iqr(
         self, df: pd.DataFrame, column_name: str, config: Optional[OutlierConfig] = None
     ) -> Union[pd.DataFrame, Tuple[pd.DataFrame, float, float]]:
-        """
-        Remove outliers using IQR (Inter Quartile Range) method.
+        """Remove outliers using IQR (Inter Quartile Range) method.
 
         Args:
             df: Input DataFrame
@@ -666,6 +658,7 @@ class DSTools:
              config_custom = OutlierConfig(sigma=1.0, percentage=False)
              df_clean = tools.remove_outliers_iqr(df, 'target_column', config=config_custom)
              df_replaced, p_upper, p_lower = tools.remove_outliers_iqr(df, 'target_column')
+
         """
         if config is None:
             config = OutlierConfig()
@@ -701,8 +694,7 @@ class DSTools:
     def stat_normal_testing(
         self, check_object: Union[pd.DataFrame, pd.Series], describe_flag: bool = False
     ) -> None:
-        """
-        Perform D'Agostino's K² test for normality testing.
+        """Perform D'Agostino's K² test for normality testing.
 
         Args:
             check_object: Input data (DataFrame or Series)
@@ -712,6 +704,7 @@ class DSTools:
              tools = DSTools()
 
              tools.stat_normal_testing(data, describe_flag=True)
+
         """
         if isinstance(check_object, pd.DataFrame) and len(check_object.columns) == 1:
             check_object = check_object.iloc[:, 0]
@@ -774,8 +767,7 @@ class DSTools:
         print_results_flag: bool = True,
         len_window: int = 30,
     ) -> None:
-        """
-        Perform Dickey-Fuller test for stationarity testing.
+        """Perform Dickey-Fuller test for stationarity testing.
 
         Args:
             check_object: Input time series data
@@ -785,6 +777,7 @@ class DSTools:
         Usage:
              tools = DSTools()
              tools.test_stationarity(time_series, print_results_flag=True)
+
         """
         # Calculate rolling statistics
         rolling_mean = check_object.rolling(window=len_window).mean()
@@ -829,8 +822,7 @@ class DSTools:
             print("\nData has a unit root. Data is NON-STATIONARY!")
 
     def check_NINF(self, data: Union[pd.DataFrame, np.ndarray]) -> None:
-        """
-        Check DataFrame or array for NaN and infinite values.
+        """Check DataFrame or array for NaN and infinite values.
 
         Args:
             data: Input data to check
@@ -838,6 +830,7 @@ class DSTools:
         Usage:
              tools = DSTools()
              tools.check_NINF(data)
+
         """
         if isinstance(data, pd.DataFrame):
             has_nan = data.isnull().any().any()
@@ -858,8 +851,7 @@ class DSTools:
     def df_stats(
         self, df: pd.DataFrame, return_format: str = "dict", detailed: bool = True
     ) -> Union[dict, pd.DataFrame]:
-        """
-        Provide quick overview of DataFrame structure.
+        """Provide quick overview of DataFrame structure.
 
         Args:
             df: Input DataFrame
@@ -868,6 +860,7 @@ class DSTools:
 
         Returns:
             dict or DataFrame with statistics
+
         """
         stats = {
             "columns": df.shape[1],
@@ -895,8 +888,7 @@ class DSTools:
             return stats
 
     def describe_categorical(self, df: pd.DataFrame) -> pd.DataFrame:
-        """
-        Detailed description of categorical columns.
+        """Detailed description of categorical columns.
 
         Args:
             df: Input DataFrame
@@ -907,6 +899,7 @@ class DSTools:
         Usage:
              tools = DSTools()
              cat_stats = tools.describe_categorical(df)
+
         """
         # 1. Select columns with types 'object', 'category', 'string'
         categorical_cols = df.select_dtypes(
@@ -917,7 +910,7 @@ class DSTools:
         all_nan_cols = df.columns[df.isnull().all()].tolist()
 
         # 3. Combine both lists and remove duplicates
-        cols_to_process = sorted(list(set(categorical_cols + all_nan_cols)))
+        cols_to_process = sorted(set(categorical_cols + all_nan_cols))
 
         if not cols_to_process:
             return pd.DataFrame()
@@ -945,8 +938,7 @@ class DSTools:
         return result_df[existing_cols]
 
     def describe_numeric(self, df: pd.DataFrame) -> pd.DataFrame:
-        """
-        Detailed description of numerical columns.
+        """Detailed description of numerical columns.
 
         Args:
             df: Input DataFrame
@@ -957,6 +949,7 @@ class DSTools:
         Usage:
              tools = DSTools()
              num_stats = tools.describe_numeric(df)
+
         """
         numeric_cols = df.select_dtypes(include=[np.number]).columns
         if len(numeric_cols) == 0:
@@ -982,8 +975,7 @@ class DSTools:
 
     @staticmethod
     def validate_moments(std: float, skewness: float, kurtosis: float) -> bool:
-        """
-        Validate that statistical moments are physically possible.
+        """Validate that statistical moments are physically possible.
         A key property is that kurtosis must be greater than or equal to
         the square of skewness minus 2.
 
@@ -998,12 +990,12 @@ class DSTools:
         Usage:
              tools = DSTools()
              is_valid = tools.validate_moments(1.0, 0.5, 3.0)
+
         """
         return std > 0 and kurtosis >= (skewness**2 - 2)
 
     def generate_distribution(self, config: DistributionConfig) -> np.ndarray:
-        """
-        Generates a distribution matching the provided statistical metrics.
+        """Generates a distribution matching the provided statistical metrics.
 
         This function creates a distribution by generating a base dataset with a
         shape defined by kurtosis, adds outliers, and then iteratively scales
@@ -1024,6 +1016,7 @@ class DSTools:
             ... )
              data = tools.generate_distribution(config)
              print(f'Generated Mean: {np.mean(data):.2f}, Std: {np.std(data):.2f}')
+
         """
         if not self.validate_moments(config.std, config.skewness, config.kurtosis):
             raise ValueError("Invalid statistical moments")
@@ -1102,8 +1095,7 @@ class DSTools:
         threshold: float = 0.5,
         figsize: Tuple[int, int] = (16, 7),
     ) -> Dict[str, Any]:
-        """
-        Calculates, prints, and visualizes metrics for a binary classification model.
+        """Calculates, prints, and visualizes metrics for a binary classification model.
 
         This "all-in-one" method provides a complete performance summary, including
         key scalar metrics, a classification report, a confusion matrix, and
@@ -1117,6 +1109,7 @@ class DSTools:
 
         Returns:
             A dictionary containing the calculated metrics for programmatic use.
+
         """
         # --- 1. Input Validation ---
         if not isinstance(true_labels, np.ndarray) or not isinstance(
@@ -1226,8 +1219,7 @@ class DSTools:
     def grubbs_test(
         x: Union[np.ndarray, pd.Series], alpha: float = 0.05
     ) -> GrubbsTestResult:
-        """
-        Performs Grubbs' test to identify a single outlier in a dataset.
+        r"""Performs Grubbs' test to identify a single outlier in a dataset.
 
         This test assumes the data comes from a normally distributed population
         and is designed to detect one outlier at a time.
@@ -1266,6 +1258,7 @@ class DSTools:
                 print(f"Outlier detected, but shouldn't have been.")
             else:
                 print("Correctly determined that there are no outliers.")
+
         """
         if not isinstance(x, (np.ndarray, pd.Series)):
             raise TypeError("Input data x must be a NumPy array or Pandas Series.")
@@ -1325,8 +1318,7 @@ class DSTools:
         title: str = "Confusion Matrix",
         cmap: str = "Blues",
     ):
-        """
-        Plots a clear and readable confusion matrix using seaborn.
+        """Plots a clear and readable confusion matrix using seaborn.
 
         This method visualizes the performance of a classification model by showing
         the number of correct and incorrect predictions for each class.
@@ -1354,6 +1346,7 @@ class DSTools:
                 class_labels=['Cat', 'Dog', 'Bird'],
                 title='Multi-Class Confusion Matrix'
             )
+
         """
         # 1. Calculate the confusion matrix
         cm = confusion_matrix(y_true, y_pred)
@@ -1400,8 +1393,7 @@ class DSTools:
     def add_missing_value_features(
         X: Union[pd.DataFrame, pl.DataFrame], add_std: bool = False
     ) -> Union[pd.DataFrame, pl.DataFrame]:
-        """
-        Adds features based on the count of missing values per row.
+        r"""Adds features based on the count of missing values per row.
 
         This preprocessing function calculates the number of missing values (NaN)
         for each row and adds this count as a new feature. This can significantly
@@ -1425,6 +1417,7 @@ class DSTools:
             pl_with_features = tools.add_missing_value_features(pl_data)
             print("\nPolars DataFrame with new feature:")
             print(pl_with_features)
+
         """
         if isinstance(X, pd.DataFrame):
             # --- Pandas Implementation ---
@@ -1485,8 +1478,7 @@ class DSTools:
         y: Union[np.ndarray, pd.Series, List[float]],
         standard_flag: bool = True,
     ) -> float:
-        """
-        Calculates Chatterjee's rank correlation coefficient (Xi).
+        """Calculates Chatterjee's rank correlation coefficient (Xi).
 
         This coefficient is a non-parametric measure of dependence between two
         variables. It is asymmetric and ranges from 0 to 1, where a value
@@ -1511,6 +1503,7 @@ class DSTools:
              tools = DSTools()
              print(f"Linear correlation: {tools.chatterjee_correlation(x, y_linear):.4f}")
              print(f"Non-linear correlation: {tools.chatterjee_correlation(x, y_nonlinear):.4f}")
+
         """
         # 1. Convert inputs to NumPy arrays and validate
         x_arr = np.asarray(x)
@@ -1553,8 +1546,7 @@ class DSTools:
     def calculate_entropy(
         p: Union[np.ndarray, List[float]], base: Optional[float] = None
     ) -> float:
-        """
-        Calculates the Shannon entropy of a probability distribution.
+        r"""Calculates the Shannon entropy of a probability distribution.
 
         Entropy measures the uncertainty or "surprise" inherent in a variable's
         possible outcomes.
@@ -1582,6 +1574,7 @@ class DSTools:
 
             entropy_a_bits = tools.calculate_entropy(dist_a, base=2)
             print(f"  - Entropy of A in bits: {entropy_a_bits:.4f}")
+
         """
         p_arr = np.asarray(p, dtype=float)
 
@@ -1607,8 +1600,7 @@ class DSTools:
         q: Union[np.ndarray, List[float]],
         base: Optional[float] = None,
     ) -> float:
-        """
-        Calculates the Kullback-Leibler (KL) divergence between two distributions.
+        r"""Calculates the Kullback-Leibler (KL) divergence between two distributions.
 
         KL divergence D_KL(P || Q) measures how one probability distribution P
         diverges from a second, expected probability distribution Q. It is
@@ -1642,6 +1634,7 @@ class DSTools:
             # Note that KL divergence is asymmetric
             kl_c_a = tools.calculate_kl_divergence(dist_c, dist_a)
             print(f"  - KL(C || A): {kl_c_a:.4f} (note: not equal to KL(A || C))")
+
         """
         p_arr = np.asarray(p, dtype=float)
         q_arr = np.asarray(q, dtype=float)
@@ -1672,8 +1665,7 @@ class DSTools:
         columns: Optional[List[str]] = None,
         const_val_fill: float = 0.0,
     ) -> Union[pd.DataFrame, pl.DataFrame]:
-        """
-        Scales specified columns of a DataFrame to the range [0, 1].
+        r"""Scales specified columns of a DataFrame to the range [0, 1].
 
         This method applies Min-Max scaling. If a column contains identical
         values, it will be filled with `const_val_fill`. The original
@@ -1702,6 +1694,7 @@ class DSTools:
             pl_scaled_half = tools.min_max_scale(pl_data, const_val_fill=0.5)
             print("\nPolars DataFrame with constant columns filled with 0.5:")
             print(pl_scaled_half)
+
         """
         if isinstance(df, pd.DataFrame):
             # --- Pandas Implementation ---
@@ -1765,8 +1758,7 @@ class DSTools:
         format: str = "parquet",
         save_index: bool = False,
     ):
-        """
-        Saves one or more Pandas or Polars DataFrames into a single ZIP archive.
+        r"""Saves one or more Pandas or Polars DataFrames into a single ZIP archive.
 
         Args:
             dataframes: A dictionary where keys are the desired filenames (without
@@ -1798,6 +1790,7 @@ class DSTools:
 
             if os.path.exists(zip_path):
             os.remove(zip_path)
+
         """
         if not isinstance(dataframes, dict):
             raise TypeError("`dataframes` must be a dictionary of {filename: df}.")
@@ -1839,8 +1832,7 @@ class DSTools:
     def read_dataframes_from_zip(
         zip_filename: str, format: str = "parquet", backend: str = "polars"
     ) -> Dict[str, Union[pd.DataFrame, pl.DataFrame]]:
-        """
-        Reads one or more DataFrames from a ZIP archive.
+        """Reads one or more DataFrames from a ZIP archive.
 
         Args:
             zip_filename: The path to the ZIP archive.
@@ -1850,6 +1842,7 @@ class DSTools:
         Returns:
             A dictionary where keys are the filenames (without extension) and
             values are the loaded DataFrames.
+
         """
         if backend not in ["polars", "pandas"]:
             raise ValueError("`backend` must be 'polars' or 'pandas'.")
@@ -1891,8 +1884,7 @@ class DSTools:
 
     @staticmethod
     def generate_alphanum_codes(n: int, length: int = 8) -> np.ndarray:
-        """
-        Generates an array of random alphanumeric codes.
+        r"""Generates an array of random alphanumeric codes.
 
         This method is optimized for performance by using NumPy vectorized operations.
 
@@ -1907,6 +1899,7 @@ class DSTools:
             tools = DSTools()
             codes = tools.generate_alphanum_codes(5, length=10)
             print(f"Generated codes:\n{codes}")
+
         """
         if n < 0 or length < 0:
             raise ValueError("Number of codes (n) and length must be non-negative.")
@@ -1941,8 +1934,7 @@ class DSTools:
         output_as: Literal["numpy", "pandas", "polars"] = "numpy",
         max_iterations: int = 100,
     ) -> Union[np.ndarray, pd.Series, pl.Series]:
-        """
-        Generates a synthetic distribution matching given statistical metrics.
+        """Generates a synthetic distribution matching given statistical metrics.
 
         This function uses an iterative approach to create a distribution that
         approximates the properties specified in the DistributionConfig.
@@ -1994,6 +1986,7 @@ class DSTools:
 
             except ValueError as e:
                 print(f"Error during configuration or generation: {e}")
+
         """
         if isinstance(metrics, dict):
             try:
