@@ -6,6 +6,7 @@ import pytest
 
 from src.ds_tool import DSTools
 
+
 # --- Dummy Objective Function for Testing ---
 def dummy_objective(trial: optuna.trial.Trial) -> float:
     """A dummy objective function that simulates model training."""
@@ -28,11 +29,13 @@ def dummy_objective(trial: optuna.trial.Trial) -> float:
     score = (100 - x**2) + y - (5 if category == "C" else 0)
     return score
 
+
 # --- Pytest Fixtures and Tests ---
 @pytest.fixture(scope="module")
 def tools():
     """Provides a DSTools instance for the tests."""
     return DSTools()
+
 
 def test_optuna_optimization_and_results_df(tools):
     """
@@ -54,7 +57,9 @@ def test_optuna_optimization_and_results_df(tools):
     ]
 
     # There must be at least one completed trial for the test to be meaningful
-    assert len(completed_trials) > 0, "Test setup failed: No trials completed successfully."
+    assert (
+        len(completed_trials) > 0
+    ), "Test setup failed: No trials completed successfully."
 
     # Call your method to convert trials list to DataFrame
     metric_name = "Accuracy"
