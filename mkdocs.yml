@@ -1,6 +1,6 @@
 # Project information
 site_name: DS-Tools Documentation
-site_url: https://github.com/s-kav/ds_tools
+site_url: https://s-kav.github.io/ds_tools/
 site_author: Sergii Kavun
 site_description: >-
   A comprehensive Python library with helper functions to accelerate 
