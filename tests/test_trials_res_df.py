@@ -18,11 +18,12 @@ def dummy_objective(trial: optuna.trial.Trial) -> float:
 
     # Simulate pruning if y < 5
     if y < 5:
-        raise optuna.exceptions.TrialPruned()
+        raise optuna.exceptions.TrialPruned("Simulating pruning for y < 5")
 
-    time.sleep(np.random.uniform(0.01, 0.02))  # Short sleep for test speed
-
+    time.sleep(np.random.uniform(0.01, 0.03))  # Short sleep for test speed
+    
     score = (100 - x**2) + y - (5 if category == "C" else 0)
+    
     return score
 
 
