@@ -6,6 +6,9 @@ site_description: >-
   A comprehensive Python library with helper functions to accelerate 
   and simplify various stages of the data science research cycle.
 
+docs_dir: src_docs
+site_dir: docs
+
 # Repository
 repo_name: s-kav/ds_tools
 repo_url: https://github.com/s-kav/ds_tools
