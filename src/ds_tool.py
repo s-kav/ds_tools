@@ -621,7 +621,7 @@ class DSTools:
 
         df_copy = df.copy()
         unique_values = df_copy[col_name].unique()
-        value_index = dict(zip(unique_values, range(len(unique_values)), strict=False))
+        value_index = dict(zip(unique_values, range(len(unique_values))))
         print(f"Set of unique indexes for <{col_name}>:\n{value_index}")
 
         if order_flag:
