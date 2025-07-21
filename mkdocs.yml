@@ -51,6 +51,6 @@ plugins:
 
 # Page tree
 nav:
-  - 'Home': 'index.md'
+  - 'Home': 'index.html'
   - 'API Reference':
-    - 'Main Toolkit': 'api/ds_tool.md'
+    - 'Main Toolkit': 'api/index.html'
