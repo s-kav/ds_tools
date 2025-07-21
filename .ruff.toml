@@ -1,0 +1,7 @@
+# .ruff.toml
+
+[tool.ruff]
+line-length = 88
+target-version = "py311"
+extend-select = ["I", "E", "F", "B", "W", "C", "D"]
+ignore = ["E501"] 
