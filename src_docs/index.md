@@ -11,4 +11,4 @@ This toolkit is built on top of popular libraries like Pandas, Polars, Scikit-le
 -   **Comprehensive Model Evaluation:** Calculate a wide range of classification metrics.
 -   **Synthetic Data Generation:** Create datasets with specific statistical properties.
 
-Check out the [API Reference](api/ds_tool.md) for detailed information on all available functions.
+Check out the [API Reference](api/index.md) for detailed information on all available functions.
