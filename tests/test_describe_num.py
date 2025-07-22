@@ -2,10 +2,6 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from src.ds_tool import DSTools
-
-tools = DSTools()
-
 
 @pytest.fixture(scope="module")
 def numeric_dataframe():
@@ -29,7 +25,7 @@ def numeric_dataframe():
     return df
 
 
-def test_numeric_columns_presence(numeric_dataframe):
+def test_numeric_columns_presence(tools, numeric_dataframe):
     result = tools.describe_numeric(numeric_dataframe)
     assert set(result.index) == {
         "orders_count",
@@ -41,7 +37,7 @@ def test_numeric_columns_presence(numeric_dataframe):
     assert "last_seen" not in result.index
 
 
-def test_revenue_column_metrics(numeric_dataframe):
+def test_revenue_column_metrics(tools, numeric_dataframe):
     result = tools.describe_numeric(numeric_dataframe)
 
     expected_missing_pct = numeric_dataframe["revenue"].isna().mean() * 100
@@ -52,13 +48,13 @@ def test_revenue_column_metrics(numeric_dataframe):
     assert skewness > 1.0
 
 
-def test_uniform_score_kurtosis(numeric_dataframe):
+def test_uniform_score_kurtosis(tools, numeric_dataframe):
     result = tools.describe_numeric(numeric_dataframe)
     kurtosis = result.loc["uniform_score", "kurtosis"]
     assert kurtosis < -1.0  # Uniform distribution has platykurtic shape
 
 
-def test_api_version_constant_column(numeric_dataframe):
+def test_api_version_constant_column(tools, numeric_dataframe):
     result = tools.describe_numeric(numeric_dataframe)
     row = result.loc["api_version"]
 
@@ -69,7 +65,7 @@ def test_api_version_constant_column(numeric_dataframe):
     assert row["median"] == 2.0
 
 
-def test_empty_result_on_non_numeric_dataframe():
+def test_empty_result_on_non_numeric_dataframe(tools):
     df = pd.DataFrame({"a": ["foo", "bar", "baz"], "b": ["one", "two", "three"]})
 
     result = tools.describe_numeric(df)

@@ -3,9 +3,6 @@ import time
 import numpy as np
 import optuna
 import pandas as pd
-import pytest
-
-from src.ds_tool import DSTools
 
 
 # --- Dummy Objective Function for Testing ---
@@ -29,13 +26,6 @@ def dummy_objective(trial: optuna.trial.Trial) -> float:
     # Calculate a dummy score
     score = (100 - x**2) + y - (5 if category == "C" else 0)
     return score
-
-
-# --- Pytest Fixtures and Tests ---
-@pytest.fixture(scope="module")
-def tools():
-    """Provides a DSTools instance for the tests."""
-    return DSTools()
 
 
 def test_optuna_optimization_and_results_df(tools):

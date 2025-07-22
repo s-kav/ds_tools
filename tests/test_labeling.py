@@ -2,8 +2,6 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from src.ds_tool import DSTools
-
 
 @pytest.fixture
 def sample_df():
@@ -11,11 +9,6 @@ def sample_df():
     np.random.seed(42)
     np.random.shuffle(categories_list)
     return pd.DataFrame({"product_category": categories_list})
-
-
-@pytest.fixture
-def tools():
-    return DSTools()
 
 
 def test_labeling_order_flag_true(sample_df, tools):

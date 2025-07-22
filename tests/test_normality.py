@@ -3,13 +3,6 @@ import pandas as pd
 import pytest
 from scipy import stats
 
-from src.ds_tool import DSTools
-
-
-@pytest.fixture(scope="module")
-def tools():
-    return DSTools()
-
 
 @pytest.fixture(scope="module")
 def sample_data():

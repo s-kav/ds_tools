@@ -3,10 +3,6 @@ import pandas as pd
 import polars as pl
 import pytest
 
-from src.ds_tool import DSTools
-
-tools = DSTools()
-
 
 # Fixtures for test data
 @pytest.fixture
@@ -35,32 +31,32 @@ def pl_df():
 
 
 # Pandas tests
-def test_pandas_default(pd_df):
+def test_pandas_default(tools, pd_df):
     result = tools.add_missing_value_features(pd_df)
     expected = [2, 0, 1, 1, 1]
     assert result["num_missing"].tolist() == expected
     assert "num_missing_std" not in result.columns
 
 
-def test_pandas_with_std(pd_df):
+def test_pandas_with_std(tools, pd_df):
     result = tools.add_missing_value_features(pd_df, add_std=True)
     assert "num_missing" in result.columns
     assert "num_missing_std" in result.columns
 
 
 # Polars tests
-def test_polars_default(pl_df):
+def test_polars_default(tools, pl_df):
     result = tools.add_missing_value_features(pl_df)
     expected = [2, 0, 1, 1, 1]
     assert result["num_missing"].to_list() == expected
 
 
-def test_polars_with_std_warns(pl_df):
+def test_polars_with_std_warns(tools, pl_df):
     result = tools.add_missing_value_features(pl_df, add_std=True)
     assert "num_missing" in result.columns
 
 
 # Error handling
-def test_invalid_input_type():
+def test_invalid_input_type(tools):
     with pytest.raises(TypeError):
         tools.add_missing_value_features([1, 2, 3])

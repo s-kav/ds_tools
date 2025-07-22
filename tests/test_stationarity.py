@@ -3,14 +3,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from src.ds_tool import DSTools
-
 matplotlib.use("Agg")
-
-
-@pytest.fixture(scope="module")
-def tools():
-    return DSTools()
 
 
 @pytest.fixture(scope="module")

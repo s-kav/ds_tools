@@ -2,10 +2,6 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from src.ds_tool import DSTools
-
-tools = DSTools()
-
 
 @pytest.fixture
 def sample_df():
@@ -25,20 +21,20 @@ def sample_df():
     return pd.DataFrame(data)
 
 
-def test_category_stats_city_column(capsys, sample_df):
+def test_category_stats_city_column(tools, capsys, sample_df):
     tools.category_stats(sample_df, "City")
     captured = capsys.readouterr()
     assert "City" in captured.out
     assert "percentage" in captured.out
 
 
-def test_category_stats_customer_status_column(capsys, sample_df):
+def test_category_stats_customer_status_column(tools, capsys, sample_df):
     tools.category_stats(sample_df, "Customer_status")
     captured = capsys.readouterr()
     assert "Customer_status" in captured.out
     assert "Active" in captured.out or "Inactive" in captured.out
 
 
-def test_category_stats_invalid_column(sample_df):
+def test_category_stats_invalid_column(tools, sample_df):
     with pytest.raises(ValueError):
         tools.category_stats(sample_df, "Non-existent_column")

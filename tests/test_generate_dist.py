@@ -2,9 +2,7 @@ import numpy as np
 import pytest
 from scipy import stats
 
-from src.ds_tool import DistributionConfig, DSTools
-
-tools = DSTools()
+from src.ds_tool import DistributionConfig
 
 
 def describe_generated_data(data: np.ndarray):
@@ -46,9 +44,7 @@ def describe_generated_data(data: np.ndarray):
         ),
     ],
 )
-
-
-def test_generate_distribution_valid_configs(config):
+def test_generate_distribution_valid_configs(tools, config):
     data = tools.generate_distribution(config)
     stats_actual = describe_generated_data(data)
 
@@ -59,7 +55,7 @@ def test_generate_distribution_valid_configs(config):
     assert stats_actual["n"] == config.n
 
 
-def test_generate_distribution_invalid_moments():
+def test_generate_distribution_invalid_moments(tools):
     config_invalid = DistributionConfig(
         mean=100,
         median=100,
@@ -91,12 +87,23 @@ def test_distribution_config_pydantic_validation():
 def test_generate_distribution_invalid_range_raises_error(tools):
     """Tests that max_val <= min_val raises ValueError."""
     with pytest.raises(ValueError, match="max_val must be greater than min_val"):
-        DistributionConfig(mean=10, median=10, std=1, min_val=20, max_val=10, skewness=0, kurtosis=3, n=100)
+        DistributionConfig(
+            mean=10,
+            median=10,
+            std=1,
+            min_val=20,
+            max_val=10,
+            skewness=0,
+            kurtosis=3,
+            n=100,
+        )
 
 
 def test_generate_distribution_zero_std_case(tools, mocker):
     """Tests the branch for zero standard deviation."""
-    config = DistributionConfig(mean=50, median=50, std=1, min_val=0, max_val=100, skewness=0, kurtosis=3, n=10)
+    config = DistributionConfig(
+        mean=50, median=50, std=1, min_val=0, max_val=100, skewness=0, kurtosis=3, n=10
+    )
     # artificially create a situation with zero std by mocking np.std
     mocker.patch("numpy.std", return_value=0)
     data = tools.generate_distribution(config)
@@ -105,21 +112,35 @@ def test_generate_distribution_zero_std_case(tools, mocker):
 
 def test_generate_distribution_no_outliers(tools):
     """Tests the branch where outlier_ratio is 0."""
-    config = DistributionConfig(mean=10, median=10, std=1, min_val=0, max_val=20, skewness=0, kurtosis=3, n=100, outlier_ratio=0)
+    config = DistributionConfig(
+        mean=10,
+        median=10,
+        std=1,
+        min_val=0,
+        max_val=20,
+        skewness=0,
+        kurtosis=3,
+        n=100,
+        outlier_ratio=0,
+    )
     data = tools.generate_distribution(config)
     assert len(data) == 100
 
 
 def test_generate_distribution_standard_normal_branch(tools):
     """Tests the branch for kurtosis <= 3.5, which uses standard_normal."""
-    config = DistributionConfig(mean=10, median=10, std=2, min_val=0, max_val=20, skewness=0, kurtosis=3, n=100)
+    config = DistributionConfig(
+        mean=10, median=10, std=2, min_val=0, max_val=20, skewness=0, kurtosis=3, n=100
+    )
     data = tools.generate_distribution(config)
     assert len(data) == 100
 
 
 def test_generate_distribution_ensures_min_max(tools):
     """Tests that min/max values are forced if not present."""
-    config = DistributionConfig(mean=50, median=50, std=1, min_val=1, max_val=100, skewness=0, kurtosis=3, n=50)
+    config = DistributionConfig(
+        mean=50, median=50, std=1, min_val=1, max_val=100, skewness=0, kurtosis=3, n=50
+    )
     data = tools.generate_distribution(config)
     assert data.min() == 1
     assert data.max() == 100

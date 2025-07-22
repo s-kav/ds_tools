@@ -2,8 +2,6 @@ import pandas as pd
 import polars as pl
 import pytest
 
-from src.ds_tool import DSTools
-
 
 @pytest.fixture
 def sample_data_dict():
@@ -23,11 +21,6 @@ def pd_df(sample_data_dict):
 @pytest.fixture
 def pl_df(sample_data_dict):
     return pl.DataFrame(sample_data_dict)
-
-
-@pytest.fixture
-def tools():
-    return DSTools()
 
 
 # --- Pandas tests ---
@@ -112,16 +105,16 @@ def test_min_max_scale_non_existent_column_prints_warning(tools, capsys):
     """
     Tests that a warning is printed for non-existent columns and they are skipped.
     """
-    df = pd.DataFrame({'a': [0, 5, 10]})
-    
+    df = pd.DataFrame({"a": [0, 5, 10]})
+
     # Call with existing and non-existent column
-    scaled_df = tools.min_max_scale(df, columns=['a', 'non_existent_col'])
-    
+    scaled_df = tools.min_max_scale(df, columns=["a", "non_existent_col"])
+
     # Check that the warning was printed
     captured = capsys.readouterr()
     assert "Warning: Column 'non_existent_col' not found" in captured.out
-    
+
     # We check that the existing column was processed and no extra ones appeared
-    assert 'a' in scaled_df.columns
-    assert 'non_existent_col' not in scaled_df.columns
-    assert scaled_df['a'].max() == 1.0
+    assert "a" in scaled_df.columns
+    assert "non_existent_col" not in scaled_df.columns
+    assert scaled_df["a"].max() == 1.0

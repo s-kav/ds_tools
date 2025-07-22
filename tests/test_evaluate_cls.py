@@ -1,10 +1,6 @@
 import numpy as np
 import pytest
 
-from src.ds_tool import DSTools
-
-tools = DSTools()
-
 
 @pytest.fixture
 def synthetic_data():
@@ -17,7 +13,7 @@ def synthetic_data():
     return y_true, y_probs
 
 
-def test_evaluate_classification_structure(synthetic_data):
+def test_evaluate_classification_structure(tools, synthetic_data):
     y_true, y_probs = synthetic_data
     result = tools.evaluate_classification(
         true_labels=y_true, pred_probs=y_probs, threshold=0.5
@@ -35,7 +31,7 @@ def test_evaluate_classification_structure(synthetic_data):
     assert 0.0 <= result["roc_auc"] <= 1.0, "ROC AUC should be in the range [0, 1]"
 
 
-def test_threshold_effect_on_accuracy(synthetic_data):
+def test_threshold_effect_on_accuracy(tools, synthetic_data):
     y_true, y_probs = synthetic_data
 
     metrics_low = tools.evaluate_classification(y_true, y_probs, threshold=0.5)
@@ -49,7 +45,7 @@ def test_threshold_effect_on_accuracy(synthetic_data):
     ), "ROC AUC is independent of threshold"
 
 
-def test_mismatched_shapes_raises(synthetic_data):
+def test_mismatched_shapes_raises(tools, synthetic_data):
     y_true, y_probs = synthetic_data
     with pytest.raises(
         ValueError, match="Shape of true_labels and pred_probs must match."

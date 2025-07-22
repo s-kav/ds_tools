@@ -1,10 +1,6 @@
 import numpy as np
 import pytest
 
-from src.ds_tool import DSTools
-
-tools = DSTools()
-
 
 @pytest.fixture
 def data_normal():
@@ -22,14 +18,14 @@ def data_constant():
     return np.full(10, 50.0)
 
 
-def test_outlier_detected(data_with_outlier):
+def test_outlier_detected(tools, data_with_outlier):
     result = tools.grubbs_test(data_with_outlier)
     assert result.is_outlier
     assert result.outlier_value == 150
     assert result.outlier_index == len(data_with_outlier) - 1
 
 
-def test_no_outlier_detected(data_normal):
+def test_no_outlier_detected(tools, data_normal):
     result = tools.grubbs_test(data_normal)
     assert not result.is_outlier
 
@@ -41,7 +37,7 @@ def test_no_outlier_detected(data_normal):
         (0.01, True),
     ],
 )
-def test_outlier_sensitivity_to_alpha(data_with_outlier, alpha, expected):
+def test_outlier_sensitivity_to_alpha(tools, data_with_outlier, alpha, expected):
     result = tools.grubbs_test(data_with_outlier, alpha=alpha)
     assert result.is_outlier == expected
     if expected:
@@ -50,19 +46,19 @@ def test_outlier_sensitivity_to_alpha(data_with_outlier, alpha, expected):
         assert result.g_calculated <= result.g_critical
 
 
-def test_constant_data(data_constant):
+def test_constant_data(tools, data_constant):
     result = tools.grubbs_test(data_constant)
     assert not result.is_outlier
 
 
-def test_too_few_values_raises_value_error():
+def test_too_few_values_raises_value_error(tools):
     with pytest.raises(
         ValueError, match="Grubbs test requires at least 3 data points."
     ):
         tools.grubbs_test(np.array([1, 2]))
 
 
-def test_invalid_input_type_raises_type_error():
+def test_invalid_input_type_raises_type_error(tools):
     with pytest.raises(
         TypeError, match="Input data x must be a NumPy array or Pandas Series."
     ):

@@ -2,10 +2,6 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from src.ds_tool import DSTools
-
-tools = DSTools()
-
 
 @pytest.mark.parametrize(
     "input_data, expected_msg",
@@ -19,7 +15,7 @@ tools = DSTools()
         ),
     ],
 )
-def test_check_NINF_pandas(input_data, expected_msg, capsys):
+def test_check_NINF_pandas(tools, input_data, expected_msg, capsys):
     tools.check_NINF(input_data)
     captured = capsys.readouterr()
     assert expected_msg in captured.out
@@ -34,7 +30,7 @@ def test_check_NINF_pandas(input_data, expected_msg, capsys):
         (np.array([[1, np.nan, 3], [-np.inf, 5, 6]]), "both NaN and infinite"),
     ],
 )
-def test_check_NINF_numpy(input_array, expected_msg, capsys):
+def test_check_NINF_numpy(tools, input_array, expected_msg, capsys):
     tools.check_NINF(input_array)
     captured = capsys.readouterr()
     assert expected_msg in captured.out

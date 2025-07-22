@@ -2,14 +2,6 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from src.ds_tool import DSTools
-
-
-@pytest.fixture
-def tools_instance():
-    """Provides a DSTools instance for tests."""
-    return DSTools()
-
 
 @pytest.fixture
 def sample_dataframe():
@@ -32,9 +24,16 @@ def sample_dataframe():
     return df
 
 
-def test_df_stats_returns_dict(tools_instance, sample_dataframe):
+@pytest.fixture
+def sample_df_with_missing():
+    """Provides a sample DataFrame with missing values."""
+    data = {"col1": [1, np.nan, 3], "col2": [4, 5, np.nan]}
+    return pd.DataFrame(data)
+
+
+def test_df_stats_returns_dict(tools, sample_dataframe):
     """Test that df_stats returns a dictionary with the expected keys."""
-    stats_dict = tools_instance.df_stats(sample_dataframe)
+    stats_dict = tools.df_stats(sample_dataframe)
 
     assert isinstance(stats_dict, dict), "Function should return a dictionary."
 
@@ -54,9 +53,9 @@ def test_df_stats_returns_dict(tools_instance, sample_dataframe):
     ), "One or more required keys are missing in the output."
 
 
-def test_df_stats_correct_values(tools_instance, sample_dataframe):
+def test_df_stats_correct_values(tools, sample_dataframe):
     """Test that the values calculated by df_stats are correct."""
-    stats_dict = tools_instance.df_stats(sample_dataframe)
+    stats_dict = tools.df_stats(sample_dataframe)
 
     expected_cols = 5
     expected_rows = 101  # 100 + 1 duplicates
@@ -75,10 +74,10 @@ def test_df_stats_correct_values(tools_instance, sample_dataframe):
     assert stats_dict["memory_mb"] >= 0
 
 
-def test_df_stats_returns_dataframe(tools_instance, sample_df_with_missing):
+def test_df_stats_returns_dataframe(tools, sample_df_with_missing):
     """Tests that df_stats returns a DataFrame with expected columns."""
-    
-    result = tools_instance.df_stats(sample_df_with_missing)
+
+    result = tools.df_stats(sample_df_with_missing)
     assert isinstance(result, pd.DataFrame)
     assert list(result.columns) == ["metric", "value"]
     assert "Columns" in result["metric"].values

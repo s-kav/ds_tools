@@ -1,12 +1,8 @@
 import numpy as np
 import pytest
 
-from src.ds_tool import DSTools
 
-tools = DSTools()
-
-
-def test_entropy_hierarchy():
+def test_entropy_hierarchy(tools):
     # discrete distribution
     dist_deterministic = np.array([1.0, 0.0, 0.0])
     dist_ordered = np.array([0.9, 0.05, 0.05])
@@ -24,7 +20,7 @@ def test_entropy_hierarchy():
     assert e_det < e_ord < e_mix < e_uni, "The order of entropies is violated"
 
 
-def test_entropy_bits_vs_nats():
+def test_entropy_bits_vs_nats(tools):
     dist = np.array([0.5, 0.3, 0.2])
     e_nats = tools.calculate_entropy(dist)
     e_bits = tools.calculate_entropy(dist, base=2)
@@ -34,7 +30,7 @@ def test_entropy_bits_vs_nats():
     ), "Entropies in nats and bits must be different"
 
 
-def test_entropy_normalization_equivalence():
+def test_entropy_normalization_equivalence(tools):
     normalized = np.array([0.1, 0.4, 0.5])
     unnormalized = np.array([1, 4, 5])
 
@@ -46,7 +42,7 @@ def test_entropy_normalization_equivalence():
     ), "The entropy of normalized and unnormalized must be the same"
 
 
-def test_entropy_invalid_distribution():
+def test_entropy_invalid_distribution(tools):
     dist_invalid = np.array([1.5, -0.5, 0.0])
     with pytest.raises(ValueError, match="Probabilities cannot be negative"):
         tools.calculate_entropy(dist_invalid)

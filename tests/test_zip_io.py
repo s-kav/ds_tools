@@ -1,11 +1,10 @@
 import os
 import tempfile
 import zipfile
+
 import pandas as pd
 import polars as pl
 import pytest
-
-from src.ds_tool import DSTools
 
 
 @pytest.fixture(scope="module")
@@ -16,13 +15,8 @@ def dfs_to_save():
     return {"pandas_data": pd_df, "polars_data": pl_df}
 
 
-@pytest.fixture(scope="module")
-def tools():
-    return DSTools()
-
-
 @pytest.mark.parametrize(
-    "format_,zip_filename",
+    "format_, zip_filename",
     [
         ("parquet", "test_archive.parquet.zip"),
         ("csv", "test_archive.csv.zip"),
@@ -85,9 +79,9 @@ def test_save_dataframes_to_zip_unsupported_format_raises_error(tools):
     """
     Tests that save_dataframes_to_zip raises a ValueError for an unsupported format.
     """
-    df = pd.DataFrame({'a': [1]})
-    dataframes = {'my_df': df}
-    
+    df = pd.DataFrame({"a": [1]})
+    dataframes = {"my_df": df}
+
     with pytest.raises(ValueError, match="Unsupported format: 'txt'"):
         with tempfile.TemporaryDirectory() as temp_dir:
             zip_path = os.path.join(temp_dir, "test.zip")
@@ -119,7 +113,9 @@ def test_read_dataframes_from_zip_invalid_backend_raises_error(tools):
         tools.read_dataframes_from_zip("any.zip", backend="invalid_backend")
 
 
-def test_read_dataframes_from_zip_pandas_fallback_to_csv(tools, mocker, sample_pandas_df):
+def test_read_dataframes_from_zip_pandas_fallback_to_csv(
+    tools, mocker, sample_pandas_df
+):
     """
     Tests the fallback logic in read_dataframes_from_zip for pandas.
     This simulates a case where read_parquet fails and read_csv succeeds.
@@ -134,14 +130,16 @@ def test_read_dataframes_from_zip_pandas_fallback_to_csv(tools, mocker, sample_p
         zip_path = os.path.join(temp_dir, "test.zip")
         csv_path = os.path.join(temp_dir, "file1.csv")
         sample_pandas_df.to_csv(csv_path, index=False)
-        
+
         with zipfile.ZipFile(zip_path, "w") as zf:
             # Important: save as file1.parquet so that read_parquet is called first
             zf.write(csv_path, "file1.parquet")
 
         # function call with backend='pandas'
-        loaded_dfs = tools.read_dataframes_from_zip(zip_path, format="parquet", backend="pandas")
-        
+        loaded_dfs = tools.read_dataframes_from_zip(
+            zip_path, format="parquet", backend="pandas"
+        )
+
         # check that fallback is done
         mock_read_csv.assert_called_once()
         assert "file1" in loaded_dfs

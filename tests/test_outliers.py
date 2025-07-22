@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from src.ds_tool import DSTools, OutlierConfig
+from src.ds_tool import OutlierConfig
 
 
 @pytest.fixture(scope="module")
@@ -15,11 +15,6 @@ def df_with_outliers():
     df = pd.DataFrame({"value": full_data})
     df["category"] = np.random.choice(["A", "B"], size=len(df))
     return df
-
-
-@pytest.fixture(scope="module")
-def tools():
-    return DSTools()
 
 
 def test_outlier_bounds_iqr_manual(df_with_outliers):
