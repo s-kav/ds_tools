@@ -4,7 +4,7 @@ import polars as pl
 import pytest
 from scipy import stats
 
-from src.ds_tool import DistributionConfig
+from ds_tool import DistributionConfig
 
 
 def describe_metrics(arr: np.ndarray):

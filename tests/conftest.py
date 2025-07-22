@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from src.ds_tool import DSTools
+from ds_tool import DSTools
 
 
 @pytest.fixture(autouse=True)

@@ -63,3 +63,7 @@ filterwarnings = [
     "ignore::DeprecationWarning:numpy.*"
 ]
 testpaths = ["tests"]
+pythonpath = [
+  ".",
+  "src",
+]

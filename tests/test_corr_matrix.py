@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from src.ds_tool import CorrelationConfig
+from ds_tool import CorrelationConfig
 
 N_SAMPLES = 100
 
