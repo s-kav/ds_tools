@@ -724,12 +724,13 @@ class DSTools:
         skewness_val = stats.skew(check_object)
 
         print(f"\nKurtosis: {kurtosis_val:.3f}")
-        if kurtosis_val > 0:
-            print("Distribution has heavier tails than normal")
-        elif kurtosis_val < 0:
-            print("Distribution has lighter tails than normal")
-        else:
+
+        if abs(kurtosis_val) < 0.1:
             print("Distribution has normal tail weight")
+        elif kurtosis_val > 0:
+            print("Distribution has heavier tails than normal")
+        else:  # kurtosis_val < -0.1
+            print("Distribution has lighter tails than normal")
 
         print(f"\nSkewness: {skewness_val:.3f}")
         if -0.5 <= skewness_val <= 0.5:

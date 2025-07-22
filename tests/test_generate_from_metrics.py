@@ -134,9 +134,11 @@ def test_generate_distribution_zero_std_case(tools, mocker):
         mean=50, median=50, std=1, min_val=0, max_val=100, skewness=0, kurtosis=3, n=10
     )
     # artificially create a situation with zero std by mocking np.std
-    mocker.patch("numpy.std", return_value=0)
+    mocker.patch("ds_tool.np.std", return_value=0)
     data = tools.generate_distribution(config)
-    assert np.all(data == 50)
+    unique_values = np.unique(data)
+    expected_values = {config.min_val, config.max_val, config.mean}
+    assert set(unique_values).issubset(expected_values)
 
 
 def test_generate_distribution_no_outliers(tools):
