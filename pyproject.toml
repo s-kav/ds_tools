@@ -3,15 +3,19 @@ name = "dscience_tools"
 version = "1.0.8"
 description = "DSTools: Data Science Tools Library"
 readme = "README.md"
+
 authors = [
   { name="Sergii Kavun", email="kavserg@gmail.com" }
 ]
+
 maintainers = [
   { name="Sergii Kavun", email="kavserg@gmail.com" }
 ]
+
 license = {text = "MIT License"}
 dependencies = ["pandas<=2.2.3,>=0.25.0", "numpy<=2.2.0,>=1.22.0"]
 requires-python = ">=3.6.0"
+
 classifiers = [
     "Intended Audience :: Developers",
     "Intended Audience :: Information Technology",
@@ -28,6 +32,13 @@ classifiers = [
 ]
 
 dynamic = []
+
+[project.optional-dependencies]
+test = [
+    "pytest",
+    "pytest-cov",
+    "pytest-mock",
+]
 
 [project.urls]
 Homepage = "https://github.com/s-kav/ds_tools"

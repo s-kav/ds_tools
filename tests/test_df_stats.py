@@ -77,8 +77,15 @@ def test_df_stats_correct_values(tools, sample_dataframe):
 def test_df_stats_returns_dataframe(tools, sample_df_with_missing):
     """Tests that df_stats returns a DataFrame with expected columns."""
 
-    result = tools.df_stats(sample_df_with_missing)
+    result = tools.df_stats(sample_df_with_missing, return_format="dataframe")
     assert isinstance(result, pd.DataFrame)
     assert list(result.columns) == ["metric", "value"]
-    assert "Columns" in result["metric"].values
-    assert "Rows" in result["metric"].values
+    assert "columns" in result["metric"].values
+
+
+def test_df_stats_returns_dict_by_default(tools, sample_df_with_missing):
+    """Tests that df_stats returns a dictionary by default."""
+    result = tools.df_stats(sample_df_with_missing)
+    assert isinstance(result, dict)
+    assert "columns" in result
+    assert "rows" in result
