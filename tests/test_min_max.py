@@ -106,3 +106,22 @@ def test_min_max_scale_type_error_for_wrong_input(tools):
     # Passing unsupported input type should raise TypeError
     with pytest.raises(TypeError):
         tools.min_max_scale([1, 2, 3])
+
+
+def test_min_max_scale_non_existent_column_prints_warning(tools, capsys):
+    """
+    Tests that a warning is printed for non-existent columns and they are skipped.
+    """
+    df = pd.DataFrame({'a': [0, 5, 10]})
+    
+    # Call with existing and non-existent column
+    scaled_df = tools.min_max_scale(df, columns=['a', 'non_existent_col'])
+    
+    # Check that the warning was printed
+    captured = capsys.readouterr()
+    assert "Warning: Column 'non_existent_col' not found" in captured.out
+    
+    # We check that the existing column was processed and no extra ones appeared
+    assert 'a' in scaled_df.columns
+    assert 'non_existent_col' not in scaled_df.columns
+    assert scaled_df['a'].max() == 1.0

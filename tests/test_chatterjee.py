@@ -4,6 +4,7 @@ import pytest
 from src.ds_tool import DSTools
 
 tools = DSTools()
+
 np.random.seed(42)
 N_SAMPLES = 200
 x = np.linspace(-10, 10, N_SAMPLES)
@@ -54,3 +55,18 @@ def test_chatterjee_standard_flag_differs(data_quadratic):
 def test_chatterjee_length_mismatch(data_linear):
     with pytest.raises(ValueError):
         tools.chatterjee_correlation(x[:-1], data_linear)
+
+
+def test_chatterjee_correlation_less_than_two_points(tools):
+    """
+    Tests that chatterjee_correlation returns 0.0 for inputs with less than 2 points,
+    as correlation is undefined.
+    """
+    x1, y1 = [1], [1]
+    x0, y0 = [], []
+    
+    # for one element
+    assert tools.chatterjee_correlation(x1, y1) == 0.0
+    
+    # for empty lists
+    assert tools.chatterjee_correlation(x0, y0) == 0.0

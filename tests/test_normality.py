@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
+from scipy import stats
 from src.ds_tool import DSTools
 
 
@@ -68,3 +69,18 @@ def test_input_dataframe(tools, sample_data, capsys):
     captured = capsys.readouterr()
     assert "p =" in captured.out
     assert "looks Gaussian" in captured.out or "looks normal" in captured.out
+
+
+def test_stat_normal_testing_near_zero_moments(tools, mocker, capsys):
+    """Tests branches for near-zero kurtosis and skewness."""
+    mocker.patch("matplotlib.pyplot.show")
+
+    # generate data that is very close to normal
+    # stats.norm.rvs gives "cleaner" normal data
+    data = pd.Series(stats.norm.rvs(loc=0, scale=1, size=5000, random_state=42))
+
+    tools.stat_normal_testing(data)
+    captured = capsys.readouterr()
+
+    assert "Distribution has normal tail weight" in captured.out
+    assert "Data are fairly symmetrical" in captured.out

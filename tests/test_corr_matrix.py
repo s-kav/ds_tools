@@ -45,3 +45,27 @@ def test_corr_matrix_spearman_custom_view(test_dataframe):
 def test_corr_matrix_invalid_method_raises():
     with pytest.raises(ValueError):
         CorrelationConfig(build_method="invalid_method")
+
+
+@pytest.mark.parametrize(
+    "num_cols, expected_size",
+    [
+        (4, (8, 8)),      # n_cols < 5
+        (8, (10, 10)),    # n_cols < 9
+        (14, (22, 22)),   # n_cols < 15
+        (20, (16, 16)),   # else, default config size
+    ]
+)
+def test_corr_matrix_fig_size_logic(tools, mocker, num_cols, expected_size):
+    """Tests the figure size selection logic based on number of columns."""
+    # Mock plt.subplots to access its arguments
+    mock_subplots = mocker.patch("matplotlib.pyplot.subplots", return_value=(mocker.Mock(), mocker.Mock()))
+    mocker.patch("matplotlib.pyplot.show") # We mock show so as not to block the test
+
+    df = pd.DataFrame({f"col_{i}": range(10) for i in range(num_cols)})
+    tools.corr_matrix(df)
+
+    # Checking what figsize subplots was called with
+    mock_subplots.assert_called_once()
+    call_args, call_kwargs = mock_subplots.call_args
+    assert call_kwargs.get("figsize") == expected_size

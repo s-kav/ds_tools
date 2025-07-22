@@ -59,7 +59,7 @@ def test_df_stats_correct_values(tools_instance, sample_dataframe):
     stats_dict = tools_instance.df_stats(sample_dataframe)
 
     expected_cols = 5
-    expected_rows = 101  # 100 + 1 дубликат
+    expected_rows = 101  # 100 + 1 duplicates
     expected_total_missing = 10
     expected_missing_percent = np.round(10 / (101 * 5) * 100, 1)
 
@@ -73,3 +73,13 @@ def test_df_stats_correct_values(tools_instance, sample_dataframe):
 
     assert stats_dict["missing_percent"] == pytest.approx(expected_missing_percent)
     assert stats_dict["memory_mb"] >= 0
+
+
+def test_df_stats_returns_dataframe(tools_instance, sample_df_with_missing):
+    """Tests that df_stats returns a DataFrame with expected columns."""
+    
+    result = tools_instance.df_stats(sample_df_with_missing)
+    assert isinstance(result, pd.DataFrame)
+    assert list(result.columns) == ["metric", "value"]
+    assert "Columns" in result["metric"].values
+    assert "Rows" in result["metric"].values
