@@ -1,6 +1,6 @@
 [project]
 name = "dscience_tools"
-version = "1.0.8"
+version = "1.0.9"
 description = "DSTools: Data Science Tools Library"
 readme = "README.md"
 
