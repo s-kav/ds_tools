@@ -1,9 +1,9 @@
 import os
 import tempfile
-import pytest
-
+import zipfile
 import pandas as pd
 import polars as pl
+import pytest
 
 from src.ds_tool import DSTools
 
@@ -119,7 +119,7 @@ def test_read_dataframes_from_zip_invalid_backend_raises_error(tools):
         tools.read_dataframes_from_zip("any.zip", backend="invalid_backend")
 
 
-def test_read_dataframes_from_zip_pandas_fallback_to_csv(tools, sample_pandas_df):
+def test_read_dataframes_from_zip_pandas_fallback_to_csv(tools, mocker, sample_pandas_df):
     """
     Tests the fallback logic in read_dataframes_from_zip for pandas.
     This simulates a case where read_parquet fails and read_csv succeeds.

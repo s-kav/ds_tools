@@ -94,7 +94,7 @@ def test_generate_distribution_invalid_range_raises_error(tools):
         DistributionConfig(mean=10, median=10, std=1, min_val=20, max_val=10, skewness=0, kurtosis=3, n=100)
 
 
-def test_generate_distribution_zero_std_case(tools):
+def test_generate_distribution_zero_std_case(tools, mocker):
     """Tests the branch for zero standard deviation."""
     config = DistributionConfig(mean=50, median=50, std=1, min_val=0, max_val=100, skewness=0, kurtosis=3, n=10)
     # artificially create a situation with zero std by mocking np.std
