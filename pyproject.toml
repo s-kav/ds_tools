@@ -33,7 +33,7 @@ dynamic = []
 Homepage = "https://github.com/s-kav/ds_tools"
 Documentation = "https://s-kav.github.io/ds_tools/"
 Repository = "https://github.com/s-kav/ds_tools.git"
-"Source Code" = "https://github.com/s-kav/ds_tools"
+"Source Code" = "https://github.com/s-kav/ds_tools/tree/main/src"
 
 [tool.black]
 line-length = 88
@@ -56,8 +56,9 @@ addopts = [
     "--import-mode=importlib",
 ]
 filterwarnings = [
-    "ignore::pydantic.warnings.PydanticDeprecatedSince20",
     "ignore::DeprecationWarning",
-    "error",
+    "ignore::PendingDeprecationWarning",
+    "ignore::UserWarning:jupyter_core.*",
+    "ignore::DeprecationWarning:numpy.*"
 ]
 testpaths = ["tests"]
