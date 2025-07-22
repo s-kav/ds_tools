@@ -1,6 +1,6 @@
 [project]
 name = "dscience_tools"
-version = "1.0.7"
+version = "1.0.8"
 description = "DSTools: Data Science Tools Library"
 readme = "README.md"
 authors = [
@@ -34,6 +34,7 @@ Homepage = "https://github.com/s-kav/ds_tools"
 Documentation = "https://s-kav.github.io/ds_tools/"
 Repository = "https://github.com/s-kav/ds_tools.git"
 "Source Code" = "https://github.com/s-kav/ds_tools/tree/main/src"
+"Bug Tracker" = "https://github.com/s-kav/ds_tools/issues" 
 
 [tool.black]
 line-length = 88

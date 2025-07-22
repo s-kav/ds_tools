@@ -7,9 +7,6 @@
 [![PyPI Downloads](https://static.pepy.tech/badge/dscience-tools)](https://pepy.tech/projects/dscience-tools)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
-# Authors
-
-- [@sergiikavun](https://www.linkedin.com/in/sergii-kavun/)
 
 # Table of Contents
 
@@ -19,6 +16,7 @@
 *   [Function Overview](#function-overview)
 *   [Examples of usage](#examples-of-usage)
 *   [Available Tools](#available-tools)
+*   [Authors](#authors)
 *   [Contributing](#contributing)
 *   [References](#references)
 *   [License](#license)
@@ -40,7 +38,6 @@ This toolkit is built on top of popular libraries like Pandas, Polars, Scikit-le
 
 
 # Key Features
-
 
 -   **Advanced Data Analysis:** Get quick and detailed statistics for numerical and categorical columns.
 -   **Powerful Visualizations:** Generate insightful correlation matrices and confusion matrices with a single function call.
@@ -295,6 +292,11 @@ The library includes a wide range of functions. Here is a complete list:
 22. save_dataframes_to_zip & read_dataframes_from_zip: Save and load multiple dataframes from a single ZIP archive.
 23. generate_alphanum_codes: Generate an array of random alphanumeric codes.
 24. generate_distribution_from_metrics: A powerful function to generate a synthetic distribution matching a full suite of statistical metrics.
+
+
+# Authors
+
+- [@sergiikavun](https://www.linkedin.com/in/sergii-kavun/)
 
 
 # Contributing

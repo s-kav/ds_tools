@@ -54,3 +54,4 @@ nav:
   - 'Home': 'index.md'
   - 'API Reference': 'api/index.md'
   - 'Source Code': 'https://github.com/s-kav/ds_tools/tree/main/src'
+  - 'PyPI Install': 'https://pypi.org/project/dscience-tools/'
