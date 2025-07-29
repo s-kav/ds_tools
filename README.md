@@ -321,9 +321,9 @@ Please ensure your code adheres to PEP8 standards and includes appropriate docst
 
 For citing you should use:
 
-Sergii Kavun. (2025). s-kav/ds_tools: Version 1.0.9 (v1.0.9). Zenodo. https://doi.org/10.5281/zenodo.15864146
+Sergii Kavun. (2025). s-kav/ds_tools: Version 1.0.9 (v1.0.9). Zenodo. https://doi.org/10.5281/zenodo.15864145
 
-[![DOI](https://zenodo.org/badge/1001952407.svg)](https://doi.org/10.5281/zenodo.15864146)
+[![DOI](https://zenodo.org/badge/1017888957.svg)](https://doi.org/10.5281/zenodo.15864145)
 
 
 # License
