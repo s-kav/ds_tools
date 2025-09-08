@@ -1,12 +1,24 @@
 # src/ds_tools/__init__.py
-"""DSTools: A library of helpful functions for various data science research stages."""
+"""
+/*
+ * Copyright (c) [2025] [Sergii Kavun]
+ * 
+ * This software is dual-licensed:
+ * - PolyForm Noncommercial 1.0.0 (default)
+ * - Commercial license available
+ * 
+ * See LICENSE for details
+ */
 
-__version__ = "0.9.2"
+DSTools: A library of helpful functions for various data science research stages.
+"""
 
-from .ds_tool import (
+__version__ = "2.0.0"
+
+from .ds_tool import DSTools
+from .models import (
     CorrelationConfig,
     DistributionConfig,
-    DSTools,
     GrubbsTestResult,
     MetricsConfig,
     OutlierConfig,

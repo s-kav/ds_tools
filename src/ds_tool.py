@@ -1,6 +1,17 @@
 # src/ds_tool/ds_tools.py
-# version 1.0.9
+# version 2.0.0
 
+'''
+/*
+ * Copyright (c) [2025] [Sergii Kavun]
+ * 
+ * This software is dual-licensed:
+ * - PolyForm Noncommercial 1.0.0 (default)
+ * - Commercial license available
+ * 
+ * See LICENSE for details
+ */
+'''
 
 # Library consisting of additional & helpful functions for data science research stages.
 
@@ -20,6 +31,17 @@ import seaborn as sns
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 from scipy import stats
 from scipy.stats import rankdata
+
+from .metrics import Metrics
+from .distance import Distance
+from .models import (
+    CorrelationConfig,
+    DistributionConfig,
+    GrubbsTestResult,
+    MetricsConfig,
+    OutlierConfig,
+)
+
 from sklearn.metrics import (
     accuracy_score,
     auc,
@@ -40,91 +62,6 @@ from sklearn.preprocessing import OrdinalEncoder
 from statsmodels.tsa.stattools import adfuller
 
 EPSILON = 1e-8  # A small constant to avoid log(0) or division by zero
-
-
-class MetricsConfig(BaseModel):
-    """Configuration for metrics computation."""
-
-    error_vis: bool = Field(True, description="Flag for error visualization")
-    print_values: bool = Field(False, description="Flag for printing metric values")
-
-
-class CorrelationConfig(BaseModel):
-    """Configuration for correlation matrix visualization."""
-
-    font_size: int = Field(14, ge=8, le=20, description="Font size for heatmap")
-    build_method: str = Field("pearson", description="Correlation method")
-    image_size: Tuple[int, int] = Field((16, 16), description="Image size as tuple")
-
-    @field_validator("build_method")
-    @classmethod
-    def validate_method(cls, v) -> str:
-        valid_methods = ["pearson", "kendall", "spearman"]
-        if v not in valid_methods:
-            raise ValueError(f"Method must be one of {valid_methods}")
-        return v
-
-
-class OutlierConfig(BaseModel):
-    """Configuration for outlier removal."""
-
-    sigma: float = Field(1.5, gt=0, description="IQR multiplier for outlier detection")
-    change_remove: bool = Field(
-        True, description="True to change outliers, False to remove"
-    )
-    percentage: bool = Field(True, description="Calculate outlier percentages")
-
-
-class DistributionConfig(BaseModel):
-    """Configuration for distribution generation."""
-
-    mean: float = Field(description="Target mean")
-    median: float = Field(description="Target median")
-    std: float = Field(gt=0, description="Target standard deviation")
-    min_val: float = Field(description="Minimum value")
-    max_val: float = Field(description="Maximum value")
-    skewness: float = Field(description="Target skewness")
-    kurtosis: float = Field(description="Target kurtosis")
-    n: int = Field(gt=0, description="Number of data points")
-    accuracy_threshold: float = Field(
-        0.01, gt=0, le=0.1, description="Accuracy threshold"
-    )
-    outlier_ratio: float = Field(
-        0.025, ge=0, le=0.1, description="Proportion of outliers"
-    )
-
-    @model_validator(mode="after")
-    def validate_max_greater_than_min(self) -> "DistributionConfig":
-        if self.min_val is not None and self.max_val is not None:
-            if self.max_val <= self.min_val:
-                raise ValueError("max_val must be greater than min_val")
-        return self
-
-    model_config = ConfigDict(
-        str_strip_whitespace=True,
-        validate_assignment=True,
-    )
-
-
-class GrubbsTestResult(BaseModel):
-    """Pydantic model for storing the results of Grubbs' test for outliers."""
-
-    is_outlier: bool = Field(
-        ..., description="True if an outlier is detected, False otherwise."
-    )
-    g_calculated: float = Field(
-        ..., description="The calculated G-statistic for the test."
-    )
-    g_critical: float = Field(
-        ..., description="The critical G-value for the given alpha."
-    )
-    outlier_value: Optional[Union[int, float]] = Field(
-        None, description="The value of the detected outlier."
-    )
-    outlier_index: Optional[int] = Field(
-        None, description="The index of the detected outlier."
-    )
-
 
 class DSTools:
     """Data Science Tools for research and analysis.
@@ -231,6 +168,8 @@ class DSTools:
 
         # Theme configuration
         self.plotly_theme = "plotly_dark"
+        self.metrics = Metrics()
+        self.distance = Distance()
 
     def function_list(self) -> pd.DataFrame:
         """Parses the list of available tools (the 'Agenda') from the class
@@ -301,11 +240,11 @@ class DSTools:
 
         with pd.option_context(
             "display.max_colwidth",
-            200,  # Макс. ширина колонки (в символах)
+            200,  # Max column width (in characters)
             "display.width",
-            350,  # Общая ширина вывода
+            350,  # Total output width
             "display.colheader_justify",
-            "center",  # Выравнивание заголовков по левому краю
+            "center",  # Left align headings
         ):
             return out_df
 

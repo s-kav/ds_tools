@@ -327,5 +327,10 @@ Sergii Kavun. (2025). s-kav/ds_tools: Version 1.0.9 (v1.0.9). Zenodo. https://do
 
 
 # License
+This project uses **dual licensing**:
 
-This project is licensed under the MIT License - see the [LICENSE](https://github.com/s-kav/ds_tools/blob/main/LICENSE) file for details.
+- 🎓 **Free for Academic & Research**: PolyForm Noncommercial 1.0.0
+- 💼 **Commercial License Available**: Contact us for business use [License](https://github.com/s-kav/ds_tools/blob/main/CLA.md)
+
+[📋 Full License Details](https://github.com/s-kav/ds_tools/blob/main/LICENSE) | [💰 Get Commercial License](mailto:kavserg@gmail.com)
+

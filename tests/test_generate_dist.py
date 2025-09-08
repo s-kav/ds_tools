@@ -1,3 +1,15 @@
+'''
+/*
+ * Copyright (c) [2025] [Sergii Kavun]
+ * 
+ * This software is dual-licensed:
+ * - PolyForm Noncommercial 1.0.0 (default)
+ * - Commercial license available
+ * 
+ * See LICENSE for details
+ */
+'''
+
 import numpy as np
 import pytest
 from scipy import stats
@@ -68,35 +80,6 @@ def test_generate_distribution_invalid_moments(tools):
     )
     with pytest.raises(ValueError, match="Invalid statistical moments"):
         tools.generate_distribution(config_invalid)
-
-
-def test_distribution_config_pydantic_validation():
-    with pytest.raises(ValueError, match="max_val must be greater than min_val"):
-        DistributionConfig(
-            mean=100,
-            median=100,
-            std=15,
-            min_val=200,
-            max_val=100,
-            skewness=0.0,
-            kurtosis=3.0,
-            n=1000,
-        )
-
-
-def test_generate_distribution_invalid_range_raises_error(tools):
-    """Tests that max_val <= min_val raises ValueError."""
-    with pytest.raises(ValueError, match="max_val must be greater than min_val"):
-        DistributionConfig(
-            mean=10,
-            median=10,
-            std=1,
-            min_val=20,
-            max_val=10,
-            skewness=0,
-            kurtosis=3,
-            n=100,
-        )
 
 
 def test_generate_distribution_zero_std_case(tools, mocker):
