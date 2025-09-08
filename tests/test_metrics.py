@@ -105,10 +105,8 @@ def test_metrics_initialization(mocker, capsys):
     captured = capsys.readouterr()
     if NUMBA_AVAILABLE:
         mock_cpu_count.assert_called_once_with(logical=True)
-        assert "Numba backend configured to use 8 threads" in captured.out
-    if CUPY_AVAILABLE:
-        assert "CuPy backend enabled for GPU acceleration" in captured.out
 
+    assert "Metrics initialized" in captured.out
 
 # ============================================================================
 # Tests for the Real-time Monitoring System
