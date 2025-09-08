@@ -23,13 +23,16 @@ except ImportError:
 
 try:
     import cupy as cp
-
-    if cp.cuda.runtime.getDeviceCount() > 0:
-        CUPY_AVAILABLE = True
-        cp.cuda.Device(0).use()
-    else:
+    try:
+        if cp.cuda.runtime.getDeviceCount() > 0:
+            CUPY_AVAILABLE = True
+            cp.cuda.Device(0).use()
+        else:
+            CUPY_AVAILABLE = False
+            warnings.warn("CuPy is installed, but no compatible CUDA GPU was found.")
+    except cp.cuda.runtime.CUDARuntimeError as e:
         CUPY_AVAILABLE = False
-        warnings.warn("CuPy is installed, but no compatible CUDA GPU was found.")
+        warnings.warn(f"CuPy installed but failed to initialize: {e}")
 except ImportError:
     CUPY_AVAILABLE = False
     warnings.warn("CuPy not installed. GPU acceleration will be unavailable.")
