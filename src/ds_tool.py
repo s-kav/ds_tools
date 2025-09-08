@@ -32,9 +32,9 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator, model_valida
 from scipy import stats
 from scipy.stats import rankdata
 
-from .metrics import Metrics
-from .distance import Distance
-from .models import (
+from metrics import Metrics
+from distance import Distance
+from models import (
     CorrelationConfig,
     DistributionConfig,
     GrubbsTestResult,
