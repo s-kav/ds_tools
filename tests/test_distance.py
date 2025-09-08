@@ -110,6 +110,7 @@ def test_backend_dispatching_logic(
 
     dist = tools.distance
     mocker.patch.object(dist, "gpu_available", True)
+    mocker.patch("distance.cp.asarray", side_effect=lambda x: x)
     mock_numba = mocker.patch("distance._euclidean_numba", return_value=1.0)
     mock_cupy = mocker.patch("distance._euclidean_cupy", return_value=2.0, create=True)
 
