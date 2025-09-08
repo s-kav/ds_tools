@@ -168,6 +168,10 @@ def _jaccard_numpy(u, v):
     if union == 0: return 0.0
     return 1.0 - (intersection / union)
 
+def _pairwise_euclidean_numpy(X, Y):
+    # Using broadcasting for efficiency
+    diff = X[:, np.newaxis, :] - Y[np.newaxis, :, :]
+    return np.sqrt(np.sum(diff**2, axis=-1))
 
 # --- Matrix-based Distances ---
 if NUMBA_AVAILABLE:
