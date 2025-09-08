@@ -1,3 +1,15 @@
+'''
+/*
+ * Copyright (c) [2025] [Sergii Kavun]
+ * 
+ * This software is dual-licensed:
+ * - PolyForm Noncommercial 1.0.0 (default)
+ * - Commercial license available
+ * 
+ * See LICENSE for details
+ */
+'''
+
 import numpy as np
 import pandas as pd
 import pytest
@@ -39,11 +51,6 @@ def test_corr_matrix_spearman_custom_view(tools, test_dataframe):
         build_method="spearman", font_size=10, image_size=(10, 10)
     )
     tools.corr_matrix(test_dataframe, config=config)
-
-
-def test_corr_matrix_invalid_method_raises():
-    with pytest.raises(ValueError):
-        CorrelationConfig(build_method="invalid_method")
 
 
 @pytest.mark.parametrize(

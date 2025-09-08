@@ -1,21 +1,69 @@
-MIT License
+# Dual License Notice
 
-Copyright (c) 2025 Sergii Kavun
+This software is available under two different licenses:
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+## 1. Non-Commercial License (Default)
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+By default, this software is licensed under the **PolyForm Noncommercial License 1.0.0**.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+**You are free to:**
+- You may use, study, and modify the software for research, academic, educational, or personal purposes only.
+- Modify and create derivative works.
+- Distribute copies and modifications.
+- All functional of this framework (library) including the last version 1.0.9.
+
+**Restrictions:**
+- Commercial use is NOT permitted under this license.
+- Any commercial use (including SaaS, internal business use, resale, or integration into a commercial product) is not permitted under this license.
+- You must include this license notice in all copies or substantial portions.
+
+**Full license text:** [LICENSE](https://github.com/s-kav/ds_tools/blob/main/LICENSE-NC.txt)
+
+## 2. Commercial License
+
+If you wish to use this software for commercial purposes, you must obtain a separate commercial license from the copyright holder.
+For commercial use, including but not limited to:
+- Integration into commercial products or services
+- Use in revenue-generating applications
+- Distribution as part of commercial software
+
+**You must obtain a separate commercial license.**
+
+### Commercial License Benefits:
+- No restrictions on commercial use
+- No copyleft requirements
+- Priority support and maintenance
+- Legal protection and indemnification
+- Right to create proprietary derivatives
+- The commercial license grants rights for production, internal business operations, SaaS hosting, and redistribution in proprietary products.
+
+### How to Obtain Commercial License - for details on pricing and terms, please contact:
+- Contact: [kavserg@gmail.com]
+- Include details about your intended use case
+- [Draft License](https://github.com/s-kav/ds_tools/blob/main/CLA.md)
+
+## License Determination
+
+If you're unsure whether your use case qualifies as commercial, please contact us. Generally:
+
+**Non-Commercial (Free):**
+- Academic research and publications
+- Educational coursework and teaching
+- Personal learning and experimentation
+- Open-source projects
+- Non-profit organizations (for non-revenue activities)
+
+**Commercial (Paid License Required):**
+- Integration into products sold for profit
+- Use in Software-as-a-Service platforms
+- Internal use at for-profit companies
+- Consulting services using this software
+- Any use that directly or indirectly generates revenue
+
+---
+
+**Copyright Notice:**
+Copyright (c) [2025] [Sergii Kavun]. All rights reserved.
+
+**Questions?** 
+For licensing questions or commercial inquiries: [kavserg@gmail.com]
