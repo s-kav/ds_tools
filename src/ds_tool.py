@@ -1,7 +1,7 @@
 # src/ds_tool/ds_tools.py
 # version 2.0.0
 
-'''
+"""
 /*
  * Copyright (c) [2025] [Sergii Kavun]
  * 
@@ -11,7 +11,7 @@
  * 
  * See LICENSE for details
  */
-'''
+"""
 
 # Library consisting of additional & helpful functions for data science research stages.
 
@@ -28,20 +28,8 @@ import numpy as np
 import pandas as pd
 import polars as pl
 import seaborn as sns
-from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 from scipy import stats
 from scipy.stats import rankdata
-
-from metrics import Metrics
-from distance import Distance
-from models import (
-    CorrelationConfig,
-    DistributionConfig,
-    GrubbsTestResult,
-    MetricsConfig,
-    OutlierConfig,
-)
-
 from sklearn.metrics import (
     accuracy_score,
     auc,
@@ -61,7 +49,18 @@ from sklearn.metrics import (
 from sklearn.preprocessing import OrdinalEncoder
 from statsmodels.tsa.stattools import adfuller
 
+from distance import Distance
+from metrics import Metrics
+from models import (
+    CorrelationConfig,
+    DistributionConfig,
+    GrubbsTestResult,
+    MetricsConfig,
+    OutlierConfig,
+)
+
 EPSILON = 1e-8  # A small constant to avoid log(0) or division by zero
+
 
 class DSTools:
     """Data Science Tools for research and analysis.

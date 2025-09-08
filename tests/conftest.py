@@ -1,4 +1,4 @@
-'''
+"""
 /*
  * Copyright (c) [2025] [Sergii Kavun]
  * 
@@ -8,7 +8,7 @@
  * 
  * See LICENSE for details
  */
-'''
+"""
 
 import os
 import sys

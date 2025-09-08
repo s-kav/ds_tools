@@ -1,4 +1,4 @@
-'''
+"""
 /*
  * Copyright (c) [2025] [Sergii Kavun]
  * 
@@ -8,4 +8,4 @@
  * 
  * See LICENSE for details
  */
-'''
+"""

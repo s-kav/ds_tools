@@ -1,4 +1,4 @@
-'''
+"""
 /*
  * Copyright (c) [2025] [Sergii Kavun]
  * 
@@ -8,7 +8,7 @@
  * 
  * See LICENSE for details
  */
-'''
+"""
 
 # tests/test_metrics.py
 """
@@ -25,8 +25,6 @@ Dispatching logic (force_cpu flag and gpu_threshold threshold).
 Error and edge case handling (empty arrays, size mismatch, invalid parameters).
 
 """
-import os
-import warnings
 
 import numpy as np
 import pandas as pd
@@ -39,12 +37,14 @@ from ds_tool import Metrics
 # --- Attempt to import optional dependencies for marking tests ---
 try:
     import cupy as cp
+
     CUPY_AVAILABLE = True
 except ImportError:
     CUPY_AVAILABLE = False
 
 try:
     from numba import jit
+
     NUMBA_AVAILABLE = True
 except ImportError:
     NUMBA_AVAILABLE = False
@@ -54,6 +54,7 @@ except ImportError:
 # Test Fixtures
 # ============================================================================
 
+
 @pytest.fixture(scope="module")
 def small_sample_data():
     """Provides a small dataset that won't trigger the GPU threshold."""
@@ -61,6 +62,7 @@ def small_sample_data():
     y_true = np.random.rand(1000).astype(np.float32)
     y_pred = y_true + np.random.normal(0, 0.1, 1000).astype(np.float32)
     return y_true, y_pred
+
 
 @pytest.fixture(scope="module")
 def large_sample_data():
@@ -71,6 +73,7 @@ def large_sample_data():
     y_true = np.random.rand(size).astype(np.float32)
     y_pred = y_true + np.random.normal(0, 0.1, size).astype(np.float32)
     return y_true, y_pred
+
 
 @pytest.fixture(scope="module")
 def triplet_data():
@@ -88,12 +91,13 @@ def triplet_data():
 # Tests for Initialization and System Awareness
 # ============================================================================
 
+
 def test_metrics_initialization(mocker, capsys):
     """Tests that the Metrics class initializes correctly and checks system features."""
     mock_cpu_count = mocker.patch("psutil.cpu_count", return_value=8)
-    
+
     metrics = Metrics(gpu_threshold=50_000)
-    
+
     assert metrics.gpu_threshold == 50_000
     assert metrics.gpu_available == CUPY_AVAILABLE
     assert metrics.numba_available == NUMBA_AVAILABLE
@@ -110,6 +114,7 @@ def test_metrics_initialization(mocker, capsys):
 # Tests for the Real-time Monitoring System
 # ============================================================================
 
+
 def test_monitoring_system(tools, mocker):
     """Tests the full lifecycle of the monitoring system."""
     # 1. Start monitoring
@@ -120,14 +125,14 @@ def test_monitoring_system(tools, mocker):
     tools.metrics.update(epoch=0, logs={"loss": 0.5, "accuracy": 0.8, "val_loss": 0.6})
     tools.metrics.update(epoch=1, logs={"loss": 0.4, "accuracy": 0.85, "val_loss": 0.5})
     tools.metrics.update(epoch=2, logs={"loss": 0.3, "accuracy": 0.9, "val_loss": 0.35})
-    
+
     expected_history = {
         "epoch": [0, 1, 2],
         "loss": [0.5, 0.4, 0.3],
         "accuracy": [0.8, 0.85, 0.9],
-        "val_loss": [0.35] # Note: history handles missing values correctly
+        "val_loss": [0.35],  # Note: history handles missing values correctly
     }
-    
+
     # Check internal state (adjust for val_loss padding)
     history = tools.metrics.history
     assert history["epoch"] == expected_history["epoch"]
@@ -144,12 +149,12 @@ def test_monitoring_system(tools, mocker):
     assert df["val_loss"].iloc[0] == 0.6
 
     # 4. Test plotting
-    mocker.patch("matplotlib.pyplot.show") # Mock show to prevent blocking
+    mocker.patch("matplotlib.pyplot.show")  # Mock show to prevent blocking
     tools.metrics.plot_history()
     # Check graceful handling of no history
     tools.metrics.start_monitoring()
     assert tools.metrics.get_history_df() is None
-    tools.metrics.plot_history() # Should not raise an error
+    tools.metrics.plot_history()  # Should not raise an error
 
 
 # ============================================================================
@@ -168,6 +173,7 @@ METRICS_TO_TEST = [
     ("cross_entropy_loss", {}),
 ]
 
+
 @pytest.mark.parametrize("metric_name, kwargs", METRICS_TO_TEST)
 @pytest.mark.parametrize("force_cpu", [True, False])
 def test_metric_correctness(tools, metric_name, kwargs, force_cpu, large_sample_data):
@@ -176,26 +182,31 @@ def test_metric_correctness(tools, metric_name, kwargs, force_cpu, large_sample_
     across different backends (CPU/GPU).
     """
     y_true, y_pred = large_sample_data
-    
+
     # Special handling for classification metrics
     if metric_name in ["hinge_loss", "log_loss", "cross_entropy_loss"]:
         y_true = np.random.randint(0, 2, size=len(y_true)).astype(np.float32)
         y_pred = np.random.rand(len(y_pred)).astype(np.float32)
         if metric_name == "hinge_loss":
-             y_true[y_true == 0] = -1 # Hinge expects {-1, 1}
+            y_true[y_true == 0] = -1  # Hinge expects {-1, 1}
 
     # Get the result from our high-performance function
     metric_func = getattr(tools.metrics, metric_name)
     result = metric_func(y_true, y_pred, force_cpu=force_cpu, **kwargs)
 
     # Calculate the expected result using a simple, trusted NumPy implementation
-    if metric_name == "mae": expected = np.mean(np.abs(y_true - y_pred))
-    elif metric_name == "mse": expected = np.mean((y_true - y_pred)**2)
-    elif metric_name == "rmse": expected = np.sqrt(np.mean((y_true - y_pred)**2))
+    if metric_name == "mae":
+        expected = np.mean(np.abs(y_true - y_pred))
+    elif metric_name == "mse":
+        expected = np.mean((y_true - y_pred) ** 2)
+    elif metric_name == "rmse":
+        expected = np.sqrt(np.mean((y_true - y_pred) ** 2))
     elif metric_name == "huber_loss":
         delta = kwargs["delta"]
         err = np.abs(y_true - y_pred)
-        expected = np.mean(np.where(err <= delta, 0.5 * err**2, delta * (err - 0.5 * delta)))
+        expected = np.mean(
+            np.where(err <= delta, 0.5 * err**2, delta * (err - 0.5 * delta))
+        )
     elif metric_name == "quantile_loss":
         q = kwargs["quantile"]
         err = y_true - y_pred
@@ -205,8 +216,9 @@ def test_metric_correctness(tools, metric_name, kwargs, force_cpu, large_sample_
     elif metric_name in ["log_loss", "cross_entropy_loss"]:
         p = np.clip(y_pred, 1e-15, 1 - 1e-15)
         expected = -np.mean(y_true * np.log(p) + (1 - y_true) * np.log(1 - p))
-        
+
     assert np.isclose(result, expected, rtol=1e-5)
+
 
 @pytest.mark.parametrize("metric_name, kwargs", METRICS_TO_TEST)
 def test_gradients(tools, metric_name, kwargs, small_sample_data):
@@ -216,16 +228,20 @@ def test_gradients(tools, metric_name, kwargs, small_sample_data):
     y_true, y_pred = small_sample_data
     if metric_name in ["hinge_loss", "log_loss", "cross_entropy_loss"]:
         y_true = np.random.randint(0, 2, size=len(y_true)).astype(np.float32)
-        if metric_name == "hinge_loss": y_true[y_true == 0] = -1
-    
+        if metric_name == "hinge_loss":
+            y_true[y_true == 0] = -1
+
     metric_func = getattr(tools.metrics, metric_name)
-    
+
     # Get both loss and gradient
     loss, grad = metric_func(y_true, y_pred, return_grad=True, force_cpu=True, **kwargs)
-    
-    assert isinstance(loss, (float, np.floating)), f"Loss for {metric_name} should be a float or numpy float, but got {type(loss)}"
+
+    assert isinstance(
+        loss, (float, np.floating)
+    ), f"Loss for {metric_name} should be a float or numpy float, but got {type(loss)}"
     assert isinstance(grad, np.ndarray)
     assert grad.shape == y_pred.shape
+
 
 def test_gpu_threshold_logic(tools, mocker, small_sample_data, large_sample_data):
     """Tests that the GPU is only used when data size exceeds the threshold."""
@@ -254,6 +270,7 @@ def test_gpu_threshold_logic(tools, mocker, small_sample_data, large_sample_data
 # Tests for Specific/Edge Cases
 # ============================================================================
 
+
 def test_empty_input(tools):
     """Tests that all metrics handle empty arrays gracefully."""
     empty_arr = np.array([])
@@ -262,6 +279,7 @@ def test_empty_input(tools):
     val, grad = tools.metrics.mae(empty_arr, empty_arr, return_grad=True)
     assert val == 0.0 and grad is None
 
+
 def test_shape_mismatch_raises_error(tools):
     """Tests that a shape mismatch in inputs raises a ValueError."""
     y_true = np.array([1, 2, 3])
@@ -269,11 +287,13 @@ def test_shape_mismatch_raises_error(tools):
     with pytest.raises(ValueError, match="Input arrays must have the same shape"):
         tools.metrics.mae(y_true, y_pred)
 
+
 def test_invalid_quantile_raises_error(tools):
     """Tests that an invalid quantile value raises a ValueError."""
     y_true, y_pred = np.array([1]), np.array([1])
     with pytest.raises(ValueError, match="Quantile must be between 0 and 1"):
         tools.metrics.quantile_loss(y_true, y_pred, quantile=1.5)
+
 
 def test_triplet_loss_correctness(tools, triplet_data):
     """Tests the Triplet Loss calculation."""
@@ -286,9 +306,11 @@ def test_triplet_loss_correctness(tools, triplet_data):
 
     # Case 2: Loss should be zero (negative is much farther than positive)
     far_negative = negative * 10
-    loss_zero = tools.metrics.triplet_loss(anchor, positive, far_negative, margin=margin)
+    loss_zero = tools.metrics.triplet_loss(
+        anchor, positive, far_negative, margin=margin
+    )
     assert np.isclose(loss_zero, 0.0)
-    
+
     # Case 3: Test gradients
     loss_val, (grad_a, grad_p, grad_n) = tools.metrics.triplet_loss(
         anchor, positive, negative, margin=margin, return_grad=True, force_cpu=True

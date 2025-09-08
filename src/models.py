@@ -16,10 +16,10 @@ data validation across the ds_tools library.
 """
 from typing import Optional, Tuple, Union
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
-
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 # --- Configuration Models ---
+
 
 class MetricsConfig(BaseModel):
     """Configuration for metrics computation."""
@@ -67,7 +67,9 @@ class DistributionConfig(BaseModel):
     accuracy_threshold: float = Field(
         0.01, gt=0, le=0.1, description="Accuracy threshold"
     )
-    outlier_ratio: float = Field(0.025, ge=0, le=0.1, description="Proportion of outliers")
+    outlier_ratio: float = Field(
+        0.025, ge=0, le=0.1, description="Proportion of outliers"
+    )
 
     @model_validator(mode="after")
     def validate_max_greater_than_min(self) -> "DistributionConfig":
@@ -77,11 +79,13 @@ class DistributionConfig(BaseModel):
 
     class Config:
         """Pydantic configuration."""
+
         str_strip_whitespace = True
         validate_assignment = True
 
 
 # --- Result Models ---
+
 
 class GrubbsTestResult(BaseModel):
     """
@@ -91,9 +95,15 @@ class GrubbsTestResult(BaseModel):
     is_outlier: bool = Field(
         ..., description="True if an outlier is detected, False otherwise."
     )
-    g_calculated: float = Field(..., description="The calculated G-statistic for the test.")
-    g_critical: float = Field(..., description="The critical G-value for the given alpha.")
+    g_calculated: float = Field(
+        ..., description="The calculated G-statistic for the test."
+    )
+    g_critical: float = Field(
+        ..., description="The critical G-value for the given alpha."
+    )
     outlier_value: Optional[Union[int, float]] = Field(
         None, description="The value of the detected outlier."
     )
-    outlier_index: Optional[int] = Field(None, description="The index of the detected outlier.")
+    outlier_index: Optional[int] = Field(
+        None, description="The index of the detected outlier."
+    )
