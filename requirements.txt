@@ -9,3 +9,4 @@ statsmodels
 pydantic>=2.0
 optuna
 fastparquet
+psutil>=5.9.0
