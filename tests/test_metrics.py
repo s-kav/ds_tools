@@ -110,7 +110,7 @@ def test_metrics_initialization(mocker, capsys):
 # Tests for the Real-time Monitoring System
 # ============================================================================
 
-def test_monitoring_system(tools):
+def test_monitoring_system(tools, mocker):
     """Tests the full lifecycle of the monitoring system."""
     # 1. Start monitoring
     tools.metrics.start_monitoring()
