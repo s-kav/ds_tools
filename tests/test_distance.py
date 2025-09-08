@@ -136,7 +136,7 @@ VECTOR_METRICS = [
     ("chebyshev", {}, lambda u, v: np.max(np.abs(u-v))),
     ("cosine_similarity", {}, lambda u, v: 1 - cdist(u.reshape(1,-1), v.reshape(1,-1), 'cosine')[0,0]),
     ("hamming", {}, lambda u, v: np.mean(u != v)),
-    ("jaccard", {}, lambda u, v: 1.0 - (np.sum((u>0.5) & (v>0.5)) / np.sum((u>0.5) | (v>0.5)))),
+    ("jaccard", {}, lambda u, v: 1.0 - (np.sum(u.astype(bool) & v.astype(bool)) / np.sum(u.astype(bool) | v.astype(bool)))),
 ]
 
 @pytest.mark.parametrize("method_name, kwargs, trusted_func", VECTOR_METRICS)
