@@ -269,7 +269,7 @@ class Distance:
         
         func, u_c, v_c = self._dispatch_v2v("mahalanobis", u, v, force_cpu)
         cov_inv_c = cov_inv.astype(np.float32)
-        if isinstance(u_c, cp.ndarray): cov_inv_c = cp.asarray(cov_inv_c)
+        if CUPY_AVAILABLE and isinstance(u_c, cp.ndarray): cov_inv_c = cp.asarray(cov_inv_c)
         return float(func(u_c, v_c, cov_inv_c))
 
     def hamming(self, u: np.ndarray, v: np.ndarray, force_cpu: bool = False):
