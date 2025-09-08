@@ -78,9 +78,9 @@ def triplet_data():
     np.random.seed(42)
     anchor = np.random.rand(100, 32).astype(np.float32)
     # Positive is close to anchor
-    positive = anchor + np.random.normal(0, 0.01, (100, 32)).astype(np.float32)
+    positive = anchor + np.random.normal(0, 0.001, (100, 32)).astype(np.float32)
     # Negative is far from anchor
-    negative = anchor + np.random.normal(0, 0.5, (100, 32)).astype(np.float32)
+    negative = anchor + np.random.normal(0, 0.1, (100, 32)).astype(np.float32)
     return anchor, positive, negative
 
 
