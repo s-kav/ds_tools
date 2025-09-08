@@ -324,7 +324,7 @@ class Metrics:
         if return_grad:
             grad_func, _, _ = self._dispatch(f"{name}_grad", y_true, y_pred, force_cpu)
             grad = grad_func(y_true_c, y_pred_c, **kwargs)
-            if isinstance(grad, cp.ndarray): grad = cp.asnumpy(grad)
+            if CUPY_AVAILABLE and isinstance(grad, cp.ndarray): grad = cp.asnumpy(grad)
             return loss, grad
         return loss
 
