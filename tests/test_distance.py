@@ -135,8 +135,8 @@ VECTOR_METRICS = [
     ("minkowski", {"p": 3}, lambda u, v, p: np.sum(np.abs(u-v)**p)**(1/p)),
     ("chebyshev", {}, lambda u, v: np.max(np.abs(u-v))),
     ("cosine_similarity", {}, lambda u, v: 1 - cdist(u.reshape(1,-1), v.reshape(1,-1), 'cosine')[0,0]),
-    ("hamming", {}, lambda u, v: cdist((u > 0.5).reshape(1,-1), (v > 0.5).reshape(1,-1), 'hamming')[0,0]),
-    ("jaccard", {}, lambda u, v: cdist((u > 0.5).reshape(1,-1), (v > 0.5).reshape(1,-1), 'jaccard')[0,0]),
+    ("hamming", {}, lambda u, v: np.mean(u != v)),
+    ("jaccard", {}, lambda u, v: 1.0 - (np.sum((u>0.5) & (v>0.5)) / np.sum((u>0.5) | (v>0.5)))),
 ]
 
 @pytest.mark.parametrize("method_name, kwargs, trusted_func", VECTOR_METRICS)
