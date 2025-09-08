@@ -247,7 +247,7 @@ def test_vector_shape_mismatch_raises_error(tools):
     """Tests that a shape mismatch in vectors raises ValueError."""
     u = np.array([1, 2, 3])
     v = np.array([1, 2])
-    with pytest.raises(ValueError, match="Input vectors must have the same shape"):
+    with pytest.raises(ValueError, match="Input vectors/matrices must have the same number of features"):
         tools.distance.euclidean(u, v)
 
 def test_invalid_minkowski_p_raises_error(tools, small_sample_vectors):
