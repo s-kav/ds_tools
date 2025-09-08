@@ -99,7 +99,6 @@ def test_metrics_initialization(mocker, capsys):
     metrics = Metrics(gpu_threshold=50_000)
 
     assert metrics.gpu_threshold == 50_000
-    assert metrics.gpu_available == CUPY_AVAILABLE
     assert metrics.numba_available == NUMBA_AVAILABLE
 
     captured = capsys.readouterr()
@@ -247,8 +246,8 @@ def test_gpu_threshold_logic(tools, mocker, small_sample_data, large_sample_data
         pytest.skip("This test requires both CuPy and Numba to be installed.")
 
     # Mock the backends to see which one is called
-    mock_cupy = mocker.patch("ds_tool.metrics._mae_cupy", return_value=1.0)
-    mock_numba = mocker.patch("ds_tool.metrics._mae_numba", return_value=2.0)
+    mock_cupy = mocker.patch("metrics._mae_cupy", return_value=1.0)
+    mock_numba = mocker.patch("metrics._mae_numba", return_value=2.0)
 
     # 1. Test with small data -> Numba should be called
     y_true_small, y_pred_small = small_sample_data

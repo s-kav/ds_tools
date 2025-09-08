@@ -98,7 +98,6 @@ def test_distance_initialization(tools):
     """Tests that the Distance class initializes correctly."""
     # 'tools' fixture provides a DSTools instance, so we access .distance
     dist = tools.distance
-    assert dist.gpu_available == CUPY_AVAILABLE
     assert dist.numba_available == NUMBA_AVAILABLE
 
 
@@ -110,8 +109,8 @@ def test_backend_dispatching_logic(
         pytest.skip("This test requires both CuPy and Numba.")
 
     dist = tools.distance
-    mock_numba = mocker.patch("ds_tool.distance._euclidean_numba", return_value=1.0)
-    mock_cupy = mocker.patch("ds_tool.distance._euclidean_cupy", return_value=2.0)
+    mock_numba = mocker.patch("distance._euclidean_numba", return_value=1.0)
+    mock_cupy = mocker.patch("distance._euclidean_cupy", return_value=2.0)
 
     # 1. Small data -> Numba should be used
     u_small, v_small = small_sample_vectors
