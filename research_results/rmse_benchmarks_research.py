@@ -44,6 +44,7 @@ except ImportError:
 # RMSE IMPLEMENTATIONS IN DIFFERENT FRAMEWORKS
 # ============================================================================
 
+
 # 1. PyTorch implementation
 def rmse_pytorch_cpu(y_true: torch.Tensor, y_pred: torch.Tensor) -> float:
     """RMSE in PyTorch on CPU"""

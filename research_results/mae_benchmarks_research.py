@@ -44,6 +44,7 @@ except ImportError:
 # MAE IMPLEMENTATIONS IN DIFFERENT FRAMEWORKS
 # ============================================================================
 
+
 # 1. PyTorch implementation
 def mae_pytorch_cpu(y_true: torch.Tensor, y_pred: torch.Tensor) -> float:
     """MAE in PyTorch on CPU"""

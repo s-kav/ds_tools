@@ -44,6 +44,7 @@ except ImportError:
 # R² SCORE IMPLEMENTATIONS IN DIFFERENT FRAMEWORKS
 # ============================================================================
 
+
 # 1. PyTorch implementation
 def r2_pytorch_cpu(y_true: torch.Tensor, y_pred: torch.Tensor) -> float:
     """R² score in PyTorch on CPU"""
