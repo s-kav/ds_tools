@@ -40,6 +40,16 @@ test = [
     "pytest-mock",
 ]
 
+performance = [
+    "cupy-cuda12x",
+    "numba",
+]
+
+lint = [
+    "black==25.1.0",
+    "ruff==0.12.12",
+]
+
 [project.urls]
 Homepage = "https://github.com/s-kav/ds_tools"
 Documentation = "https://s-kav.github.io/ds_tools/"
