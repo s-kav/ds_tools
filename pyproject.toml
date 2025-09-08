@@ -12,7 +12,7 @@ maintainers = [
   { name="Sergii Kavun", email="kavserg@gmail.com" }
 ]
 
-license = {text = "MIT License"}
+license = {text = "PolyForm-Noncommercial-1.0.0 OR Commercial"}
 dependencies = ["pandas<=2.2.3,>=0.25.0", "numpy<=2.2.0,>=1.22.0"]
 requires-python = ">=3.6.0"
 
