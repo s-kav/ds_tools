@@ -1,5 +1,8 @@
+# tests/test_models.py
 """
-/*
+Tests for all Pydantic models in ds_tool.models.
+This file validates default values, constraints, and custom validation logic.
+ *
  * Copyright (c) [2025] [Sergii Kavun]
  *
  * This software is dual-licensed:
@@ -7,13 +10,7 @@
  * - Commercial license available
  *
  * See LICENSE for details
- */
-"""
-
-# tests/test_models.py
-"""
-Tests for all Pydantic models in ds_tool.models.
-This file validates default values, constraints, and custom validation logic.
+ *
 """
 import pytest
 

@@ -594,14 +594,9 @@ class Metrics:
             raise ValueError("Input arrays must have the same shape.")
 
         # Dispatching manually as the signature is different
-        backend_choice = "numpy"
         use_gpu = (
             self.gpu_available and not force_cpu and anchor.size >= self.gpu_threshold
         )
-        if use_gpu:
-            backend_choice = "cupy"
-        elif self.numba_available:
-            backend_choice = "numba"
 
         # Convert to float32
         anchor_c = anchor.astype(np.float32)

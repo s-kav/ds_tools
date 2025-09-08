@@ -1,15 +1,3 @@
-"""
-/*
- * Copyright (c) [2025] [Sergii Kavun]
- *
- * This software is dual-licensed:
- * - PolyForm Noncommercial 1.0.0 (default)
- * - Commercial license available
- *
- * See LICENSE for details
- */
-"""
-
 # tests/test_distance.py
 """
 Comprehensive tests for the Distance class in ds_tools.
@@ -21,28 +9,21 @@ All 12 metrics, including their correctness compared to reference implementation
 All backends (NumPy, Numba, CuPy) and the logic behind their selection (gpu_threshold, force_cpu).
 All major code paths, including matrix (pairwise, knn, radius) and vector functions.
 Error and edge case handling (incorrect sizes, empty arrays, incorrect parameters).
+*
+* Copyright (c) [2025] [Sergii Kavun]
+*
+* This software is dual-licensed:
+* - PolyForm Noncommercial 1.0.0 (default)
+* - Commercial license available
+*
+* See LICENSE for details
+*
 """
 import numpy as np
 import pytest
-from scipy.spatial.distance import cdist  # Used as a trusted reference
+from scipy.spatial.distance import cdist
 
-# --- Import the necessary components from the library ---
-
-# --- Attempt to import optional dependencies for marking tests ---
-try:
-    import cupy as cp
-
-    CUPY_AVAILABLE = True
-except ImportError:
-    CUPY_AVAILABLE = False
-
-try:
-    from numba import jit
-
-    NUMBA_AVAILABLE = True
-except ImportError:
-    NUMBA_AVAILABLE = False
-
+from distance import CUPY_AVAILABLE, NUMBA_AVAILABLE
 
 # ============================================================================
 # Test Fixtures

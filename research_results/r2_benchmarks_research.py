@@ -209,7 +209,7 @@ def benchmark_function(func, y_true, y_pred, n_runs: int = 100) -> Tuple[float, 
     for _ in range(n_runs):
         start_time = time.perf_counter()
         try:
-            result = func(y_true, y_pred)
+            func(y_true, y_pred)
         except Exception:
             return float("inf"), 0.0, 0.0
         end_time = time.perf_counter()

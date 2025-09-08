@@ -1,15 +1,3 @@
-"""
-/*
- * Copyright (c) [2025] [Sergii Kavun]
- *
- * This software is dual-licensed:
- * - PolyForm Noncommercial 1.0.0 (default)
- * - Commercial license available
- *
- * See LICENSE for details
- */
-"""
-
 # tests/test_metrics.py
 """
 Comprehensive tests for the Metrics class in ds_tools.
@@ -23,32 +11,22 @@ Gradient calculation for all applicable functions.
 Monitoring system (start, update, get_history_df, plot).
 Dispatching logic (force_cpu flag and gpu_threshold threshold).
 Error and edge case handling (empty arrays, size mismatch, invalid parameters).
-
+*
+* Copyright (c) [2025] [Sergii Kavun]
+*
+* This software is dual-licensed:
+* - PolyForm Noncommercial 1.0.0 (default)
+* - Commercial license available
+*
+* See LICENSE for details
+*
 """
-
 import numpy as np
 import pandas as pd
 import pytest
 
-# --- Import the necessary components from the library ---
-# conftest.py provides the 'tools' fixture
 from ds_tool import Metrics
-
-# --- Attempt to import optional dependencies for marking tests ---
-try:
-    import cupy as cp
-
-    CUPY_AVAILABLE = True
-except ImportError:
-    CUPY_AVAILABLE = False
-
-try:
-    from numba import jit
-
-    NUMBA_AVAILABLE = True
-except ImportError:
-    NUMBA_AVAILABLE = False
-
+from metrics import CUPY_AVAILABLE, NUMBA_AVAILABLE
 
 # ============================================================================
 # Test Fixtures
