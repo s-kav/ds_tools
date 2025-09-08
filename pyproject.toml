@@ -33,6 +33,13 @@ classifiers = [
 
 dynamic = []
 
+[project.optional-dependencies]
+test = [
+    "pytest",
+    "pytest-cov",
+    "pytest-mock",
+]
+
 [project.urls]
 Homepage = "https://github.com/s-kav/ds_tools"
 Documentation = "https://s-kav.github.io/ds_tools/"
