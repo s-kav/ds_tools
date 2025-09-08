@@ -117,11 +117,10 @@ def test_monitoring_system(tools):
     assert tools.metrics.history == {}
 
     # 2. Update with logs
-    tools.metrics.update(epoch=0, logs={"loss": 0.5, "accuracy": 0.8})
-    tools.metrics.update(epoch=1, logs={"loss": 0.4, "accuracy": 0.85})
-    # Add a new metric mid-run
+    tools.metrics.update(epoch=0, logs={"loss": 0.5, "accuracy": 0.8, "val_loss": 0.6})
+    tools.metrics.update(epoch=1, logs={"loss": 0.4, "accuracy": 0.85, "val_loss": 0.5})
     tools.metrics.update(epoch=2, logs={"loss": 0.3, "accuracy": 0.9, "val_loss": 0.35})
-
+    
     expected_history = {
         "epoch": [0, 1, 2],
         "loss": [0.5, 0.4, 0.3],
