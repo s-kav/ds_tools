@@ -109,6 +109,7 @@ def test_backend_dispatching_logic(
         pytest.skip("This test requires both CuPy and Numba.")
 
     dist = tools.distance
+    mocker.patch.object(dist, "gpu_available", True)
     mock_numba = mocker.patch("distance._euclidean_numba", return_value=1.0)
     mock_cupy = mocker.patch("distance._euclidean_cupy", return_value=2.0, create=True)
 
