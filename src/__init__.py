@@ -15,8 +15,8 @@ DSTools: A library of helpful functions for various data science research stages
 
 __version__ = "2.0.0"
 
-from .ds_tool import DSTools
-from .models import (
+from ds_tool import DSTools
+from models import (
     CorrelationConfig,
     DistributionConfig,
     GrubbsTestResult,
