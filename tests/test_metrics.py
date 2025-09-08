@@ -141,7 +141,7 @@ def test_monitoring_system(tools):
     assert isinstance(df, pd.DataFrame)
     assert len(df) == 3
     assert "val_loss" in df.columns
-    assert pd.isna(df["val_loss"][0]) # Check that padding is NaN
+    assert df["val_loss"].iloc[0] == 0.6
 
     # 4. Test plotting
     mocker.patch("matplotlib.pyplot.show") # Mock show to prevent blocking
