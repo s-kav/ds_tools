@@ -16,7 +16,7 @@ Tests for all Pydantic models in ds_tool.models.
 This file validates default values, constraints, and custom validation logic.
 """
 import pytest
-from ds_tool.models import (
+from models import (
     CorrelationConfig,
     DistributionConfig,
     GrubbsTestResult,
