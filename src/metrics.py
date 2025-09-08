@@ -37,6 +37,7 @@ except ImportError:
 
 try:
     import cupy as cp
+
     try:
         if cp.cuda.runtime.getDeviceCount() > 0:
             CUPY_AVAILABLE = True

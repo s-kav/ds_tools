@@ -107,6 +107,7 @@ def test_metrics_initialization(mocker, capsys):
 
     assert "Metrics initialized" in captured.out
 
+
 # ============================================================================
 # Tests for the Real-time Monitoring System
 # ============================================================================
@@ -244,7 +245,7 @@ def test_gpu_threshold_logic(tools, mocker, small_sample_data, large_sample_data
     """Tests that the GPU is only used when data size exceeds the threshold."""
     if not (CUPY_AVAILABLE and NUMBA_AVAILABLE):
         pytest.skip("This test requires both CuPy and Numba to be installed.")
-    
+
     mocker.patch.object(tools.metrics, "gpu_available", True)
     mocker.patch("metrics.cp.asarray", side_effect=lambda x: x, create=True)
     # Mock the backends to see which one is called
