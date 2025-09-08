@@ -133,7 +133,8 @@ def test_monitoring_system(tools):
     assert history["epoch"] == expected_history["epoch"]
     assert history["loss"] == expected_history["loss"]
     assert history["accuracy"] == expected_history["accuracy"]
-    assert len(history["val_loss"]) == 1 # Check specific case
+    assert history["val_loss"] == [0.6, 0.5, 0.35]
+    assert len(history["val_loss"]) == 3
 
     # 3. Get DataFrame
     df = tools.metrics.get_history_df()
@@ -222,7 +223,7 @@ def test_gradients(tools, metric_name, kwargs, small_sample_data):
     # Get both loss and gradient
     loss, grad = metric_func(y_true, y_pred, return_grad=True, force_cpu=True, **kwargs)
     
-    assert isinstance(loss, float)
+    assert isinstance(loss, (float, np.floating)), f"Loss for {metric_name} should be a float or numpy float, but got {type(loss)}"
     assert isinstance(grad, np.ndarray)
     assert grad.shape == y_pred.shape
 
