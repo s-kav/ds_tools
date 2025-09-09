@@ -53,6 +53,34 @@ This toolkit is built on top of popular libraries like Pandas, Polars, Scikit-le
 -   **Advanced Statistics:** Calculate non-parametric correlation (`chatterjee_correlation`), entropy, and KL-divergence.
 -   **Utilities:** Save/load DataFrames to/from ZIP archives, generate random alphanumeric codes, and more.
 
+## What's New in Version 2.0.0
+
+This version marks a major architectural refactoring of the library, focusing on modularity, performance, and advanced ML features.
+
+-   **✨ Modular Design:** The toolkit is now re-organized into logical namespaces. Instead of a single flat API, you now access functionality through `tools.metrics`, `tools.distance`, etc.
+-   **🚀 High-Performance Backends:** Major functions in `metrics` and `distance` now automatically leverage **GPU acceleration (CuPy)** and **parallel CPU execution (Numba)** for significant speedups on large datasets.
+-   **🤖 Gradient Calculation:** Key loss functions (like `mse`, `mae`, `huber_loss`) can now return their gradients (`return_grad=True`), making them suitable for custom training loops in ML frameworks.
+-   **📈 Training Monitoring:** A new real-time monitoring system has been added to the `metrics` module to track and plot metrics during model training.
+
+## TODO & Future Plans
+
+This library is actively maintained and will be expanded to cover more aspects of the daily data science workflow. The focus remains on providing high-performance, easy-to-use tools for common and resource-intensive tasks.
+
+Here is the development roadmap:
+
+-   [ ] **Expand Core Modules:**
+    -   [ ] Add more loss and another functions and metrics to `tools.metrics` (e.g. for classification, clusterization, etc.).
+    -   [ ] Implement more distance measures in `tools.distance` (e.g., Levenshtein for strings, Silhouette, etc.).
+-   [ ] **New `Preprocessing` Module:**
+    -   [ ] Develop high-performance feature scaling and encoding functions.
+    -   [ ] Add utilities for handling time-series data.
+-   [ ] **New `Visualization` Module:**
+    -   [ ] Create simple wrappers around Matplotlib/Seaborn for common plots (e.g., feature distribution, ROC curves).
+-   [ ] **Community & Contributions:**
+    -   [ ] Improve documentation with more examples.
+    -   [ ] Create contribution guidelines (`CONTRIBUTING.md`).
+
+Your feature requests and contributions are highly encouraged! Please open an issue to suggest a new function.
 
 # Installation
 
@@ -102,6 +130,58 @@ tools.function_list()
 # Examples of usage
 
 Here're some simple examples of how to use this library.
+
+## Using the Metrics Module
+
+Calculate Mean Absolute Error and its gradient. The best backend (GPU/Numba/NumPy) is chosen automatically.
+
+```python
+
+import numpy as np
+
+y_true = np.array()
+y_pred = np.array([1.1, 2.2, 2.8, 4.3])
+
+# Calculate only the loss value
+mae_loss = tools.metrics.mae(y_true, y_pred)
+print(f"MAE Loss: {mae_loss:.4f}")
+
+# Calculate both loss and its gradient
+loss, grad = tools.metrics.mae(y_true, y_pred, return_grad=True)
+print(f"Gradient: {grad}")
+```
+
+## Using the Distance Module
+
+```python
+u = np.array()
+v = np.array()
+
+euc_dist = tools.distance.euclidean(u, v)
+print(f"Euclidean Distance: {euc_dist:.4f}")
+```
+
+## Real-time Training Monitoring
+
+```python
+# 1. Start monitoring
+tools.metrics.start_monitoring()
+
+# 2. Simulate training loop
+for epoch in range(10):
+    # Dummy loss values
+    loss = 1 / (epoch + 1)
+    val_loss = 1.2 / (epoch + 1) + np.random.rand() * 0.1
+    
+    # Update history at the end of each epoch
+    tools.metrics.update(epoch, logs={'loss': loss, 'val_loss': val_loss})
+
+# 3. Get history as a DataFrame or plot it
+history_df = tools.metrics.get_history_df()
+print(history_df)
+
+tools.metrics.plot_history()
+```
 
 ## Evaluate a classification model.
 
@@ -254,6 +334,15 @@ cmap='YlGnBu'
 )
 ```
 
+**Example of benchmarking for MAE implementation**
+![](research_results/MAE_comparison.png)
+
+**Example of benchmarking for RMSE implementation**
+![](research_results/RMSE_comparison.png)
+
+**Example of benchmarking for R2 implementation**
+![](research_results/R2_comparison.png)
+
 **Example of confusion matrix plotting (for binary classification)**
 ![](tests_figures/bin_classification.png)
 
@@ -267,32 +356,29 @@ Full code base for other function testing you can find [here](https://github.com
 
 # Available Tools
 
-The library includes a wide range of functions. Here is a complete list:
+The library is now organized into logical modules. Here is an overview of the available toolkits:
 
-1. compute_metrics: Calculate main pre-selected classification metrics.
-2. corr_matrix: Calculate and visualize a correlation matrix.
-3. category_stats: Calculate and print categorical statistics.
-4. sparse_calc: Calculate sparsity level as a coefficient.
-5. trials_res_df: Aggregate Optuna optimization trials into a DataFrame.
-6. labeling: Encode categorical variables with optional ordering.
-7. remove_outliers_iqr: Remove or cap outliers using the IQR method.
-8. stat_normal_testing: Perform D'Agostino's K² test for normality.
-9. test_stationarity: Perform the Dickey-Fuller test for time-series stationarity.
-10. check_NINF: Check for NaN and infinite values in a DataFrame.
-11. df_stats: Get a quick, comprehensive overview of a DataFrame's structure.
-12. describe_categorical: Generate a detailed description of categorical columns.
-13. describe_numeric: Generate a detailed description of numerical columns.
-14. generate_distribution: Generate a synthetic numerical distribution with specific statistical properties.
-15. evaluate_classification: A master function to calculate, print, and visualize metrics for a binary classification model.
-16. grubbs_test: Perform Grubbs' test to identify a single outlier.
-17. plot_confusion_matrix: Plot a clear and readable confusion matrix.
-18. add_missing_value_features: Add features based on the count of missing values per row.
-19. chatterjee_correlation: Calculate Chatterjee's rank correlation coefficient (Xi).
-20. calculate_entropy & calculate_kl_divergence: Compute information theory metrics.
-21. min_max_scale: Scale DataFrame columns to the range [0, 1].
-22. save_dataframes_to_zip & read_dataframes_from_zip: Save and load multiple dataframes from a single ZIP archive.
-23. generate_alphanum_codes: Generate an array of random alphanumeric codes.
-24. generate_distribution_from_metrics: A powerful function to generate a synthetic distribution matching a full suite of statistical metrics.
+### Core Toolkit (`tools.*`)
+General-purpose utilities for data analysis and manipulation.
+- **`function_list`**: Prints a list of all available tools.
+- **`corr_matrix`**: Calculates and visualizes a correlation matrix.
+- **`category_stats`**: Provides detailed statistics for categorical columns.
+- **`remove_outliers_iqr`**: Replaces or removes outliers using the IQR method.
+- **`stat_normal_testing`**: Performs normality tests on a distribution.
+- `... and more.`
+
+### Metrics Toolkit (`tools.metrics.*`)
+A high-performance toolkit for calculating loss functions and their gradients.
+- **Regression Losses:** `mae`, `mse`, `rmse`, `huber_loss`, `quantile_loss`.
+- **Classification Losses:** `hinge_loss`, `log_loss` (Binary Cross-Entropy).
+- **Embedding Losses:** `triplet_loss`.
+- **Monitoring:** `start_monitoring`, `update`, `get_history_df`, `plot_history`.
+
+### Distance Toolkit (`tools.distance.*`)
+A high-performance toolkit for calculating distances and similarities.
+- **Vector-to-Vector:** `euclidean`, `manhattan`, `cosine_similarity`, `minkowski`, `chebyshev`, `mahalanobis`, `haversine`, `hamming`, `jaccard`.
+- **Matrix Operations:** `pairwise_euclidean`, `kmeans_distance`.
+- **Neighbor Searches:** `knn_distances`, `radius_neighbors`.
 
 
 # Authors
