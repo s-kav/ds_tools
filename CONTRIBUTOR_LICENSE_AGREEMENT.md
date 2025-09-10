@@ -2,7 +2,9 @@
 
 **Last updated:** 2025-09-10
 
-Thank you for your interest in contributing to **ds_tools** (the “Project”). To clarify the intellectual property license granted with contributions from any person or entity, you (the contributor) must agree to this Contributor License Agreement (CLA) before your contribution can be accepted and merged.
+Thank you for your interest in contributing to **ds_tools** (the “Project”).
+
+To clarify the intellectual property license granted with contributions from any person or entity, you (the contributor) must agree to this Contributor License Agreement (CLA) before your contribution can be accepted and merged.
 
 This CLA does **not** replace or modify the Project's primary license (if any). It governs the intellectual property rights that you grant to the Project maintainers with respect to your Contributions.
 
@@ -13,7 +15,7 @@ This CLA does **not** replace or modify the Project's primary license (if any). 
 
 ---
 
-## 1. Definitions
+## 1. Parties
 - **“Contribution”** means any original work of authorship, including any modifications or additions to an existing work, that is intentionally submitted by You to the Project (including, but not limited to, code, documentation, examples, tests, and other materials), whether submitted via pull request, email, issue tracker, or otherwise.
 - **“You” or “Your”** means the individual or legal entity making the Contribution.
 - **“Maintainer”, “Licensor”, or “Project”** means the person or organization listed as the owner/copyright holder of the repository.
@@ -24,7 +26,7 @@ This CLA does **not** replace or modify the Project's primary license (if any). 
 You hereby grant to the Maintainer and to recipients of software distributed by the Project a **perpetual, worldwide, non-exclusive, royalty-free, irrevocable, sublicensable, transferable** copyright license to:
 
 - reproduce, prepare derivative works of, publicly display, publicly perform, sublicense, distribute, and otherwise use Your Contribution; and  
-- to license and relicense Your Contribution, in whole or in part, under any license terms selected by the Maintainer (including, without limitation, open source licenses such as AGPL-3.0 and proprietary or commercial licenses), for any purpose.
+- to license and relicense (incorporate) Your Contribution, in whole or in part, under any license terms selected by the Maintainer (including, without limitation, open source licenses such as AGPL-3.0 and proprietary or commercial licenses), for any purpose.
 
 This grant includes the right for the Maintainer to incorporate Your Contribution into works that are distributed under different and/or multiple licenses (i.e., dual-licensing).
 
@@ -32,6 +34,14 @@ This grant includes the right for the Maintainer to incorporate Your Contributio
 
 ## 3. Grant of Patent License
 To the extent You own patent rights that would be necessarily infringed by Your Contribution, You hereby grant to the Maintainer and to recipients of software distributed by the Project a **perpetual, worldwide, non-exclusive, royalty-free, irrevocable** patent license to make, use, sell, offer for sale, import, and otherwise transfer the Contribution.
+
+### 3.1. Explicit Relicensing Right
+You acknowledge and agree that the Maintainer may, at its sole discretion, **release, distribute or otherwise make available the Project (including Your Contribution)** under one or more license terms, including without limitation:
+
+- the **GNU Affero General Public License v3.0 (AGPL-3.0)** (or later versions) for public distribution (for example, to support academic, research, and public community use), and/or  
+- one or more **commercial or proprietary licenses** for business customers or other commercial use cases.
+
+You hereby expressly consent to such relicensing and sublicensing of Your Contribution, in whole or in part, without further notice to You.
 
 ---
 
@@ -47,17 +57,17 @@ You represent and warrant that:
 3. To the best of Your knowledge, the Contribution does not infringe any third-party rights (including copyright, patent, trademark, or trade secret rights);  
 4. You will not submit Contributions that are under terms that would conflict with the rights granted in this CLA (for example, code licensed under a license that forbids relicensing).
 
-If You become aware of a problem with any Representation above, You will promptly notify the Maintainer.
+If You become aware that any of the above representations are untrue, You must promptly notify the Maintainer.
 
 ---
 
 ## 6. No Compensation
-You agree that You will not receive monetary or other compensation from the Maintainer for contributions accepted under this CLA, unless otherwise agreed in writing.
+You agree that You will not receive monetary or other compensation from the Maintainer for contributions accepted under this CLA, except as separately agreed in writing.
 
 ---
 
 ## 7. No Obligation to Accept
-This CLA does not obligate the Maintainer to accept any Contribution. The Maintainer reserves the right to accept, reject, or request changes to Contributions in its discretion.
+This CLA does not obligate the Maintainer to accept, merge, or distribute any Contribution. The Maintainer reserves the right to accept, reject, or request modifications to Contributions in its discretion.
 
 ---
 
@@ -66,22 +76,28 @@ If the Project repository currently does not contain a `LICENSE` file, the Maint
 
 ---
 
-## 9. Termination
+## 9. Confidentiality
+Do not submit confidential information or trade secrets as a Contribution. The Maintainer will treat Contributions as non-confidential for purposes of evaluation and distribution.
+
+---
+
+## 10. Termination
 Your grants under this CLA are perpetual and irrevocable except for material breach by You of the representations above. If You materially breach this CLA and do not cure the breach within 30 days of notice, the Maintainer may terminate rights to future distributions of Your Contributions.
 
 ---
 
-## 10. Governing Law
+## 11. Governing Law
 This CLA shall be governed by and construed in accordance with the laws of **Ukraine**, without regard to conflict of laws principles.
 
 ---
 
-## 11. How to sign / indicate agreement
+## 12. How to sign / indicate agreement
 **By submitting a pull request, issue, or other contribution to this repository, You agree to the terms of this CLA.**
 
-Alternatively, you may sign explicitly:
+If You prefer to provide an explicit signature, you may use the forms below.
 
 ### Individual Contributor
+
 I, [Full name], confirm that I am the author or have the right to make this contribution
 and agree to the terms of this CLA.
 
