@@ -386,20 +386,7 @@ A high-performance toolkit for calculating distances and similarities.
 
 # Contributing
 
-Contributions are welcome! Please feel free to submit a pull request or open an issue on the GitHub repository. If you have ideas for new features or improvements, please open an issue first to discuss what you would like to change.
-
-To contribute:
-
-1. Fork the repository.
-2. Create a new branch for your feature or bugfix (git checkout -b feature/AmazingFeature).
-3. Make your changes.
-4. Add tests for your new feature. Ensure all tests pass (pytest).
-5. Format your code (black . and ruff --fix .).
-6. Commit your changes with clear messages (git commit -m 'Add some AmazingFeature').
-7. Push to the branch/fork (git push origin feature/AmazingFeature).
-8. Open a Pull Request.
-
-Please ensure your code adheres to PEP8 standards and includes appropriate docstrings and comments.
+See [CONTRIBUTING](/CONTRIBUTING.md)
 
 
 # References
