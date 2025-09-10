@@ -334,6 +334,12 @@ cmap='YlGnBu'
 )
 ```
 
+**Example of confusion matrix plotting (for binary classification)**
+![](tests_figures/bin_classification.png)
+
+**Example of confusion matrix plotting (for multiclass classification)**
+![](tests_figures/multiclass_classification.png)
+
 **Example of benchmarking for MAE implementation**
 ![](research_results/MAE_comparison.png)
 
@@ -342,14 +348,6 @@ cmap='YlGnBu'
 
 **Example of benchmarking for R2 implementation**
 ![](research_results/R2_comparison.png)
-
-**Example of confusion matrix plotting (for binary classification)**
-![](tests_figures/bin_classification.png)
-
-
-**Example of confusion matrix plotting (for multiclass classification)**
-![](tests_figures/multiclass_classification.png)
-
 
 Full code base for other function testing you can find [here](https://github.com/s-kav/ds_tools/blob/main/tests/).
 
