@@ -92,13 +92,14 @@ def test_metrics_initialization(mocker, capsys):
     assert "Metrics initialized" in captured.out
 
 
-def test_metrics_init_psutil_fails(mocker, capsys):
+def test_metrics_init_psutil_fails(mocker):
     """Covers the exception handling if psutil fails."""
     if not NUMBA_AVAILABLE:
         pytest.skip("Test requires Numba")
     mocker.patch("psutil.cpu_count", side_effect=Exception("Test psutil error"))
-    Metrics()
-    assert "Could not set Numba threads" in capsys.readouterr().err
+    
+    with pytest.warns(UserWarning, match="Could not set Numba threads with psutil"):
+        Metrics()
 
 
 # ============================================================================
