@@ -21,12 +21,18 @@ Error and edge case handling (empty arrays, size mismatch, invalid parameters).
 * See LICENSE for details
 *
 """
+
 import numpy as np
 import pandas as pd
 import pytest
 
 from ds_tool import Metrics
 from metrics import CUPY_AVAILABLE, NUMBA_AVAILABLE
+
+pytestmark_cupy = pytest.mark.skipif(
+    not CUPY_AVAILABLE, 
+    reason="CuPy or compatible GPU is not available"
+)
 
 # ============================================================================
 # Test Fixtures
@@ -84,6 +90,15 @@ def test_metrics_initialization(mocker, capsys):
         mock_cpu_count.assert_called_once_with(logical=True)
 
     assert "Metrics initialized" in captured.out
+
+
+def test_metrics_init_psutil_fails(mocker, capsys):
+    """Covers the exception handling if psutil fails."""
+    if not NUMBA_AVAILABLE:
+        pytest.skip("Test requires Numba")
+    mocker.patch("psutil.cpu_count", side_effect=Exception("Test psutil error"))
+    Metrics()
+    assert "Could not set Numba threads" in capsys.readouterr().err
 
 
 # ============================================================================
@@ -244,6 +259,69 @@ def test_gpu_threshold_logic(tools, mocker, small_sample_data, large_sample_data
     mock_numba.assert_not_called()
 
 
+@pytest.mark.skipif(NUMBA_AVAILABLE, reason="This test is for when Numba is NOT available")
+def test_dispatch_fallback_to_numpy(tools, mocker, small_sample_data):
+    """Tests that dispatcher falls back to NumPy if Numba is missing."""
+    mock_numpy = mocker.patch("metrics._mae_numpy", return_value=99.0)
+    y_true, y_pred = small_sample_data
+    result = tools.metrics.mae(y_true, y_pred, force_cpu=True)
+    mock_numpy.assert_called_once()
+    assert result == 99.0
+
+
+# ============================================================================
+# Tests for GPU-Specific Execution
+# ============================================================================
+
+@pytestmark_cupy
+class TestGPUBackends:
+    """A class to group tests that require a functional CuPy environment."""
+
+    @pytest.mark.parametrize("metric_name, kwargs", METRICS_TO_TEST)
+    def test_metric_correctness_gpu(self, tools, metric_name, kwargs, large_sample_data):
+        """Tests numerical correctness of all metrics on GPU vs NumPy."""
+        y_true, y_pred = large_sample_data
+        if metric_name in ["hinge_loss", "log_loss"]:
+            y_true = np.random.randint(0, 2, len(y_true)).astype(np.float32)
+            y_pred = np.clip(y_pred, 1e-7, 1 - 1e-7)
+            if metric_name == "hinge_loss":
+                y_true[y_true == 0] = -1
+
+        metric_func = getattr(tools.metrics, metric_name)
+        result_gpu = metric_func(y_true, y_pred, force_cpu=False, **kwargs)
+        result_cpu = metric_func(y_true, y_pred, force_cpu=True, **kwargs)
+        
+        assert np.isclose(result_gpu, result_cpu, rtol=1e-5)
+
+    @pytest.mark.parametrize("metric_name, kwargs", METRICS_TO_TEST)
+    def test_gradients_gpu(self, tools, metric_name, kwargs, large_sample_data):
+        """Tests that gradient calculation on GPU returns correct shapes and types."""
+        y_true, y_pred = large_sample_data
+        if metric_name in ["hinge_loss", "log_loss"]:
+            y_true = np.random.randint(0, 2, len(y_true)).astype(np.float32)
+            if metric_name == "hinge_loss":
+                y_true[y_true == 0] = -1
+
+        metric_func = getattr(tools.metrics, metric_name)
+        loss, grad = metric_func(y_true, y_pred, return_grad=True, force_cpu=False, **kwargs)
+        
+        assert isinstance(loss, (float, np.floating))
+        assert isinstance(grad, np.ndarray) # Should be converted back to numpy
+        assert grad.shape == y_pred.shape
+
+    def test_triplet_loss_gpu(self, tools, triplet_data):
+        """Tests Triplet Loss on the GPU."""
+        anchor, positive, negative = triplet_data
+        loss_gpu, (ga_gpu, gp_gpu, gn_gpu) = tools.metrics.triplet_loss(
+            anchor, positive, negative, return_grad=True, force_cpu=False
+        )
+        loss_cpu, (ga_cpu, gp_cpu, gn_cpu) = tools.metrics.triplet_loss(
+            anchor, positive, negative, return_grad=True, force_cpu=True
+        )
+        assert np.isclose(loss_gpu, loss_cpu)
+        assert isinstance(ga_gpu, np.ndarray)
+
+
 # ============================================================================
 # Tests for Specific/Edge Cases
 # ============================================================================
@@ -256,6 +334,11 @@ def test_empty_input(tools):
     assert tools.metrics.mse(empty_arr, empty_arr) == 0.0
     val, grad = tools.metrics.mae(empty_arr, empty_arr, return_grad=True)
     assert val == 0.0 and grad is None
+    
+    anchor, pos, neg = empty_arr, empty_arr, empty_arr
+    assert tools.metrics.triplet_loss(anchor, pos, neg) == 0.0
+    val, grad_tuple = tools.metrics.triplet_loss(anchor, pos, neg, return_grad=True)
+    assert val == 0.0 and grad_tuple == (None, None, None)
 
 
 def test_shape_mismatch_raises_error(tools):
@@ -264,6 +347,12 @@ def test_shape_mismatch_raises_error(tools):
     y_pred = np.array([1, 2])
     with pytest.raises(ValueError, match="Input arrays must have the same shape"):
         tools.metrics.mae(y_true, y_pred)
+    
+    anchor = np.zeros((3,2))
+    positive = np.zeros((3,2))
+    negative = np.zeros((2,2)) # Mismatched shape
+    with pytest.raises(ValueError, match="Input arrays must have the same shape"):
+        tools.metrics.triplet_loss(anchor, positive, negative)
 
 
 def test_invalid_quantile_raises_error(tools):
