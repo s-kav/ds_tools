@@ -30,8 +30,7 @@ from ds_tool import Metrics
 from metrics import CUPY_AVAILABLE, NUMBA_AVAILABLE
 
 pytestmark_cupy = pytest.mark.skipif(
-    not CUPY_AVAILABLE, 
-    reason="CuPy or compatible GPU is not available"
+    not CUPY_AVAILABLE, reason="CuPy or compatible GPU is not available"
 )
 
 # ============================================================================
@@ -97,7 +96,7 @@ def test_metrics_init_psutil_fails(mocker):
     if not NUMBA_AVAILABLE:
         pytest.skip("Test requires Numba")
     mocker.patch("psutil.cpu_count", side_effect=Exception("Test psutil error"))
-    
+
     with pytest.warns(UserWarning, match="Could not set Numba threads with psutil"):
         Metrics()
 
@@ -260,7 +259,9 @@ def test_gpu_threshold_logic(tools, mocker, small_sample_data, large_sample_data
     mock_numba.assert_not_called()
 
 
-@pytest.mark.skipif(NUMBA_AVAILABLE, reason="This test is for when Numba is NOT available")
+@pytest.mark.skipif(
+    NUMBA_AVAILABLE, reason="This test is for when Numba is NOT available"
+)
 def test_dispatch_fallback_to_numpy(tools, mocker, small_sample_data):
     """Tests that dispatcher falls back to NumPy if Numba is missing."""
     mock_numpy = mocker.patch("metrics._mae_numpy", return_value=99.0)
@@ -274,12 +275,15 @@ def test_dispatch_fallback_to_numpy(tools, mocker, small_sample_data):
 # Tests for GPU-Specific Execution
 # ============================================================================
 
+
 @pytestmark_cupy
 class TestGPUBackends:
     """A class to group tests that require a functional CuPy environment."""
 
     @pytest.mark.parametrize("metric_name, kwargs", METRICS_TO_TEST)
-    def test_metric_correctness_gpu(self, tools, metric_name, kwargs, large_sample_data):
+    def test_metric_correctness_gpu(
+        self, tools, metric_name, kwargs, large_sample_data
+    ):
         """Tests numerical correctness of all metrics on GPU vs NumPy."""
         y_true, y_pred = large_sample_data
         if metric_name in ["hinge_loss", "log_loss"]:
@@ -291,7 +295,7 @@ class TestGPUBackends:
         metric_func = getattr(tools.metrics, metric_name)
         result_gpu = metric_func(y_true, y_pred, force_cpu=False, **kwargs)
         result_cpu = metric_func(y_true, y_pred, force_cpu=True, **kwargs)
-        
+
         assert np.isclose(result_gpu, result_cpu, rtol=1e-5)
 
     @pytest.mark.parametrize("metric_name, kwargs", METRICS_TO_TEST)
@@ -304,10 +308,12 @@ class TestGPUBackends:
                 y_true[y_true == 0] = -1
 
         metric_func = getattr(tools.metrics, metric_name)
-        loss, grad = metric_func(y_true, y_pred, return_grad=True, force_cpu=False, **kwargs)
-        
+        loss, grad = metric_func(
+            y_true, y_pred, return_grad=True, force_cpu=False, **kwargs
+        )
+
         assert isinstance(loss, (float, np.floating))
-        assert isinstance(grad, np.ndarray) # Should be converted back to numpy
+        assert isinstance(grad, np.ndarray)  # Should be converted back to numpy
         assert grad.shape == y_pred.shape
 
     def test_triplet_loss_gpu(self, tools, triplet_data):
@@ -335,7 +341,7 @@ def test_empty_input(tools):
     assert tools.metrics.mse(empty_arr, empty_arr) == 0.0
     val, grad = tools.metrics.mae(empty_arr, empty_arr, return_grad=True)
     assert val == 0.0 and grad is None
-    
+
     anchor, pos, neg = empty_arr, empty_arr, empty_arr
     assert tools.metrics.triplet_loss(anchor, pos, neg) == 0.0
     val, grad_tuple = tools.metrics.triplet_loss(anchor, pos, neg, return_grad=True)
@@ -348,10 +354,10 @@ def test_shape_mismatch_raises_error(tools):
     y_pred = np.array([1, 2])
     with pytest.raises(ValueError, match="Input arrays must have the same shape"):
         tools.metrics.mae(y_true, y_pred)
-    
-    anchor = np.zeros((3,2))
-    positive = np.zeros((3,2))
-    negative = np.zeros((2,2)) # Mismatched shape
+
+    anchor = np.zeros((3, 2))
+    positive = np.zeros((3, 2))
+    negative = np.zeros((2, 2))  # Mismatched shape
     with pytest.raises(ValueError, match="Input arrays must have the same shape"):
         tools.metrics.triplet_loss(anchor, positive, negative)
 
