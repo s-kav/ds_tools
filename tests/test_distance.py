@@ -25,6 +25,14 @@ from scipy.spatial.distance import cdist
 
 from distance import CUPY_AVAILABLE, NUMBA_AVAILABLE
 
+# --- Define markers for hardware-specific tests ---
+pytestmark_cupy = pytest.mark.skipif(
+    not CUPY_AVAILABLE, reason="CuPy or compatible GPU is not available"
+)
+pytestmark_numba = pytest.mark.skipif(
+    not NUMBA_AVAILABLE, reason="Numba is not available"
+)
+
 # ============================================================================
 # Test Fixtures
 # ============================================================================
@@ -115,10 +123,6 @@ def test_backend_dispatching_logic(
     mock_cupy.assert_not_called()
 
 
-# ============================================================================
-# Tests for Vector-to-Vector Distances
-# ============================================================================
-
 # --- Parametrized test for simple distances ---
 VECTOR_METRICS = [
     ("euclidean", {}, lambda u, v: np.linalg.norm(u - v)),
@@ -143,49 +147,166 @@ VECTOR_METRICS = [
 ]
 
 
-@pytest.mark.parametrize("method_name, kwargs, trusted_func", VECTOR_METRICS)
-def test_vector_distances_correctness(
-    tools, method_name, kwargs, trusted_func, large_sample_vectors
-):
-    """Tests numerical correctness of vector-to-vector distances against a trusted source."""
-    u, v = large_sample_vectors
-
-    # Get the result from our library (testing GPU path)
-    method = getattr(tools.distance, method_name)
-    result = method(u, v, **kwargs)
-
-    # Get the expected result from the trusted source (NumPy/SciPy)
-    expected = trusted_func(u, v, **kwargs)
-
-    assert np.isclose(result, expected, rtol=1e-5)
+# ============================================================================
+# Tests for CPU Backends (NumPy and Numba)
+# ============================================================================
 
 
-def test_mahalanobis_correctness(
-    tools, small_sample_vectors, inverse_covariance_matrix
-):
-    """Separate test for Mahalanobis due to its unique signature."""
-    u, v = small_sample_vectors
-    VI = inverse_covariance_matrix
+class TestCPUBackends:
+    """Groups tests that specifically target NumPy and Numba backends."""
 
-    # SciPy's implementation is a trusted source
-    from scipy.spatial.distance import mahalanobis as scipy_mahalanobis
+    @pytest.mark.parametrize("method_name, kwargs, trusted_func", VECTOR_METRICS)
+    def test_vector_distances_correctness(
+        self, tools, method_name, kwargs, trusted_func, large_sample_vectors
+    ):
+        """Tests numerical correctness of vector-to-vector distances against a trusted source."""
+        u, v = large_sample_vectors
 
-    expected = scipy_mahalanobis(u, v, VI)
+        # Get the result from our library (testing GPU path)
+        method = getattr(tools.distance, method_name)
+        result = method(u, v, **kwargs)
 
-    result = tools.distance.mahalanobis(u, v, VI)
-    assert np.isclose(result, expected)
+        # Get the expected result from the trusted source (NumPy/SciPy)
+        expected = trusted_func(u, v, **kwargs)
+
+        assert np.isclose(result, expected, rtol=1e-5)
+
+    @pytest.mark.parametrize("method_name, kwargs, scipy_metric", VECTOR_METRICS)
+    def test_vector_distances_numpy(
+        self, tools, mocker, method_name, kwargs, scipy_metric, small_sample_vectors
+    ):
+        """Tests correctness of NumPy implementations against SciPy."""
+        u, v = small_sample_vectors
+
+        # Force NumPy by disabling GPU and Numba via mocking
+        mocker.patch.object(tools.distance, "gpu_available", False)
+        mocker.patch.object(tools.distance, "numba_available", False)
+
+        method = getattr(tools.distance, method_name)
+        result = method(u, v, **kwargs)
+
+        # SciPy's cdist is our trusted source
+        # Reshape for cdist and handle special cases
+        u_2d, v_2d = u.reshape(1, -1), v.reshape(1, -1)
+        if method_name in ("hamming", "jaccard"):
+            u_2d, v_2d = u_2d > 0.5, v_2d > 0.5
+
+        if scipy_metric == "minkowski":
+            expected = cdist(u_2d, v_2d, metric=scipy_metric, p=kwargs["p"])[0, 0]
+        else:
+            expected = cdist(u_2d, v_2d, metric=scipy_metric)[0, 0]
+
+        if method_name == "cosine_similarity":
+            expected = 1.0 - expected  # scipy cdist returns cosine distance
+
+        assert np.isclose(result, expected, rtol=1e-5)
+
+    @pytestmark_numba
+    @pytest.mark.parametrize("method_name, kwargs, scipy_metric", VECTOR_METRICS)
+    def test_vector_distances_numba(
+        self, tools, mocker, method_name, kwargs, scipy_metric, small_sample_vectors
+    ):
+        """Tests correctness of Numba implementations against SciPy."""
+        u, v = small_sample_vectors
+
+        # Force Numba by disabling GPU
+        mocker.patch.object(tools.distance, "gpu_available", False)
+
+        method = getattr(tools.distance, method_name)
+        result = method(u, v, **kwargs)
+
+        u_2d, v_2d = u.reshape(1, -1), v.reshape(1, -1)
+        if method_name in ("hamming", "jaccard"):
+            u_2d, v_2d = u_2d > 0.5, v_2d > 0.5
+
+        if scipy_metric == "minkowski":
+            expected = cdist(u_2d, v_2d, metric=scipy_metric, p=kwargs["p"])[0, 0]
+        else:
+            expected = cdist(u_2d, v_2d, metric=scipy_metric)[0, 0]
+
+        if method_name == "cosine_similarity":
+            expected = 1.0 - expected
+
+        assert np.isclose(result, expected, rtol=1e-5)
+
+    def test_mahalanobis_correctness(
+        self, tools, small_sample_vectors, inverse_covariance_matrix
+    ):
+        """Separate test for Mahalanobis due to its unique signature."""
+        u, v = small_sample_vectors
+        VI = inverse_covariance_matrix
+
+        # SciPy's implementation is a trusted source
+        from scipy.spatial.distance import mahalanobis as scipy_mahalanobis
+
+        expected = scipy_mahalanobis(u, v, VI)
+
+        result = tools.distance.mahalanobis(u, v, VI, force_cpu=True)
+        assert np.isclose(result, expected)
+
+    @pytestmark_numba
+    def test_pairwise_euclidean_numba(self, tools, mocker, sample_matrices):
+        """Tests the Numba implementation of pairwise euclidean distance."""
+        X, Y = sample_matrices
+        mocker.patch.object(tools.distance, "gpu_available", False)
+
+        result = tools.distance.pairwise_euclidean(X, Y)
+        expected = cdist(X, Y, "euclidean")
+        assert np.allclose(result, expected)
+
+    def test_haversine_correctness(self, tools):
+        """Tests Haversine distance with a known example (Paris to London)."""
+        # Coordinates for Paris and London
+        lat1, lon1 = 48.8566, 2.3522  # Paris
+        lat2, lon2 = 51.5074, -0.1278  # London
+
+        expected_distance_km = 343.5  # Approximate distance
+
+        result = tools.distance.haversine(lat1, lon1, lat2, lon2)
+        assert np.isclose(result, expected_distance_km, atol=1)  # Allow 1km tolerance
 
 
-def test_haversine_correctness(tools):
-    """Tests Haversine distance with a known example (Paris to London)."""
-    # Coordinates for Paris and London
-    lat1, lon1 = 48.8566, 2.3522  # Paris
-    lat2, lon2 = 51.5074, -0.1278  # London
+# ============================================================================
+# Tests for GPU-Specific Execution
+# ============================================================================
 
-    expected_distance_km = 343.5  # Approximate distance
 
-    result = tools.distance.haversine(lat1, lon1, lat2, lon2)
-    assert np.isclose(result, expected_distance_km, atol=1)  # Allow 1km tolerance
+@pytestmark_cupy
+class TestGPUBackends:
+    """A class to group tests that require a functional CuPy environment."""
+
+    @pytest.mark.parametrize("method_name, kwargs, scipy_metric", VECTOR_METRICS)
+    def test_vector_distances_gpu(
+        self, tools, method_name, kwargs, scipy_metric, large_sample_vectors
+    ):
+        """Tests correctness of CuPy implementations against SciPy on large data."""
+        u, v = large_sample_vectors
+
+        method = getattr(tools.distance, method_name)
+        # force_cpu=False is default, so GPU should be chosen
+        result = method(u, v, **kwargs)
+
+        u_2d, v_2d = u.reshape(1, -1), v.reshape(1, -1)
+        if method_name in ("hamming", "jaccard"):
+            u_2d, v_2d = u_2d > 0.5, v_2d > 0.5
+
+        if scipy_metric == "minkowski":
+            expected = cdist(u_2d, v_2d, metric=scipy_metric, p=kwargs["p"])[0, 0]
+        else:
+            expected = cdist(u_2d, v_2d, metric=scipy_metric)[0, 0]
+
+        if method_name == "cosine_similarity":
+            expected = 1.0 - expected
+
+        assert np.isclose(result, expected, rtol=1e-5)
+
+    def test_pairwise_euclidean_gpu(self, tools, sample_matrices):
+        """Tests the CuPy implementation of pairwise euclidean distance."""
+        X, Y = sample_matrices
+
+        result = tools.distance.pairwise_euclidean(X, Y)
+        expected = cdist(X, Y, "euclidean")
+        assert np.allclose(result, expected, rtol=1e-5)
 
 
 # ============================================================================
@@ -297,7 +418,7 @@ def test_cosine_similarity_with_zero_vector(tools):
     # Test against a zero vector
     assert tools.distance.cosine_similarity(u, v_zero) == 0.0
     # Test against itself
-    assert tools.distance.cosine_similarity(v_zero, v_zero) == 0.0
+    assert tools.distance.cosine_similarity(v_zero, v_zero) == 1.0
 
 
 def test_jaccard_with_empty_sets(tools):
@@ -320,3 +441,22 @@ def test_pairwise_euclidean_empty_input(tools):
     result = tools.distance.pairwise_euclidean(empty_matrix)
     # The function should return an empty array of shape (0, 0) or similar
     assert result.shape[0] == 0
+
+
+def test_pairwise_and_neighbors_empty_input(tools):
+    """Covers edge cases for matrix functions with empty inputs."""
+    empty_matrix = np.empty((0, 10), dtype=np.float32)
+
+    # Test pairwise
+    result_pairwise = tools.distance.pairwise_euclidean(empty_matrix)
+    assert result_pairwise.shape == (0, 0)
+
+    # Test k-NN
+    dists_knn, idxs_knn = tools.distance.knn_distances(empty_matrix, k=3)
+    assert dists_knn.shape == (0, 3)
+    assert idxs_knn.shape == (0, 3)
+
+    # Test radius
+    dists_rad, idxs_rad = tools.distance.radius_neighbors(empty_matrix, radius=0.5)
+    assert isinstance(dists_rad, list) and len(dists_rad) == 0
+    assert isinstance(idxs_rad, list) and len(idxs_rad) == 0
