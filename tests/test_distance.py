@@ -25,19 +25,20 @@ import numpy as np
 import pytest
 from scipy.spatial.distance import cdist
 
-from distance import (
-    CUPY_AVAILABLE,
-    NUMBA_AVAILABLE,
-    _chebyshev_numba,
-    _cosine_similarity_numba,
-    _euclidean_numba,
-    _hamming_numba,
-    _jaccard_numba,
-    _mahalanobis_numba,
-    _manhattan_numba,
-    _minkowski_numba,
-    _pairwise_euclidean_numba,
-)
+from distance import CUPY_AVAILABLE, NUMBA_AVAILABLE
+
+if NUMBA_AVAILABLE:
+    from distance import (
+        _chebyshev_numba,
+        _cosine_similarity_numba,
+        _euclidean_numba,
+        _hamming_numba,
+        _jaccard_numba,
+        _mahalanobis_numba,
+        _manhattan_numba,
+        _minkowski_numba,
+        _pairwise_euclidean_numba,
+    )
 
 # --- Define markers for hardware-specific tests ---
 pytestmark_cupy = pytest.mark.skipif(
