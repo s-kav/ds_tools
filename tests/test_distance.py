@@ -316,7 +316,7 @@ def test_pairwise_euclidean_empty_input(tools):
     Covers the 'if self._validate_vectors(...) is not None' branch
     in pairwise_euclidean for empty inputs.
     """
-    empty_matrix = np.array([[]])
+    empty_matrix = np.empty((0, 10), dtype=np.float32)
     result = tools.distance.pairwise_euclidean(empty_matrix)
     # The function should return an empty array of shape (0, 0) or similar
     assert result.shape[0] == 0
