@@ -134,16 +134,6 @@ VECTOR_METRICS = [
         {},
         lambda u, v: 1.0 - cdist(u.reshape(1, -1), v.reshape(1, -1), "cosine")[0, 0],
     ),
-    ("hamming", {}, lambda u, v: np.mean(u != v)),
-    (
-        "jaccard",
-        {},
-        lambda u, v: 1.0
-        - (
-            np.sum(u.astype(bool) & v.astype(bool))
-            / np.sum(u.astype(bool) | v.astype(bool))
-        ),
-    ),
 ]
 
 
@@ -188,10 +178,6 @@ class TestCPUBackends:
         # SciPy's cdist is our trusted source
         # Reshape for cdist and handle special cases
         u_2d, v_2d = u.reshape(1, -1), v.reshape(1, -1)
-        if method_name in ("hamming", "jaccard"):
-            u_2d, v_2d = (u > 0.5).reshape(1, -1), (v > 0.5).reshape(1, -1)
-        else:
-            u_2d, v_2d = u.reshape(1, -1), v.reshape(1, -1)
 
         expected = cdist(u_2d, v_2d, metric=scipy_metric, **kwargs)[0, 0]
 
@@ -212,10 +198,6 @@ class TestCPUBackends:
         result = method(u, v, **kwargs)
 
         u_2d, v_2d = u.reshape(1, -1), v.reshape(1, -1)
-        if method_name in ("hamming", "jaccard"):
-            u_2d, v_2d = (u > 0.5).reshape(1, -1), (v > 0.5).reshape(1, -1)
-        else:
-            u_2d, v_2d = u.reshape(1, -1), v.reshape(1, -1)
 
         expected = cdist(u_2d, v_2d, metric=scipy_metric, **kwargs)[0, 0]
 
@@ -279,10 +261,6 @@ class TestGPUBackends:
         result = method(u, v, **kwargs)
 
         u_2d, v_2d = u.reshape(1, -1), v.reshape(1, -1)
-        if method_name in ("hamming", "jaccard"):
-            u_2d, v_2d = (u > 0.5).reshape(1, -1), (v > 0.5).reshape(1, -1)
-        else:
-            u_2d, v_2d = u.reshape(1, -1), v.reshape(1, -1)
 
         expected = cdist(u_2d, v_2d, metric=scipy_metric, **kwargs)[0, 0]
 
@@ -357,6 +335,31 @@ def test_radius_neighbors_correctness(tools, sample_matrices):
     for dist_array in distances:
         if len(dist_array) > 0:
             assert np.all(dist_array <= radius)
+
+
+def test_hamming_distance_correctness(tools):
+    """Tests Hamming distance on a simple binary case."""
+    u = np.array([1, 0, 1, 1, 0, 1])
+    v = np.array([1, 1, 0, 1, 0, 1])
+    # 2 non-matching elements out of 6 -> distance = 2/6 = 0.333...
+    expected = 2 / 6
+    result = tools.distance.hamming(u, v)
+    assert np.isclose(result, expected)
+
+
+def test_jaccard_distance_correctness(tools):
+    """Tests Jaccard distance on a simple binary case."""
+    u = np.array([1, 1, 0, 1, 0])
+    v = np.array([0, 1, 1, 1, 0])
+    # Intersection = 2 ({1, 3})
+    # Union = 3 ({0, 1, 2, 3}) -> {1,1,1,1,0} -> 4. Sorry, my math was off.
+    # Union = sum(u | v) = sum([1,1,1,1,0]) = 4
+    # Intersection = sum(u & v) = sum([0,1,0,1,0]) = 2
+    # Jaccard Similarity = 2 / 4 = 0.5
+    # Jaccard Distance = 1 - 0.5 = 0.5
+    expected = 0.5
+    result = tools.distance.jaccard(u, v)
+    assert np.isclose(result, expected)
 
 
 # ============================================================================

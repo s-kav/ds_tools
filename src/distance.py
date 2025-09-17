@@ -142,10 +142,10 @@ if NUMBA_AVAILABLE:
             norm_u += u[i] ** 2
             norm_v += v[i] ** 2
         norm_u, norm_v = np.sqrt(norm_u), np.sqrt(norm_v)
-        if norm_u == 0.0 or norm_v == 0.0:
-            return 0.0
         if norm_u == 0.0 and norm_v == 0.0:
-            return 1.0
+            return 1.0  # similarity of two zero vectors = 1
+        if norm_u == 0.0 or norm_v == 0.0:
+            return 0.0  # similarity with one zero vectors = 0
         return dot / (norm_u * norm_v)
 
 
@@ -153,19 +153,19 @@ if CUPY_AVAILABLE:
 
     def _cosine_similarity_cupy(u, v):
         dot, norm_u, norm_v = cp.dot(u, v), cp.linalg.norm(u), cp.linalg.norm(v)
-        if norm_u == 0.0 or norm_v == 0.0:
-            return 0.0
         if norm_u == 0.0 and norm_v == 0.0:
-            return 1.0
+            return 1.0  # similarity of two zero vectors = 1
+        if norm_u == 0.0 or norm_v == 0.0:
+            return 0.0  # similarity with one zero vectors = 0
         return dot / (norm_u * norm_v)
 
 
 def _cosine_similarity_numpy(u, v):
     dot, norm_u, norm_v = np.dot(u, v), np.linalg.norm(u), np.linalg.norm(v)
-    if norm_u == 0.0 or norm_v == 0.0:
-        return 0.0
     if norm_u == 0.0 and norm_v == 0.0:
-        return 1.0
+        return 1.0  # similarity of two zero vectors = 1
+    if norm_u == 0.0 or norm_v == 0.0:
+        return 0.0  # similarity with one zero vectors = 0
     return dot / (norm_u * norm_v)
 
 
