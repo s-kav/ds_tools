@@ -132,7 +132,7 @@ VECTOR_METRICS = [
     (
         "cosine_similarity",
         {},
-        lambda u, v: 1 - cdist(u.reshape(1, -1), v.reshape(1, -1), "cosine")[0, 0],
+        lambda u, v: cdist(u.reshape(1, -1), v.reshape(1, -1), "cosine")[0, 0],
     ),
     ("hamming", {}, lambda u, v: np.mean(u != v)),
     (
@@ -192,9 +192,7 @@ class TestCPUBackends:
             u_2d, v_2d = u_2d > 0.5, v_2d > 0.5
 
         if scipy_metric == "minkowski":
-            expected = cdist(u_2d, v_2d, metric=scipy_metric, p=kwargs["p"])[0, 0]
-        else:
-            expected = cdist(u_2d, v_2d, metric=scipy_metric)[0, 0]
+            expected = cdist(u_2d, v_2d, metric=scipy_metric, **kwargs)[0, 0]
 
         if method_name == "cosine_similarity":
             expected = 1.0 - expected  # scipy cdist returns cosine distance
@@ -220,9 +218,7 @@ class TestCPUBackends:
             u_2d, v_2d = u_2d > 0.5, v_2d > 0.5
 
         if scipy_metric == "minkowski":
-            expected = cdist(u_2d, v_2d, metric=scipy_metric, p=kwargs["p"])[0, 0]
-        else:
-            expected = cdist(u_2d, v_2d, metric=scipy_metric)[0, 0]
+            expected = cdist(u_2d, v_2d, metric=scipy_metric, **kwargs)[0, 0]
 
         if method_name == "cosine_similarity":
             expected = 1.0 - expected
@@ -291,9 +287,7 @@ class TestGPUBackends:
             u_2d, v_2d = u_2d > 0.5, v_2d > 0.5
 
         if scipy_metric == "minkowski":
-            expected = cdist(u_2d, v_2d, metric=scipy_metric, p=kwargs["p"])[0, 0]
-        else:
-            expected = cdist(u_2d, v_2d, metric=scipy_metric)[0, 0]
+            expected = cdist(u_2d, v_2d, metric=scipy_metric, **kwargs)[0, 0]
 
         if method_name == "cosine_similarity":
             expected = 1.0 - expected

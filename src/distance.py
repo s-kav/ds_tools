@@ -144,7 +144,9 @@ if NUMBA_AVAILABLE:
         norm_u, norm_v = np.sqrt(norm_u), np.sqrt(norm_v)
         if norm_u == 0.0 or norm_v == 0.0:
             return 0.0
-        return dot / (norm_u * norm_v)
+        if norm_u == 0.0 and norm_v == 0.0:
+            return 1.0
+        return 1.0 - (dot / (norm_u * norm_v))
 
 
 if CUPY_AVAILABLE:
@@ -153,14 +155,14 @@ if CUPY_AVAILABLE:
         dot, norm_u, norm_v = cp.dot(u, v), cp.linalg.norm(u), cp.linalg.norm(v)
         if norm_u == 0.0 or norm_v == 0.0:
             return 0.0
-        return dot / (norm_u * norm_v)
+        return 1.0 - (dot / (norm_u * norm_v))
 
 
 def _cosine_similarity_numpy(u, v):
     dot, norm_u, norm_v = np.dot(u, v), np.linalg.norm(u), np.linalg.norm(v)
     if norm_u == 0.0 or norm_v == 0.0:
         return 0.0
-    return dot / (norm_u * norm_v)
+    return 1.0 - (dot / (norm_u * norm_v))
 
 
 # Mahalanobis
@@ -450,6 +452,12 @@ class Distance:
         force_cpu: bool = False,
     ):
         Y = X if Y is None else Y
+        if X.shape[0] == 0:
+            return (np.empty((0, k)), np.empty((0, k), dtype=int))
+        if X.shape[1] != Y.shape[1]:
+            raise ValueError(
+                "Input matrices must have the same number of features (columns)."
+            )
         if self._validate_vectors(X, Y, check_dims=False) is not None:
             return (
                 np.empty((0, Y.shape[0]), dtype=np.float32),
