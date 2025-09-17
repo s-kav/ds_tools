@@ -132,7 +132,7 @@ VECTOR_METRICS = [
     (
         "cosine_similarity",
         {},
-        lambda u, v: cdist(u.reshape(1, -1), v.reshape(1, -1), "cosine")[0, 0],
+        lambda u, v: 1.0 - cdist(u.reshape(1, -1), v.reshape(1, -1), "cosine")[0, 0],
     ),
     ("hamming", {}, lambda u, v: np.mean(u != v)),
     (
@@ -189,12 +189,11 @@ class TestCPUBackends:
         # Reshape for cdist and handle special cases
         u_2d, v_2d = u.reshape(1, -1), v.reshape(1, -1)
         if method_name in ("hamming", "jaccard"):
-            u_2d, v_2d = u_2d > 0.5, v_2d > 0.5
+            u_2d, v_2d = (u > 0.5).reshape(1, -1), (v > 0.5).reshape(1, -1)
+        else:
+            u_2d, v_2d = u.reshape(1, -1), v.reshape(1, -1)
 
         expected = cdist(u_2d, v_2d, metric=scipy_metric, **kwargs)[0, 0]
-
-        if method_name == "cosine_similarity":
-            expected = 1.0 - expected
 
         assert np.isclose(result, expected, rtol=1e-5)
 
@@ -214,12 +213,11 @@ class TestCPUBackends:
 
         u_2d, v_2d = u.reshape(1, -1), v.reshape(1, -1)
         if method_name in ("hamming", "jaccard"):
-            u_2d, v_2d = u_2d > 0.5, v_2d > 0.5
+            u_2d, v_2d = (u > 0.5).reshape(1, -1), (v > 0.5).reshape(1, -1)
+        else:
+            u_2d, v_2d = u.reshape(1, -1), v.reshape(1, -1)
 
         expected = cdist(u_2d, v_2d, metric=scipy_metric, **kwargs)[0, 0]
-
-        if method_name == "cosine_similarity":
-            expected = 1.0 - expected
 
         assert np.isclose(result, expected, rtol=1e-5)
 
@@ -282,12 +280,11 @@ class TestGPUBackends:
 
         u_2d, v_2d = u.reshape(1, -1), v.reshape(1, -1)
         if method_name in ("hamming", "jaccard"):
-            u_2d, v_2d = u_2d > 0.5, v_2d > 0.5
+            u_2d, v_2d = (u > 0.5).reshape(1, -1), (v > 0.5).reshape(1, -1)
+        else:
+            u_2d, v_2d = u.reshape(1, -1), v.reshape(1, -1)
 
         expected = cdist(u_2d, v_2d, metric=scipy_metric, **kwargs)[0, 0]
-
-        if method_name == "cosine_similarity":
-            expected = 1.0 - expected
 
         assert np.isclose(result, expected, rtol=1e-5)
 
