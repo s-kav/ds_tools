@@ -96,7 +96,6 @@ def inverse_covariance_matrix():
 # ============================================================================
 
 
-@pytestmark_numba
 class TestNumbaInternals:
     """
     Tests the correctness of private, Numba-jitted functions directly.
@@ -108,6 +107,8 @@ class TestNumbaInternals:
             small_sample_vectors[0][:3],
             small_sample_vectors[1][:3],
         )  # Use a small slice for known values
+        if not NUMBA_AVAILABLE:
+            pytest.skip("Numba is not available in this environment")
         u, v = np.array([1, 2, 3], dtype=np.float32), np.array(
             [4, 5, 6], dtype=np.float32
         )
@@ -115,6 +116,8 @@ class TestNumbaInternals:
         assert np.isclose(_euclidean_numba(u, v), expected)
 
     def test_manhattan_numba(self):
+        if not NUMBA_AVAILABLE:
+            pytest.skip("Numba is not available in this environment")
         u, v = np.array([1, 2, 3], dtype=np.float32), np.array(
             [4, 5, 6], dtype=np.float32
         )
@@ -122,6 +125,8 @@ class TestNumbaInternals:
         assert np.isclose(_manhattan_numba(u, v), expected)
 
     def test_minkowski_numba(self):
+        if not NUMBA_AVAILABLE:
+            pytest.skip("Numba is not available in this environment")
         u, v = np.array([1, 2, 3], dtype=np.float32), np.array(
             [4, 5, 6], dtype=np.float32
         )
@@ -130,6 +135,8 @@ class TestNumbaInternals:
         assert np.isclose(_minkowski_numba(u, v, 3), expected)
 
     def test_chebyshev_numba(self):
+        if not NUMBA_AVAILABLE:
+            pytest.skip("Numba is not available in this environment")
         u, v = np.array([1, 8, 3], dtype=np.float32), np.array(
             [4, 5, 9], dtype=np.float32
         )
@@ -137,6 +144,8 @@ class TestNumbaInternals:
         assert np.isclose(_chebyshev_numba(u, v), expected)
 
     def test_cosine_similarity_numba(self):
+        if not NUMBA_AVAILABLE:
+            pytest.skip("Numba is not available in this environment")
         u, v = np.array([1, 2, 3], dtype=np.float32), np.array(
             [4, 5, 6], dtype=np.float32
         )
@@ -148,6 +157,8 @@ class TestNumbaInternals:
         assert _cosine_similarity_numba(u, zero_vec) == 0.0
 
     def test_mahalanobis_numba(self):
+        if not NUMBA_AVAILABLE:
+            pytest.skip("Numba is not available in this environment")
         u, v = np.array([1, 2], dtype=np.float32), np.array([3, 4], dtype=np.float32)
         VI = np.array([[2.0, 0.5], [0.5, 1.0]], dtype=np.float32)
         diff = u - v
@@ -155,18 +166,24 @@ class TestNumbaInternals:
         assert np.isclose(_mahalanobis_numba(u, v, VI), expected)
 
     def test_hamming_numba(self):
+        if not NUMBA_AVAILABLE:
+            pytest.skip("Numba is not available in this environment")
         u = np.array([1, 0, 1, 1], dtype=np.float32)
         v = np.array([1, 1, 0, 1], dtype=np.float32)
         expected = 2.0 / 4.0  # 2 differences out of 4
         assert np.isclose(_hamming_numba(u, v), expected)
 
     def test_jaccard_numba(self):
+        if not NUMBA_AVAILABLE:
+            pytest.skip("Numba is not available in this environment")
         u = np.array([1, 1, 0, 1, 0], dtype=np.float32)
         v = np.array([0, 1, 1, 1, 0], dtype=np.float32)
         # Intersection = 2, Union = 4. Distance = 1 - (2/4) = 0.5
         assert np.isclose(_jaccard_numba(u, v), 0.5)
 
     def test_pairwise_euclidean_numba(self):
+        if not NUMBA_AVAILABLE:
+            pytest.skip("Numba is not available in this environment")
         X = np.array([[1, 2], [3, 4]], dtype=np.float32)
         Y = np.array([[5, 6], [7, 8]], dtype=np.float32)
         expected = np.array(
