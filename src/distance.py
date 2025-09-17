@@ -419,8 +419,12 @@ class Distance:
         self, X: np.ndarray, Y: Optional[np.ndarray] = None, force_cpu: bool = False
     ):
         Y = X if Y is None else Y
+
+        if X.shape[0] == 0:
+            return np.empty((0, Y.shape[0]), dtype=np.float32)
+
         if self._validate_vectors(X, Y, check_dims=False) is not None:
-            return np.array([[]])
+            return np.empty((X.shape[0], Y.shape[0]), dtype=np.float32)
 
         func, X_c, Y_c, use_gpu = self._dispatch_m2m(
             "pairwise_euclidean", X, Y, force_cpu
@@ -447,7 +451,10 @@ class Distance:
     ):
         Y = X if Y is None else Y
         if self._validate_vectors(X, Y, check_dims=False) is not None:
-            return (np.array([]), np.array([]))
+            return (
+                np.empty((0, Y.shape[0]), dtype=np.float32),
+                np.empty((0, Y.shape[0]), dtype=np.float32),
+            )
 
         dist_matrix = self.pairwise_euclidean(X, Y, force_cpu=force_cpu)
 
@@ -473,7 +480,7 @@ class Distance:
     ):
         Y = X if Y is None else Y
         if self._validate_vectors(X, Y, check_dims=False) is not None:
-            return ([], [])
+            return np.empty((0, Y.shape[0]), dtype=np.float32)
 
         dist_matrix = self.pairwise_euclidean(X, Y, force_cpu=force_cpu)
 
