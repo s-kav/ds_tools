@@ -191,11 +191,10 @@ class TestCPUBackends:
         if method_name in ("hamming", "jaccard"):
             u_2d, v_2d = u_2d > 0.5, v_2d > 0.5
 
-        if scipy_metric == "minkowski":
-            expected = cdist(u_2d, v_2d, metric=scipy_metric, **kwargs)[0, 0]
+        expected = cdist(u_2d, v_2d, metric=scipy_metric, **kwargs)[0, 0]
 
         if method_name == "cosine_similarity":
-            expected = 1.0 - expected  # scipy cdist returns cosine distance
+            expected = 1.0 - expected
 
         assert np.isclose(result, expected, rtol=1e-5)
 
@@ -217,8 +216,7 @@ class TestCPUBackends:
         if method_name in ("hamming", "jaccard"):
             u_2d, v_2d = u_2d > 0.5, v_2d > 0.5
 
-        if scipy_metric == "minkowski":
-            expected = cdist(u_2d, v_2d, metric=scipy_metric, **kwargs)[0, 0]
+        expected = cdist(u_2d, v_2d, metric=scipy_metric, **kwargs)[0, 0]
 
         if method_name == "cosine_similarity":
             expected = 1.0 - expected
@@ -286,8 +284,7 @@ class TestGPUBackends:
         if method_name in ("hamming", "jaccard"):
             u_2d, v_2d = u_2d > 0.5, v_2d > 0.5
 
-        if scipy_metric == "minkowski":
-            expected = cdist(u_2d, v_2d, metric=scipy_metric, **kwargs)[0, 0]
+        expected = cdist(u_2d, v_2d, metric=scipy_metric, **kwargs)[0, 0]
 
         if method_name == "cosine_similarity":
             expected = 1.0 - expected
