@@ -19,8 +19,6 @@ Error and edge case handling (incorrect sizes, empty arrays, incorrect parameter
 * See LICENSE for details
 *
 """
-import importlib
-
 import numpy as np
 import pytest
 from scipy.spatial.distance import cdist
@@ -269,33 +267,23 @@ VECTOR_METRICS = [
 def test_fallback_without_numba(tools, mocker, small_sample_vectors):
     """
     Tests that the code gracefully falls back to NumPy when Numba is not available.
-    This test uses importlib.reload, which is the correct and standard way to
-    simulate module-level state changes for testing purposes.
     """
     u, v = small_sample_vectors
 
-    # --- Simulate Numba being UNAVAILABLE ---
-    mocker.patch("distance.NUMBA_AVAILABLE", False)
-    # The functions are defined at import time, so we must reload the module
-    # for the NUMBA_AVAILABLE=False to take effect on function definitions.
-    import distance
+    dist = tools.distance
 
-    importlib.reload(distance)
+    # --- Simulate Numba being UNAVAILABLE directly on the instance ---
+    mocker.patch.object(dist, "numba_available", False)
 
-    # --- Test that the NumPy backend is used ---
+    # --- Spy on the NumPy backend to ensure it's called ---
     mock_numpy_fallback = mocker.patch("distance._euclidean_numpy", return_value=99.0)
 
-    # Re-initialize the class to pick up the reloaded module's state
-    distance_no_numba = distance.Distance()
-    result = distance_no_numba.euclidean(u, v)
+    # Call the method on the original 'tools' instance
+    result = dist.euclidean(u, v)
 
+    # --- Assertions ---
     mock_numpy_fallback.assert_called_once()
     assert result == 99.0
-
-    # --- IMPORTANT: Clean up by reloading the module again ---
-    # This restores the original state for other tests in the session.
-    mocker.patch("distance.NUMBA_AVAILABLE", NUMBA_AVAILABLE)  # Restore original flag
-    importlib.reload(distance)
 
 
 # ============================================================================
