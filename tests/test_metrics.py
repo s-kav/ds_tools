@@ -392,3 +392,98 @@ def test_triplet_loss_correctness(tools, triplet_data):
     assert grad_a.shape == anchor.shape
     assert grad_p.shape == positive.shape
     assert grad_n.shape == negative.shape
+
+
+def test_mae_grad_zero_difference(tools):
+    """
+    Covers the 'else 0.0' branch in MAE gradient calculation when y_true == y_pred.
+    """
+    y_true = np.array([1, 2, 3], dtype=np.float32)
+    y_pred = np.array([1, 2, 3], dtype=np.float32)
+
+    _, grad = tools.metrics.mae(y_true, y_pred, return_grad=True, force_cpu=True)
+
+    # Gradient should be all zeros
+    assert np.all(grad == 0.0)
+
+
+def test_huber_loss_branches(tools):
+    """
+    Covers both branches (abs_err <= delta and abs_err > delta) of Huber loss.
+    """
+    delta = 1.0
+    y_true = np.array([10, 10], dtype=np.float32)
+
+    # Case 1: Error is SMALLER than delta (quadratic region)
+    y_pred_small_err = np.array([10.5, 9.5], dtype=np.float32)  # error = 0.5
+    loss_small, grad_small = tools.metrics.huber_loss(
+        y_true, y_pred_small_err, delta=delta, return_grad=True, force_cpu=True
+    )
+
+    expected_loss_small = np.mean(0.5 * (0.5**2))
+    expected_grad_small = (y_pred_small_err - y_true) / len(y_true)
+    assert np.isclose(loss_small, expected_loss_small)
+    assert np.allclose(grad_small, expected_grad_small)
+
+    # Case 2: Error is LARGER than delta (linear region)
+    y_pred_large_err = np.array([12, 8], dtype=np.float32)  # error = 2.0
+    loss_large, grad_large = tools.metrics.huber_loss(
+        y_true, y_pred_large_err, delta=delta, return_grad=True, force_cpu=True
+    )
+
+    expected_loss_large = np.mean(delta * (2.0 - 0.5 * delta))
+    # Expected gradient is delta * sign(error)
+    expected_grad_large = (np.array([delta, -delta])) / len(y_true)
+    assert np.isclose(loss_large, expected_loss_large)
+    assert np.allclose(grad_large, expected_grad_large)
+
+
+def test_quantile_loss_branches(tools):
+    """
+    Covers both branches (err > 0 and err <= 0) of Quantile loss.
+    """
+    quantile = 0.8
+    y_true = np.array([10, 10], dtype=np.float32)
+    y_pred = np.array([9, 11], dtype=np.float32)  # One overestimate, one underestimate
+    # err = y_true - y_pred = [1, -1]
+
+    loss, grad = tools.metrics.quantile_loss(
+        y_true, y_pred, quantile=quantile, return_grad=True, force_cpu=True
+    )
+
+    # Expected loss: mean( quantile * 1, (quantile - 1) * -1 )
+    expected_loss = np.mean([quantile * 1, (quantile - 1) * -1])
+    # Expected grad: where(err > 0, q-1, q) / n
+    expected_grad = np.array([quantile - 1.0, quantile]) / len(y_true)
+
+    assert np.isclose(loss, expected_loss)
+    assert np.allclose(grad, expected_grad)
+
+
+def test_hinge_loss_branches(tools):
+    """
+    Covers both branches (loss > 0 and loss == 0) of Hinge loss.
+    """
+    y_true = np.array([1, -1], dtype=np.float32)
+
+    # Case 1: Incurring loss (1 - y_true * y_pred > 0)
+    # y_true=1, y_pred=0.5 -> 1 - 0.5 = 0.5 > 0
+    # y_true=-1, y_pred=0.5 -> 1 - (-0.5) = 1.5 > 0
+    y_pred_loss = np.array([0.5, 0.5], dtype=np.float32)
+    loss1, grad1 = tools.metrics.hinge_loss(
+        y_true, y_pred_loss, return_grad=True, force_cpu=True
+    )
+
+    assert loss1 > 0
+    assert not np.all(grad1 == 0)
+
+    # Case 2: No loss (1 - y_true * y_pred <= 0)
+    # y_true=1, y_pred=1.5 -> 1 - 1.5 = -0.5 <= 0
+    # y_true=-1, y_pred=-1.5 -> 1 - 1.5 = -0.5 <= 0
+    y_pred_no_loss = np.array([1.5, -1.5], dtype=np.float32)
+    loss2, grad2 = tools.metrics.hinge_loss(
+        y_true, y_pred_no_loss, return_grad=True, force_cpu=True
+    )
+
+    assert np.isclose(loss2, 0.0)
+    assert np.all(grad2 == 0.0)

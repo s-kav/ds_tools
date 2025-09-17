@@ -285,3 +285,38 @@ def test_invalid_mahalanobis_vi_raises_error(tools, small_sample_vectors):
     VI_bad_shape = np.eye(u.shape[0] - 1)  # Wrong dimension
     with pytest.raises(ValueError, match="Inverse covariance matrix must be square"):
         tools.distance.mahalanobis(u, v, VI_bad_shape)
+
+
+def test_cosine_similarity_with_zero_vector(tools):
+    """
+    Covers the 'if norm_u == 0.0 or norm_v == 0.0' branch in cosine similarity.
+    """
+    u = np.array([1, 2, 3], dtype=np.float32)
+    v_zero = np.array([0, 0, 0], dtype=np.float32)
+
+    # Test against a zero vector
+    assert tools.distance.cosine_similarity(u, v_zero) == 0.0
+    # Test against itself
+    assert tools.distance.cosine_similarity(v_zero, v_zero) == 0.0
+
+
+def test_jaccard_with_empty_sets(tools):
+    """
+    Covers the 'if union == 0' branch in Jaccard distance, which happens
+    when both vectors are all zeros (representing empty sets).
+    """
+    u_zero = np.array([0, 0, 0], dtype=np.float32)
+    v_zero = np.array([0, 0, 0], dtype=np.float32)
+
+    assert tools.distance.jaccard(u_zero, v_zero) == 0.0
+
+
+def test_pairwise_euclidean_empty_input(tools):
+    """
+    Covers the 'if self._validate_vectors(...) is not None' branch
+    in pairwise_euclidean for empty inputs.
+    """
+    empty_matrix = np.array([[]])
+    result = tools.distance.pairwise_euclidean(empty_matrix)
+    # The function should return an empty array of shape (0, 0) or similar
+    assert result.shape[0] == 0
