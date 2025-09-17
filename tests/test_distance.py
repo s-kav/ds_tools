@@ -19,11 +19,25 @@ Error and edge case handling (incorrect sizes, empty arrays, incorrect parameter
 * See LICENSE for details
 *
 """
+import importlib
+
 import numpy as np
 import pytest
 from scipy.spatial.distance import cdist
 
-from distance import CUPY_AVAILABLE, NUMBA_AVAILABLE
+from distance import (
+    CUPY_AVAILABLE,
+    NUMBA_AVAILABLE,
+    _chebyshev_numba,
+    _cosine_similarity_numba,
+    _euclidean_numba,
+    _hamming_numba,
+    _jaccard_numba,
+    _mahalanobis_numba,
+    _manhattan_numba,
+    _minkowski_numba,
+    _pairwise_euclidean_numba,
+)
 
 # --- Define markers for hardware-specific tests ---
 pytestmark_cupy = pytest.mark.skipif(
@@ -79,8 +93,117 @@ def inverse_covariance_matrix():
 
 
 # ============================================================================
-# Tests for Initialization and Dispatching
+# Section 1: Direct Tests of Internal Numba Implementations
 # ============================================================================
+
+
+@pytestmark_numba
+class TestNumbaInternals:
+    """
+    Tests the correctness of private, Numba-jitted functions directly.
+    This ensures the core calculation logic is flawless.
+    """
+
+    def test_euclidean_numba(self, small_sample_vectors):
+        u, v = (
+            small_sample_vectors[0][:3],
+            small_sample_vectors[1][:3],
+        )  # Use a small slice for known values
+        u, v = np.array([1, 2, 3], dtype=np.float32), np.array(
+            [4, 5, 6], dtype=np.float32
+        )
+        expected = np.sqrt(27.0)  # (1-4)^2 + (2-5)^2 + (3-6)^2 = 9+9+9 = 27
+        assert np.isclose(_euclidean_numba(u, v), expected)
+
+    def test_manhattan_numba(self):
+        u, v = np.array([1, 2, 3], dtype=np.float32), np.array(
+            [4, 5, 6], dtype=np.float32
+        )
+        expected = 9.0  # |1-4| + |2-5| + |3-6| = 3+3+3 = 9
+        assert np.isclose(_manhattan_numba(u, v), expected)
+
+    def test_minkowski_numba(self):
+        u, v = np.array([1, 2, 3], dtype=np.float32), np.array(
+            [4, 5, 6], dtype=np.float32
+        )
+        # p=3, diffs are all 3. (3^3 + 3^3 + 3^3)^(1/3) = (81)^(1/3)
+        expected = (3**3 * 3) ** (1 / 3)
+        assert np.isclose(_minkowski_numba(u, v, 3), expected)
+
+    def test_chebyshev_numba(self):
+        u, v = np.array([1, 8, 3], dtype=np.float32), np.array(
+            [4, 5, 9], dtype=np.float32
+        )
+        expected = 6.0  # max(|1-4|, |8-5|, |3-9|) = max(3, 3, 6)
+        assert np.isclose(_chebyshev_numba(u, v), expected)
+
+    def test_cosine_similarity_numba(self):
+        u, v = np.array([1, 2, 3], dtype=np.float32), np.array(
+            [4, 5, 6], dtype=np.float32
+        )
+        expected = np.dot(u, v) / (np.linalg.norm(u) * np.linalg.norm(v))
+        assert np.isclose(_cosine_similarity_numba(u, v), expected)
+        # Test zero vectors
+        zero_vec = np.zeros(3, dtype=np.float32)
+        assert _cosine_similarity_numba(zero_vec, zero_vec) == 1.0
+        assert _cosine_similarity_numba(u, zero_vec) == 0.0
+
+    def test_mahalanobis_numba(self):
+        u, v = np.array([1, 2], dtype=np.float32), np.array([3, 4], dtype=np.float32)
+        VI = np.array([[2.0, 0.5], [0.5, 1.0]], dtype=np.float32)
+        diff = u - v
+        expected = np.sqrt(diff.T @ VI @ diff)
+        assert np.isclose(_mahalanobis_numba(u, v, VI), expected)
+
+    def test_hamming_numba(self):
+        u = np.array([1, 0, 1, 1], dtype=np.float32)
+        v = np.array([1, 1, 0, 1], dtype=np.float32)
+        expected = 2.0 / 4.0  # 2 differences out of 4
+        assert np.isclose(_hamming_numba(u, v), expected)
+
+    def test_jaccard_numba(self):
+        u = np.array([1, 1, 0, 1, 0], dtype=np.float32)
+        v = np.array([0, 1, 1, 1, 0], dtype=np.float32)
+        # Intersection = 2, Union = 4. Distance = 1 - (2/4) = 0.5
+        assert np.isclose(_jaccard_numba(u, v), 0.5)
+
+    def test_pairwise_euclidean_numba(self):
+        X = np.array([[1, 2], [3, 4]], dtype=np.float32)
+        Y = np.array([[5, 6], [7, 8]], dtype=np.float32)
+        expected = np.array(
+            [[np.sqrt(32.0), np.sqrt(72.0)], [np.sqrt(8.0), np.sqrt(32.0)]],
+            dtype=np.float32,
+        )
+        result = _pairwise_euclidean_numba(X, Y)
+        assert np.allclose(result, expected)
+
+
+# ============================================================================
+# Section 2: Tests for Initialization and Dispatching
+# ============================================================================
+
+
+def test_public_interface_calls_correct_backend(tools, mocker, small_sample_vectors):
+    """
+    Tests that public methods dispatch to the correct backend based on availability.
+    This replaces the 'test_public_interface_calls_internal_functions' from the sample.
+    """
+    u, v = small_sample_vectors
+
+    # Case 1: All available (Numba is preferred over NumPy for CPU)
+    if NUMBA_AVAILABLE:
+        mocker.patch.object(tools.distance, "gpu_available", False)
+        mocker.patch.object(tools.distance, "numba_available", True)
+        mock_numba = mocker.patch("distance._manhattan_numba", return_value=1.0)
+        tools.distance.manhattan(u, v)
+        mock_numba.assert_called_once()
+
+    # Case 2: Only NumPy is available
+    mocker.patch.object(tools.distance, "gpu_available", False)
+    mocker.patch.object(tools.distance, "numba_available", False)
+    mock_numpy = mocker.patch("distance._manhattan_numpy", return_value=2.0)
+    tools.distance.manhattan(u, v)
+    mock_numpy.assert_called_once()
 
 
 def test_distance_initialization(tools):
@@ -138,7 +261,44 @@ VECTOR_METRICS = [
 
 
 # ============================================================================
-# Tests for CPU Backends (NumPy and Numba)
+# Section 4: Test for Fallback Mechanism
+# ============================================================================
+
+
+def test_fallback_without_numba(tools, mocker, small_sample_vectors):
+    """
+    Tests that the code gracefully falls back to NumPy when Numba is not available.
+    This test uses importlib.reload, which is the correct and standard way to
+    simulate module-level state changes for testing purposes.
+    """
+    u, v = small_sample_vectors
+
+    # --- Simulate Numba being UNAVAILABLE ---
+    mocker.patch("distance.NUMBA_AVAILABLE", False)
+    # The functions are defined at import time, so we must reload the module
+    # for the NUMBA_AVAILABLE=False to take effect on function definitions.
+    import distance
+
+    importlib.reload(distance)
+
+    # --- Test that the NumPy backend is used ---
+    mock_numpy_fallback = mocker.patch("distance._euclidean_numpy", return_value=99.0)
+
+    # Re-initialize the class to pick up the reloaded module's state
+    distance_no_numba = distance.Distance()
+    result = distance_no_numba.euclidean(u, v)
+
+    mock_numpy_fallback.assert_called_once()
+    assert result == 99.0
+
+    # --- IMPORTANT: Clean up by reloading the module again ---
+    # This restores the original state for other tests in the session.
+    mocker.patch("distance.NUMBA_AVAILABLE", NUMBA_AVAILABLE)  # Restore original flag
+    importlib.reload(distance)
+
+
+# ============================================================================
+# Section 5: Tests for CPU Backends (NumPy and Numba)
 # ============================================================================
 
 
@@ -241,7 +401,7 @@ class TestCPUBackends:
 
 
 # ============================================================================
-# Tests for GPU-Specific Execution
+# Section 6: Tests for GPU-Specific Execution
 # ============================================================================
 
 
@@ -276,7 +436,7 @@ class TestGPUBackends:
 
 
 # ============================================================================
-# Tests for Matrix-based Functions
+# Section 7: Tests for Matrix-based Functions
 # ============================================================================
 
 
@@ -363,7 +523,7 @@ def test_jaccard_distance_correctness(tools):
 
 
 # ============================================================================
-# Tests for Edge Cases and Error Handling
+# Section 8: Tests for Edge Cases and Error Handling
 # ============================================================================
 
 
