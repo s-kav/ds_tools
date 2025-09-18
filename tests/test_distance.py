@@ -654,12 +654,7 @@ def test_numpy_backend_correctness(
     u_2d, v_2d = u.reshape(1, -1), v.reshape(1, -1)
     expected = cdist(u_2d, v_2d, metric=scipy_metric, **kwargs)[0, 0]
 
-    if method_name == "cosine_similarity":
-        expected_result = 1.0 - expected  # Convert SciPy's distance to our similarity
-    else:
-        expected_result = expected
-
-    assert np.isclose(result, expected_result, rtol=1e-5)
+    assert np.isclose(result, expected, rtol=1e-5)
 
 
 @pytestmark_numba
@@ -681,12 +676,7 @@ def test_numba_backend_correctness(
     u_2d, v_2d = u.reshape(1, -1), v.reshape(1, -1)
     expected = cdist(u_2d, v_2d, metric=scipy_metric, **kwargs)[0, 0]
 
-    if method_name == "cosine_similarity":
-        expected_result = 1.0 - expected
-    else:
-        expected_result = expected
-
-    assert np.isclose(result, expected_result, rtol=1e-5)
+    assert np.isclose(result, expected, rtol=1e-5)
 
 
 @pytestmark_cupy
@@ -705,9 +695,4 @@ def test_cupy_backend_correctness(
     u_2d, v_2d = u.reshape(1, -1), v.reshape(1, -1)
     expected = cdist(u_2d, v_2d, metric=scipy_metric, **kwargs)[0, 0]
 
-    if method_name == "cosine_similarity":
-        expected_result = 1.0 - expected
-    else:
-        expected_result = expected
-
-    assert np.isclose(result, expected_result, rtol=1e-5)
+    assert np.isclose(result, expected, rtol=1e-5)
