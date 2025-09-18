@@ -68,7 +68,9 @@ def test_pairwise_euclidean_fallback_when_cupy_missing(monkeypatch, mocker):
     # Force gpu selection on first dispatch
     monkeypatch.setattr(dist, "gpu_available", True)
 
-    fake_cp = types.SimpleNamespace(asarray=lambda x: x, ndarray=np.ndarray)
+    fake_cp = types.SimpleNamespace(
+        asarray=lambda x: x, asnumpy=lambda x: x, ndarray=np.ndarray
+    )
     mocker.patch.dict(distance.__dict__, {"cp": fake_cp})
 
     monkeypatch.delitem(distance.__dict__, "_pairwise_euclidean_cupy", raising=False)
