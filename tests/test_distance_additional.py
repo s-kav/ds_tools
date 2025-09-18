@@ -61,19 +61,23 @@ def test_dispatch_v2v_fallback_to_numpy(monkeypatch):
 
 # --- 3) pairwise_euclidean: cover a branch when the cupy version is missing --
 def test_pairwise_euclidean_fallback_when_cupy_missing(monkeypatch, mocker):
-    dist = distance.Distance(gpu_threshold=1)  # a small threshold to choose a GPU
+    dist = distance.Distance(gpu_threshold=1)
     X = make_random_matrix(10, 4)
     Y = make_random_matrix(12, 4)
 
     # Force gpu selection on first dispatch
     monkeypatch.setattr(dist, "gpu_available", True)
+
+    fake_cp = types.SimpleNamespace(asarray=lambda x: x, ndarray=np.ndarray)
+    mocker.patch.dict(distance.__dict__, {"cp": fake_cp})
+
     monkeypatch.delitem(distance.__dict__, "_pairwise_euclidean_cupy", raising=False)
+
     mock_numpy = mocker.patch(
         "distance._pairwise_euclidean_numpy", return_value=np.full((10, 12), 777.0)
     )
 
     res = dist.pairwise_euclidean(X, Y, force_cpu=False)
-
     mock_numpy.assert_called_once()
     assert np.allclose(res, 777.0)
 
