@@ -382,7 +382,7 @@ class TestCPUBackends:
         expected = scipy_mahalanobis(u, v, VI)
 
         result = tools.distance.mahalanobis(u, v, VI, force_cpu=True)
-        assert np.isclose(result, expected)
+        assert np.isclose(result, expected, rtol=1e-5)
 
     @pytestmark_numba
     def test_pairwise_euclidean_numba(self, tools, mocker, sample_matrices):
@@ -392,7 +392,7 @@ class TestCPUBackends:
 
         result = tools.distance.pairwise_euclidean(X, Y)
         expected = cdist(X, Y, "euclidean")
-        assert np.allclose(result, expected)
+        assert np.allclose(result, expected, rtol=1e-5)
 
     def test_haversine_correctness(self, tools):
         """Tests Haversine distance with a known example (Paris to London)."""
@@ -453,12 +453,12 @@ def test_pairwise_euclidean_correctness(tools, sample_matrices):
     # Test within a single matrix
     expected_within = cdist(X, X, "euclidean")
     result_within = tools.distance.pairwise_euclidean(X)
-    assert np.allclose(result_within, expected_within)
+    assert np.allclose(result_within, expected_within, rtol=1e-5)
 
     # Test between two matrices
     expected_between = cdist(X, Y, "euclidean")
     result_between = tools.distance.pairwise_euclidean(X, Y)
-    assert np.allclose(result_between, expected_between)
+    assert np.allclose(result_between, expected_between, rtol=1e-5)
 
 
 def test_kmeans_distance_is_alias(tools, mocker, sample_matrices):
@@ -510,7 +510,7 @@ def test_hamming_distance_correctness(tools):
     # 2 non-matching elements out of 6 -> distance = 2/6 = 0.333...
     expected = 2 / 6
     result = tools.distance.hamming(u, v)
-    assert np.isclose(result, expected)
+    assert np.isclose(result, expected, rtol=1e-5)
 
 
 def test_jaccard_distance_correctness(tools):
@@ -525,7 +525,20 @@ def test_jaccard_distance_correctness(tools):
     # Jaccard Distance = 1 - 0.5 = 0.5
     expected = 0.5
     result = tools.distance.jaccard(u, v)
-    assert np.isclose(result, expected)
+    assert np.isclose(result, expected, rtol=1e-5)
+
+
+def test_mahalanobis_correctness(
+    tools, small_sample_vectors, inverse_covariance_matrix
+):
+    """Separate test for Mahalanobis due to its unique signature."""
+    from scipy.spatial.distance import mahalanobis as scipy_mahalanobis
+
+    u, v = small_sample_vectors
+    VI = inverse_covariance_matrix
+    expected = scipy_mahalanobis(u, v, VI)
+    result = tools.distance.mahalanobis(u, v, VI, force_cpu=True)
+    assert np.isclose(result, expected, rtol=1e-5)
 
 
 # ============================================================================
@@ -584,9 +597,8 @@ def test_jaccard_with_empty_sets(tools):
     when both vectors are all zeros (representing empty sets).
     """
     u_zero = np.array([0, 0, 0], dtype=np.float32)
-    v_zero = np.array([0, 0, 0], dtype=np.float32)
 
-    assert tools.distance.jaccard(u_zero, v_zero) == 0.0
+    assert tools.distance.jaccard(u_zero, u_zero) == 0.0
 
 
 def test_pairwise_euclidean_empty_input(tools):
@@ -617,3 +629,79 @@ def test_pairwise_and_neighbors_empty_input(tools):
     dists_rad, idxs_rad = tools.distance.radius_neighbors(empty_matrix, radius=0.5)
     assert isinstance(dists_rad, list) and len(dists_rad) == 0
     assert isinstance(idxs_rad, list) and len(idxs_rad) == 0
+
+
+# ============================================================================
+# Section 9: Dedicated Tests for Each Backend
+# ============================================================================
+
+
+@pytest.mark.parametrize("method_name, kwargs, scipy_metric", VECTOR_METRICS)
+def test_numpy_backend_correctness(
+    tools, mocker, method_name, kwargs, scipy_metric, small_sample_vectors
+):
+    """Tests that the NumPy backend calculates correctly for continuous metrics."""
+    u, v = small_sample_vectors
+    method = getattr(tools.distance, method_name)
+
+    # Force NumPy backend
+    mocker.patch.object(tools.distance, "gpu_available", False)
+    mocker.patch.object(tools.distance, "numba_available", False)
+
+    result = method(u, v, **kwargs)
+
+    # Calculate expected value using SciPy as ground truth
+    u_2d, v_2d = u.reshape(1, -1), v.reshape(1, -1)
+    expected = cdist(u_2d, v_2d, metric=scipy_metric, **kwargs)[0, 0]
+
+    if method_name == "cosine_similarity":
+        expected = 1.0 - expected  # Convert SciPy's distance to our similarity
+
+    assert np.isclose(result, expected, rtol=1e-5)
+
+
+@pytestmark_numba
+@pytest.mark.parametrize("method_name, kwargs, scipy_metric", VECTOR_METRICS)
+def test_numba_backend_correctness(
+    tools, mocker, method_name, kwargs, scipy_metric, small_sample_vectors
+):
+    """Tests that the Numba backend calculates correctly for continuous metrics."""
+    u, v = small_sample_vectors
+    method = getattr(tools.distance, method_name)
+
+    # Force Numba backend
+    mocker.patch.object(tools.distance, "gpu_available", False)
+    mocker.patch.object(tools.distance, "numba_available", True)
+
+    result = method(u, v, **kwargs)
+
+    # Calculate expected value
+    u_2d, v_2d = u.reshape(1, -1), v.reshape(1, -1)
+    expected = cdist(u_2d, v_2d, metric=scipy_metric, **kwargs)[0, 0]
+
+    if method_name == "cosine_similarity":
+        expected = 1.0 - expected
+
+    assert np.isclose(result, expected, rtol=1e-5)
+
+
+@pytestmark_cupy
+@pytest.mark.parametrize("method_name, kwargs, scipy_metric", VECTOR_METRICS)
+def test_cupy_backend_correctness(
+    tools, method_name, kwargs, scipy_metric, large_sample_vectors
+):
+    """Tests that the CuPy backend calculates correctly on large data for continuous metrics."""
+    u, v = large_sample_vectors
+    method = getattr(tools.distance, method_name)
+
+    # CuPy backend is chosen automatically due to large data size
+    result = method(u, v, **kwargs, force_cpu=False)
+
+    # Calculate expected value
+    u_2d, v_2d = u.reshape(1, -1), v.reshape(1, -1)
+    expected = cdist(u_2d, v_2d, metric=scipy_metric, **kwargs)[0, 0]
+
+    if method_name == "cosine_similarity":
+        expected = 1.0 - expected
+
+    assert np.isclose(result, expected, rtol=1e-5)
