@@ -73,8 +73,8 @@ def test_hamming_numba():
 
 @pytest.mark.skipif(not NUMBA_AVAILABLE, reason="Numba not available")
 def test_jaccard_numba_nonempty_and_empty():
-    u = np.array([1, 0, 1], dtype=np.int32)
-    v = np.array([1, 1, 0], dtype=np.int32)
+    u = np.array([1, 0, 1], dtype=np.float32)
+    v = np.array([1, 1, 0], dtype=np.float32)
     res = distance._jaccard_numba(u, v)
     intersection = np.sum(u.astype(bool) & v.astype(bool))
     union = np.sum(u.astype(bool) | v.astype(bool))
@@ -82,8 +82,8 @@ def test_jaccard_numba_nonempty_and_empty():
     assert np.isclose(res, expected)
 
     # edge-case union==0
-    u0 = np.array([0, 0, 0], dtype=np.int32)
-    v0 = np.array([0, 0, 0], dtype=np.int32)
+    u0 = np.array([0, 0, 0], dtype=np.float32)
+    v0 = np.array([0, 0, 0], dtype=np.float32)
     res0 = distance._jaccard_numba(u0, v0)
     assert res0 == 0.0
 
