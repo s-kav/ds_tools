@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 
 ---
+## [2.0.1] - 2025-09-17
+
+### 🐞 Fixed
+
+-   **Fixed a critical packaging bug** that caused the `v2.0.0` wheel on PyPI to be empty (containing only metadata). This resulted in a `ModuleNotFoundError` when trying to import the library after installation. The package now correctly includes all source code. (Fixes #4)
+
+### Internal
+
+-   Significantly improved test coverage for the `metrics` and `distance` modules, adding tests for all backend implementations (NumPy, Numba, CuPy) and numerous edge cases.
+-   Refactored the CI pipeline for more robust and reliable test execution.
+
 
 ## [2.0.0] - 2025-09-08
 
