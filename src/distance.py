@@ -474,7 +474,7 @@ class Distance:
             "pairwise_euclidean", X, Y, force_cpu
         )
         if func is None:  # Fallback to numpy if no specialized func
-            return _pairwise_euclidean_numpy(X_c, Y_c)
+            return _pairwise_euclidean_numpy(X.astype(np.float32), Y.astype(np.float32))
 
         distances = func(X_c, Y_c)
         if use_gpu:
