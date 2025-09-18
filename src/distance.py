@@ -4,6 +4,8 @@ This module provides a collection of high-performance, system-aware distance
 and similarity metric implementations, with support for CPU parallelization
 and GPU acceleration. All implementations are self-contained where feasible.
 """
+
+import logging
 import warnings
 from typing import Optional
 
@@ -293,6 +295,29 @@ if CUPY_AVAILABLE:
         return cp.sqrt(cp.sum(diff**2, axis=-1))
 
 
+if not NUMBA_AVAILABLE:
+    _euclidean_numba = _euclidean_numpy
+    _manhattan_numba = _manhattan_numpy
+    _minkowski_numba = _minkowski_numpy
+    _chebyshev_numba = _chebyshev_numpy
+    _cosine_similarity_numba = _cosine_similarity_numpy
+    _mahalanobis_numba = _mahalanobis_numpy
+    _hamming_numba = _hamming_numpy
+    _jaccard_numba = _jaccard_numpy
+    _pairwise_euclidean_numba = _pairwise_euclidean_numpy
+
+if not CUPY_AVAILABLE:
+    _euclidean_cupy = _euclidean_numpy
+    _manhattan_cupy = _manhattan_numpy
+    _minkowski_cupy = _minkowski_numpy
+    _chebyshev_cupy = _chebyshev_numpy
+    _cosine_similarity_cupy = _cosine_similarity_numpy
+    _mahalanobis_cupy = _mahalanobis_numpy
+    _hamming_cupy = _hamming_numpy
+    _jaccard_cupy = _jaccard_numpy
+    _pairwise_euclidean_cupy = _pairwise_euclidean_numpy
+
+
 # ============================================================================
 # PUBLIC DISTANCE CLASS
 # ============================================================================
@@ -301,7 +326,8 @@ class Distance:
         self.gpu_threshold = gpu_threshold
         self.numba_available = NUMBA_AVAILABLE
         self.gpu_available = CUPY_AVAILABLE
-        print(
+
+        logging.getLogger(__name__).debug(
             f"Distance initialized. GPU: {self.gpu_available}, Numba: {self.numba_available}"
         )
 
@@ -337,7 +363,7 @@ class Distance:
         elif self.numba_available:
             backend = "numba"
 
-        func = globals().get(f"_{name}_{backend}")
+        func = globals().get(f"_{name}_{backend}") or globals().get(f"_{name}_numpy")
 
         X_c, Y_c = X.astype(np.float32), Y.astype(np.float32)
         if use_gpu:
