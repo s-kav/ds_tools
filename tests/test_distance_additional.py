@@ -60,36 +60,21 @@ def test_dispatch_v2v_fallback_to_numpy(monkeypatch):
 
 
 # --- 3) pairwise_euclidean: cover a branch when the cupy version is missing --
-def test_pairwise_euclidean_fallback_when_cupy_missing(monkeypatch):
+def test_pairwise_euclidean_fallback_when_cupy_missing(monkeypatch, mocker):
     dist = distance.Distance(gpu_threshold=1)  # a small threshold to choose a GPU
     X = make_random_matrix(10, 4)
     Y = make_random_matrix(12, 4)
 
     # Force gpu selection on first dispatch
     monkeypatch.setattr(dist, "gpu_available", True)
-
-    # If there is no real cupy in the environment, we create a fake cp with asarray -> identity,
-    # so that _dispatch_m2m doesn't crash on cp.asarray
-    fake_cp = types.SimpleNamespace(asarray=lambda x: x, asnumpy=lambda x: x)
-    monkeypatch.setattr(distance, "cp", fake_cp, raising=False)
-
-    # Let's remove the cupy implementation (as if it didn't exist)
     monkeypatch.delitem(distance.__dict__, "_pairwise_euclidean_cupy", raising=False)
-
-    # prepare fallback-function (numba/numpy)
-    def fake_pairwise_numba(Xc, Yc):
-        return np.full((Xc.shape[0], Yc.shape[0]), 777.0, dtype=np.float32)
-
-    # Let's put this function in globals - it will be used by the second call to dispatch
-    monkeypatch.setitem(
-        distance.__dict__, "_pairwise_euclidean_numba", fake_pairwise_numba
+    mock_numpy = mocker.patch(
+        "distance._pairwise_euclidean_numpy", return_value=np.full((10, 12), 777.0)
     )
 
-    # Make sure numba_available = True (so that the second dispatch selects numba)
-    monkeypatch.setattr(dist, "numba_available", True)
-
     res = dist.pairwise_euclidean(X, Y, force_cpu=False)
-    assert res.shape == (X.shape[0], Y.shape[0])
+
+    mock_numpy.assert_called_once()
     assert np.allclose(res, 777.0)
 
 

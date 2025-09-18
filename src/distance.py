@@ -11,35 +11,47 @@ from typing import Optional
 
 import numpy as np
 
-# --- Environment Checks for Optional Dependencies ---
 
-try:
-    from numba import jit, prange
+def _detect_optional_dependencies():
+    deps = {
+        "numba_available": False,
+        "cupy_available": False,
+        "cp": None,
+        "jit": None,
+        "prange": None,
+    }
 
-    NUMBA_AVAILABLE = True
-except ImportError:
-    NUMBA_AVAILABLE = False
-    warnings.warn(
-        "Numba not installed. CPU parallel implementations will be unavailable."
-    )
-
-try:
-    import cupy as cp
-
+    # Numba detection
     try:
-        if cp.cuda.runtime.getDeviceCount() > 0:
-            CUPY_AVAILABLE = True
-            cp.cuda.Device(0).use()
-        else:
-            CUPY_AVAILABLE = False
-            warnings.warn("CuPy is installed, but no compatible CUDA GPU was found.")
-    except cp.cuda.runtime.CUDARuntimeError as e:
-        CUPY_AVAILABLE = False
-        warnings.warn(f"CuPy installed but failed to initialize: {e}")
-except ImportError:
-    CUPY_AVAILABLE = False
-    warnings.warn("CuPy not installed. GPU acceleration will be unavailable.")
+        from numba import jit, prange
 
+        deps.update({"numba_available": True, "jit": jit, "prange": prange})
+    except ImportError:
+        warnings.warn("Numba not installed...")
+
+    # CuPy detection
+    try:
+        import cupy
+
+        if cupy.cuda.runtime.getDeviceCount() > 0:
+            cupy.cuda.Device(0).use()
+            deps.update({"cupy_available": True, "cp": cupy})
+        else:
+            warnings.warn("CuPy is installed, but no compatible CUDA GPU found.")
+    except ImportError:
+        warnings.warn("CuPy not installed...")
+    except Exception as e:  # Catch any CuPy error (like driver issues)
+        warnings.warn(f"CuPy installed but failed to initialize: {e}")
+
+    return deps
+
+
+_DEPS = _detect_optional_dependencies()
+NUMBA_AVAILABLE = _DEPS["numba_available"]
+CUPY_AVAILABLE = _DEPS["cupy_available"]
+cp = _DEPS["cp"]  # None, if CuPy unavailable
+jit = _DEPS["jit"]  # None, if Numba unavailable
+prange = _DEPS["prange"]  # None, if Numba unavailable
 
 # ============================================================================
 # PRIVATE IMPLEMENTATIONS (The actual computation engines)
@@ -462,9 +474,7 @@ class Distance:
             "pairwise_euclidean", X, Y, force_cpu
         )
         if func is None:  # Fallback to numpy if no specialized func
-            return self._dispatch_m2m("pairwise_euclidean", X, Y, force_cpu=True)[0](
-                X_c, Y_c
-            )
+            return _pairwise_euclidean_numpy(X_c, Y_c)
 
         distances = func(X_c, Y_c)
         if use_gpu:
