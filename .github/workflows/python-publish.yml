@@ -1,5 +1,6 @@
 # This workflow will upload a  Python Package to PyPI when a release is created
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python#publishing-to-package-registries
+# For more information see:
+# https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python#publishing-to-package-registries
 
 # This workflow uses actions that are not certified by GitHub.
 # They are provided by a third-party and are governed by
@@ -21,9 +22,10 @@ jobs:
     permissions:
       contents: read
     strategy:
+      fail-fast: false
       matrix:
-        python-version: ["3.8", "3.9", "3.10", "3.11"]
-        exclude_numba: [false, true] 
+        python-version: ["3.9", "3.10", "3.11", "3.12"]
+        optional-deps: [none, numba, cupy, all]
 
     steps:
       - name: Checkout repository
@@ -37,13 +39,16 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install .[test,performance]
+          pip install .[test]
+        
+          if [ "${{ matrix.optional-deps }}" = "numba" ]; then
+            pip install .[performance-numba]
+          elif [ "${{ matrix.optional-deps }}" = "cupy" ]; then
+            pip install .[performance-cupy]
+          elif [ "${{ matrix.optional-deps }}" = "all" ]; then
+            pip install .[performance]
+          fi
       
-      - name: Uninstall Numba if required by matrix
-        if: matrix.exclude_numba
-        run: pip uninstall -y numba
-
       - name: Run tests and collect coverage 
         run: |
           pytest --cov=src --cov-report=xml
