@@ -63,7 +63,6 @@ jobs:
         uses: codecov/codecov-action@v4
         with:
           files: ./coverage.xml
-          root_dir: ./src
           fail_ci_if_error: true
           verbose: true
           flags: py${{ matrix.python-version }}-${{ matrix.optional-deps }}

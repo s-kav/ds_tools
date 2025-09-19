@@ -2,6 +2,7 @@ codecov:
   # Max age for uploaded reports (e.g., '12h' for 12 hours, '1d' for 1 day)
   # Reports older than this will be rejected. Set to 'off' to disable.
   max_report_age: 12h
+  disable_default_path_fixes: yes
 
 coverage:
   precision: 2
@@ -11,6 +12,27 @@ coverage:
         target: auto
         # Threshold for coverage decrease before a status check fails
         threshold: 1%
+        flags:
+          - py3.8-none
+          - py3.8-numba
+          - py3.8-cupy
+          - py3.8-all
+          - py3.9-none
+          - py3.9-numba
+          - py3.9-cupy
+          - py3.9-all
+          - py3.10-none
+          - py3.10-numba
+          - py3.10-cupy
+          - py3.10-all
+          - py3.11-none
+          - py3.11-numba
+          - py3.11-cupy
+          - py3.11-all
+          - py3.12-none
+          - py3.12-numba
+          - py3.12-cupy
+          - py3.12-all
   parsers:
     gcov:
       branch_detection:
@@ -18,3 +40,6 @@ coverage:
         loop: yes
         method: yes
         macro: yes
+  
+  fixes:
+  - "/home/runner/work/ds_tools/ds_tools/::"
