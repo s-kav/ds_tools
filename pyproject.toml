@@ -41,7 +41,7 @@ test = [
 ]
 
 performance = [
-    "cupy-cuda12x",
+    "cupy-cuda13x",
     "numba",
 ]
 
