@@ -1,0 +1,21 @@
+codecov:
+  # Max age for uploaded reports (e.g., '12h' for 12 hours, '1d' for 1 day)
+  # Reports older than this will be rejected. Set to 'off' to disable.
+  max_report_age: 12h
+
+coverage:
+  precision: 2
+  status:
+    project:
+      default:
+        target: auto
+        # Threshold for coverage decrease before a status check fails
+        threshold: 1%
+        flags: null   # unite everything
+  parsers:
+    gcov:
+      branch_detection:
+        conditional: yes
+        loop: yes
+        method: yes
+        macro: yes
