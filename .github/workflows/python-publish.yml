@@ -52,7 +52,7 @@ jobs:
       
       - name: Run tests and collect coverage 
         run: |
-          pytest --cov=src --cov-report=xml:coverage.xml
+          pytest --cov --cov-report=xml:coverage.xml
       
       - name: Debug coverage.xml
         run: |
