@@ -62,8 +62,8 @@ jobs:
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v4
         with:
-          disable_gcov: true
           files: ./coverage.xml
+          root_dir: ./src
           fail_ci_if_error: true
           verbose: true
           flags: py${{ matrix.python-version }}-${{ matrix.optional-deps }}
