@@ -14,6 +14,15 @@ All notable changes to this project will be documented in this file.
 -   Significantly improved test coverage for the `metrics` and `distance` modules, adding tests for all backend implementations (NumPy, Numba, CuPy) and numerous edge cases.
 -   Refactored the CI pipeline for more robust and reliable test execution.
 
+## 🚀 Supported Python Versions Update
+
+To leverage modern language features, improve performance, and ensure long-term maintainability, the range of supported Python versions has been updated.
+
+-   **Dropped Support for Python 3.8:** Python 3.8 has reached its end-of-life for bugfixes and is no longer actively supported. Dropping it allows the library to use newer, more efficient APIs.
+-   **Added Support for Python 3.12:** The library is now fully tested and compatible with the latest stable version, Python 3.12.
+
+The officially supported Python versions are now **3.9, 3.10, 3.11, and 3.12**. Users on Python 3.8 are encouraged to upgrade their environment to continue receiving updates for this library.
+
 
 ## [2.0.0] - 2025-09-08
 
