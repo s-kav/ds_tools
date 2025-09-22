@@ -1,12 +1,17 @@
 # DSTools: Data Science Research Toolkit
 
-[![Tests](https://github.com/s-kav/ds_tools/actions/workflows/python-publish.yml/badge.svg)](https://github.com/s-kav/ds_tools/actions)
+[![Tests](https://img.shields.io/github/actions/workflow/status/s-kav/ds_tools/python-publish.yml?label=Tests&color=darkgreen&style=flat)](https://github.com/s-kav/ds_tools/actions)
 [![PyPI version](https://img.shields.io/pypi/v/dscience-tools.svg)](https://pypi.org/project/dscience-tools/)
 [![codecov](https://codecov.io/gh/s-kav/ds_tools/branch/main/graph/badge.svg)](https://codecov.io/gh/s-kav/ds_tools)
 [![License: PolyForm Non-Commercial 1.0.0](https://img.shields.io/badge/License-PolyForm%20Non--Commercial-blue.svg)](https://polyformproject.org/licenses/noncommercial/1.0.0/)
 [![PyPI Downloads](https://static.pepy.tech/badge/dscience-tools)](https://pepy.tech/projects/dscience-tools)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-[![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit)](https://github.com/pre-commit/pre-commit)
+[![pre-commit](https://img.shields.io/badge/pre--commit-enabled-darkgreen?logo=pre-commit)](https://github.com/pre-commit/pre-commit)
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
+[![PEP8](https://img.shields.io/badge/code%20style-pep8-orange.svg)](https://www.python.org/dev/peps/pep-0008/)
+![PyPI - Implementation](https://img.shields.io/pypi/implementation/dscience-tools)
+[![Supported Python Versions](https://img.shields.io/badge/Python-3.9%20|%203.10%20|%203.11%20|%203.12-3776AB?style=flat&logo=python&logoColor=white)](https://www.python.org)
+[![Supports GPU and CPU](https://img.shields.io/badge/GPU%2FCPU-Supported-darkgreen?style=flat&logo=nvidia&logoColor=white)](https://pytorch.org/)
 
 
 # Table of Contents
