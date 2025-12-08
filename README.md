@@ -19,6 +19,7 @@
 *   [Available Tools](#available-tools)
 *   [Authors](#authors)
 *   [Contributing](#contributing)
+*   [TODO](#todo)
 *   [References](#references)
 *   [License](#license)
 
@@ -387,6 +388,22 @@ A high-performance toolkit for calculating distances and similarities.
 # Contributing
 
 See [CONTRIBUTING](/CONTRIBUTING.md)
+
+# TODO
+1. Add some important kind of plots:
+📌 KS Plot – Measures how well your model separates positive and negative classes.
+📌 SHAP Plot – Explains feature impact and model interpretability.
+📌 QQ Plot – Checks if your data follows a theoretical distribution.
+📌 Cumulative Explained Variance – Helps decide the optimal number of PCA components.
+📌 Gini vs Entropy – Key metrics for understanding decision tree impurity.
+📌 Bias–Variance Tradeoff – Shows the balance between underfitting and overfitting.
+📌 ROC Curve – Evaluates classification performance across thresholds.
+📌 Precision–Recall Curve – Crucial for imbalanced datasets.
+📌 Elbow Curve – Helps choose the right number of clusters in K-Means.
+
+2. Implement Fast Fourier Transform (FFT) algorithm and Shannon’s interpolation formula
+
+3. Add some fast distance metrics (expand of existed).
 
 
 # References
