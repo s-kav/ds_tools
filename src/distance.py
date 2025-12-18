@@ -5,11 +5,13 @@ and similarity metric implementations, with support for CPU parallelization
 and GPU acceleration. All implementations are self-contained where feasible.
 """
 
+import inspect
 import logging
 import warnings
 from typing import Optional
 
 import numpy as np
+import pandas as pd
 
 
 def _detect_optional_dependencies():
@@ -54,79 +56,35 @@ jit = _DEPS["jit"]  # None, if Numba unavailable
 prange = _DEPS["prange"]  # None, if Numba unavailable
 
 # ============================================================================
-# PRIVATE IMPLEMENTATIONS (The actual computation engines)
+# NUMBA IMPLEMENTATIONS (JIT-compiled, CPU optimized)
 # ============================================================================
 
-# --- Vector-to-Vector Distances ---
 
-# Euclidean / L2
 if NUMBA_AVAILABLE:
-
+    # --- Vector-to-Vector Distances ---
     @jit("float64(float32[:], float32[:])", nopython=True, fastmath=True)
-    def _euclidean_numba(u, v):
+    def _euclidean_numba(u, v):  # Euclidean / L2
         dist_sq = 0.0
         for i in range(u.shape[0]):
             dist_sq += (u[i] - v[i]) ** 2
         return np.sqrt(dist_sq)
 
-
-if CUPY_AVAILABLE:
-
-    def _euclidean_cupy(u, v):
-        return cp.linalg.norm(u - v)
-
-
-def _euclidean_numpy(u, v):
-    return np.linalg.norm(u - v)
-
-
-# Manhattan / L1
-if NUMBA_AVAILABLE:
-
     @jit("float64(float32[:], float32[:])", nopython=True, fastmath=True)
-    def _manhattan_numba(u, v):
+    def _manhattan_numba(u, v):  # Manhattan / L1
         dist = 0.0
         for i in range(u.shape[0]):
             dist += abs(u[i] - v[i])
         return dist
 
-
-if CUPY_AVAILABLE:
-
-    def _manhattan_cupy(u, v):
-        return cp.sum(cp.abs(u - v))
-
-
-def _manhattan_numpy(u, v):
-    return np.sum(np.abs(u - v))
-
-
-# Minkowski
-if NUMBA_AVAILABLE:
-
     @jit("float64(float32[:], float32[:], int_)", nopython=True, fastmath=True)
-    def _minkowski_numba(u, v, p):
+    def _minkowski_numba(u, v, p):  # Minkowski
         dist = 0.0
         for i in range(u.shape[0]):
             dist += abs(u[i] - v[i]) ** p
         return dist ** (1.0 / p)
 
-
-if CUPY_AVAILABLE:
-
-    def _minkowski_cupy(u, v, p):
-        return cp.sum(cp.abs(u - v) ** p) ** (1.0 / p)
-
-
-def _minkowski_numpy(u, v, p):
-    return np.sum(np.abs(u - v) ** p) ** (1.0 / p)
-
-
-# Chebyshev / L-infinity
-if NUMBA_AVAILABLE:
-
     @jit("float64(float32[:], float32[:])", nopython=True, fastmath=True)
-    def _chebyshev_numba(u, v):
+    def _chebyshev_numba(u, v):  # Chebyshev / L-infinity
         max_dist = 0.0
         for i in range(u.shape[0]):
             dist = abs(u[i] - v[i])
@@ -134,22 +92,8 @@ if NUMBA_AVAILABLE:
                 max_dist = dist
         return max_dist
 
-
-if CUPY_AVAILABLE:
-
-    def _chebyshev_cupy(u, v):
-        return cp.max(cp.abs(u - v))
-
-
-def _chebyshev_numpy(u, v):
-    return np.max(np.abs(u - v))
-
-
-# Cosine Similarity
-if NUMBA_AVAILABLE:
-
     @jit("float64(float32[:], float32[:])", nopython=True, fastmath=True)
-    def _cosine_similarity_numba(u, v):
+    def _cosine_similarity_numba(u, v):  # Cosine Similarity
         dot, norm_u, norm_v = 0.0, 0.0, 0.0
         for i in range(u.shape[0]):
             dot += u[i] * v[i]
@@ -162,32 +106,8 @@ if NUMBA_AVAILABLE:
             return 0.0  # similarity with one zero vectors = 0
         return dot / (norm_u * norm_v)
 
-
-if CUPY_AVAILABLE:
-
-    def _cosine_similarity_cupy(u, v):
-        dot, norm_u, norm_v = cp.dot(u, v), cp.linalg.norm(u), cp.linalg.norm(v)
-        if norm_u == 0.0 and norm_v == 0.0:
-            return 1.0  # similarity of two zero vectors = 1
-        if norm_u == 0.0 or norm_v == 0.0:
-            return 0.0  # similarity with one zero vectors = 0
-        return dot / (norm_u * norm_v)
-
-
-def _cosine_similarity_numpy(u, v):
-    dot, norm_u, norm_v = np.dot(u, v), np.linalg.norm(u), np.linalg.norm(v)
-    if norm_u == 0.0 and norm_v == 0.0:
-        return 1.0  # similarity of two zero vectors = 1
-    if norm_u == 0.0 or norm_v == 0.0:
-        return 0.0  # similarity with one zero vectors = 0
-    return dot / (norm_u * norm_v)
-
-
-# Mahalanobis
-if NUMBA_AVAILABLE:
-
     @jit("float64(float32[:], float32[:], float32[:,:])", nopython=True, fastmath=True)
-    def _mahalanobis_numba(u, v, VI):
+    def _mahalanobis_numba(u, v, VI):  # Mahalanobis
         diff = u - v
         # Perform (u-v)^T @ VI @ (u-v)
         tmp = np.empty(VI.shape[0], dtype=np.float32)
@@ -201,46 +121,16 @@ if NUMBA_AVAILABLE:
             result += tmp[i] * diff[i]
         return np.sqrt(result)
 
-
-if CUPY_AVAILABLE:
-
-    def _mahalanobis_cupy(u, v, VI):
-        diff = u - v
-        return cp.sqrt(diff.T @ VI @ diff)
-
-
-def _mahalanobis_numpy(u, v, VI):
-    diff = u - v
-    return np.sqrt(diff.T @ VI @ diff)
-
-
-# Hamming
-if NUMBA_AVAILABLE:
-
     @jit("float64(float32[:], float32[:])", nopython=True, fastmath=True)
-    def _hamming_numba(u, v):
+    def _hamming_numba(u, v):  # Hamming
         diff_count = 0
         for i in range(u.shape[0]):
             if u[i] != v[i]:
                 diff_count += 1
         return diff_count / u.shape[0]
 
-
-if CUPY_AVAILABLE:
-
-    def _hamming_cupy(u, v):
-        return cp.mean(u != v)
-
-
-def _hamming_numpy(u, v):
-    return np.mean(u != v)
-
-
-# Jaccard
-if NUMBA_AVAILABLE:
-
     @jit("float64(float32[:], float32[:])", nopython=True, fastmath=True)
-    def _jaccard_numba(u, v):
+    def _jaccard_numba(u, v):  # Jaccard
         intersection, union = 0, 0
         for i in range(u.shape[0]):
             u_bool = u[i] != 0
@@ -253,34 +143,134 @@ if NUMBA_AVAILABLE:
             return 0.0
         return 1.0 - (intersection / union)
 
+    @jit("float64(float32[:], float32[:])", nopython=True, fastmath=True)
+    def _canberra_numba(u, v, w):  # weighted Canberra distance
+        n = u.shape[0]
+        dist = 0.0
+        for i in range(n):
+            abs_u = abs(u[i])
+            abs_v = abs(v[i])
+            denom = abs_u + abs_v
+            if denom > 0:  # Avoid division by zero
+                num = abs(u[i] - v[i])
+                dist += num / denom * w[i]
+        return dist
 
-if CUPY_AVAILABLE:
-
-    def _jaccard_cupy(u, v):
-        u_bool, v_bool = u.astype(bool), v.astype(bool)
-        intersection, union = cp.sum(u_bool & v_bool), cp.sum(u_bool | v_bool)
-        if union == 0:
+    @jit("float64(float32[:], float32[:])", nopython=True, fastmath=True)
+    def _braycurtis_numba(u, v):  # Bray-Curtis distance between two 1D arrays
+        diff_sum = 0.0
+        abs_sum = 0.0
+        for i in range(u.shape[0]):
+            diff_sum += abs(u[i] - v[i])
+            abs_sum += abs(u[i] + v[i])
+        if abs_sum == 0.0:
             return 0.0
-        return 1.0 - (intersection / union)
+        return diff_sum / abs_sum
 
+    # --- Relative Entropy (Kullback-Leibler Divergence) ---
+    @jit("float64(float32[:], float32[:])", nopython=True, fastmath=True)
+    def _relative_entropy_numba(u, v):  # relative entropy between two 1D arrays
+        entropy = 0.0
+        for i in range(u.shape[0]):
 
-def _jaccard_numpy(u, v):
-    u_bool, v_bool = u.astype(bool), v.astype(bool)
-    intersection, union = np.sum(u_bool & v_bool), np.sum(u_bool | v_bool)
-    if union == 0:
-        return 0.0
-    return 1.0 - (intersection / union)
+            # Avoid log(0) and division by zero; input should theoretically be prob dists
+            if u[i] > 0 and v[i] > 0:
+                entropy += u[i] * np.log(u[i] / v[i])
+        return entropy
 
+    # Helper to calculate contingency table components
+    @jit("UniTuple(float64, 4)(float32[:], float32[:])", nopython=True, fastmath=True)
+    def _get_boolean_counts_numba(u, v):
+        c_tt = 0.0  # True-True
+        c_tf = 0.0  # True-False
+        c_ft = 0.0  # False-True
+        c_ff = 0.0  # False-False
 
-def _pairwise_euclidean_numpy(X, Y):
-    # Using broadcasting for efficiency
-    diff = X[:, np.newaxis, :] - Y[np.newaxis, :, :]
-    return np.sqrt(np.sum(diff**2, axis=-1))
+        for i in range(u.shape[0]):
+            u_bool = u[i] != 0
+            v_bool = v[i] != 0
 
+            if u_bool and v_bool:
+                c_tt += 1.0
+            elif u_bool and not v_bool:
+                c_tf += 1.0
+            elif not u_bool and v_bool:
+                c_ft += 1.0
+            else:
+                c_ff += 1.0
+        return c_tt, c_tf, c_ft, c_ff
 
-# --- Matrix-based Distances ---
-if NUMBA_AVAILABLE:
+    @jit("float64(float32[:], float32[:])", nopython=True, fastmath=True)
+    def _dice_numba(u, v):  # Dice dissimilarity between two boolean 1D arrays
+        c_tt, c_tf, c_ft, _ = _get_boolean_counts_numba(u, v)
+        denom = 2.0 * c_tt + c_tf + c_ft
+        if denom == 0.0:
+            return 0.0
+        return (c_tf + c_ft) / denom
 
+    @jit("float64(float32[:], float32[:])", nopython=True, fastmath=True)
+    def _kulsinski_numba(u, v):  # Kulsinski dissimilarity between two boolean 1D arrays
+        c_tt, c_tf, c_ft, c_ff = _get_boolean_counts_numba(u, v)
+        n = c_tt + c_tf + c_ft + c_ff
+        denom = c_tf + c_ft + n
+        if denom == 0.0:
+            return 0.0
+        return (c_tf + c_ft - c_tt + n) / denom
+
+    @jit("float64(float32[:], float32[:])", nopython=True, fastmath=True)
+    def _rogers_tanimoto_numba(
+        u, v
+    ):  # Rogers-Tanimoto dissimilarity between two boolean 1D arrays
+        c_tt, c_tf, c_ft, c_ff = _get_boolean_counts_numba(u, v)
+        r = 2.0 * (c_tf + c_ft)
+        denom = c_tt + c_ff + r
+        if denom == 0.0:
+            return 0.0
+        return r / denom
+
+    @jit("float64(float32[:], float32[:])", nopython=True, fastmath=True)
+    def _russellrao_numba(
+        u, v
+    ):  # Ruseell-Rao dissimilarity between two boolean 1D arrays
+        c_tt, c_tf, c_ft, c_ff = _get_boolean_counts_numba(u, v)
+        n = c_tt + c_tf + c_ft + c_ff
+        if n == 0.0:
+            return 0.0
+        return (n - c_tt) / n
+
+    @jit("float64(float32[:], float32[:])", nopython=True, fastmath=True)
+    def _sokal_michener_numba(
+        u, v
+    ):  # Sokal-Michener dissimilarity between two boolean 1D arrays
+        c_tt, c_tf, c_ft, c_ff = _get_boolean_counts_numba(u, v)
+        r = 2.0 * (c_tf + c_ft)
+        n = c_tt + c_tf + c_ft + c_ff
+        denom = n + r
+        if denom == 0.0:
+            return 0.0
+        return r / denom
+
+    @jit("float64(float32[:], float32[:])", nopython=True, fastmath=True)
+    def _sokal_sneath_numba(
+        u, v
+    ):  # Sokal-Sneath dissimilarity between two boolean 1D arrays
+        c_tt, c_tf, c_ft, c_ff = _get_boolean_counts_numba(u, v)
+        r = 2.0 * (c_tf + c_ft)
+        denom = c_tt + r
+        if denom == 0.0:
+            return 0.0
+        return r / denom
+
+    @jit("float64(float32[:], float32[:])", nopython=True, fastmath=True)
+    def _yule_numba(u, v):  # Yule dissimilarity between two boolean 1D arrays
+        c_tt, c_tf, c_ft, c_ff = _get_boolean_counts_numba(u, v)
+        r = 2.0 * c_tf * c_ft
+        denom = c_tt * c_ff + r / 2.0
+        if denom == 0.0:
+            return 0.0  # Avoid div by zero, definition varies
+        return r / denom
+
+    # --- Matrix-based Distances ---
     @jit(
         "float32[:,:](float32[:,:], float32[:,:])",
         nopython=True,
@@ -300,11 +290,276 @@ if NUMBA_AVAILABLE:
         return distances
 
 
+# ==============================================================================
+# CUPY IMPLEMENTATIONS (GPU accelerated)
+# ==============================================================================
+
+
 if CUPY_AVAILABLE:
+
+    def _euclidean_cupy(u, v):
+        return cp.linalg.norm(u - v)
+
+    def _manhattan_cupy(u, v):
+        return cp.sum(cp.abs(u - v))
+
+    def _minkowski_cupy(u, v, p):
+        return cp.sum(cp.abs(u - v) ** p) ** (1.0 / p)
+
+    def _chebyshev_cupy(u, v):
+        return cp.max(cp.abs(u - v))
+
+    def _cosine_similarity_cupy(u, v):
+        dot, norm_u, norm_v = cp.dot(u, v), cp.linalg.norm(u), cp.linalg.norm(v)
+        if norm_u == 0.0 and norm_v == 0.0:
+            return 1.0  # similarity of two zero vectors = 1
+        if norm_u == 0.0 or norm_v == 0.0:
+            return 0.0  # similarity with one zero vectors = 0
+        return dot / (norm_u * norm_v)
+
+    def _mahalanobis_cupy(u, v, VI):
+        diff = u - v
+        return cp.sqrt(diff.T @ VI @ diff)
+
+    def _hamming_cupy(u, v):
+        return cp.mean(u != v)
+
+    def _jaccard_cupy(u, v):
+        u_bool, v_bool = u.astype(bool), v.astype(bool)
+        intersection, union = cp.sum(u_bool & v_bool), cp.sum(u_bool | v_bool)
+        if union == 0:
+            return 0.0
+        return 1.0 - (intersection / union)
 
     def _pairwise_euclidean_cupy(X, Y):
         diff = X[:, None, :] - Y[None, :, :]
         return cp.sqrt(cp.sum(diff**2, axis=-1))
+
+    def _canberra_cupy(u, v, w=None):
+        """GPU-accelerated Canberra distance."""
+        if w is None:
+            w = cp.ones_like(u)
+        num = cp.abs(u - v)
+        denom = cp.abs(u) + cp.abs(v)
+        # Safe division
+        mask = denom != 0
+        ratios = cp.where(mask, num / denom, 0.0)
+        return float(cp.sum(ratios * w))
+
+    def _braycurtis_cupy(u, v):
+        diff = cp.abs(u - v)
+        sum_val = cp.abs(u + v)
+        denom = cp.sum(sum_val)
+        if denom == 0.0:
+            return 0.0
+        return cp.sum(diff) / denom
+
+    def _relative_entropy_cupy(u, v):
+        # Filter where both are positive to avoid NaNs/Infs
+        mask = (u > 0) & (v > 0)
+        u_valid = u[mask]
+        v_valid = v[mask]
+        return cp.sum(u_valid * cp.log(u_valid / v_valid))
+
+    # --- Boolean Helpers for CuPy ---
+    def _get_boolean_counts_cupy(u, v):
+        u_bool = u.astype(bool)
+        v_bool = v.astype(bool)
+        not_u = ~u_bool
+        not_v = ~v_bool
+        c_tt = cp.sum(u_bool & v_bool)
+        c_tf = cp.sum(u_bool & not_v)
+        c_ft = cp.sum(not_u & v_bool)
+        c_ff = cp.sum(not_u & not_v)
+        return float(c_tt), float(c_tf), float(c_ft), float(c_ff)
+
+    def _dice_cupy(u, v):
+        c_tt, c_tf, c_ft, _ = _get_boolean_counts_cupy(u, v)
+        denom = 2.0 * c_tt + c_tf + c_ft
+        return (c_tf + c_ft) / denom if denom != 0 else 0.0
+
+    def _kulsinski_cupy(u, v):
+        c_tt, c_tf, c_ft, c_ff = _get_boolean_counts_cupy(u, v)
+        n = c_tt + c_tf + c_ft + c_ff
+        denom = c_tf + c_ft + n
+        return (c_tf + c_ft - c_tt + n) / denom if denom != 0 else 0.0
+
+    def _rogers_tanimoto_cupy(u, v):
+        c_tt, c_tf, c_ft, c_ff = _get_boolean_counts_cupy(u, v)
+        r = 2.0 * (c_tf + c_ft)
+        denom = c_tt + c_ff + r
+        return r / denom if denom != 0 else 0.0
+
+    def _russellrao_cupy(u, v):
+        c_tt, c_tf, c_ft, c_ff = _get_boolean_counts_cupy(u, v)
+        n = c_tt + c_tf + c_ft + c_ff
+        return (n - c_tt) / n if n != 0 else 0.0
+
+    def _sokal_michener_cupy(u, v):
+        c_tt, c_tf, c_ft, c_ff = _get_boolean_counts_cupy(u, v)
+        r = 2.0 * (c_tf + c_ft)
+        n = c_tt + c_tf + c_ft + c_ff
+        denom = n + r
+        return r / denom if denom != 0 else 0.0
+
+    def _sokal_sneath_cupy(u, v):
+        c_tt, c_tf, c_ft, c_ff = _get_boolean_counts_cupy(u, v)
+        r = 2.0 * (c_tf + c_ft)
+        denom = c_tt + r
+        return r / denom if denom != 0 else 0.0
+
+    def _yule_cupy(u, v):
+        c_tt, c_tf, c_ft, c_ff = _get_boolean_counts_cupy(u, v)
+        r = 2.0 * c_tf * c_ft
+        denom = c_tt * c_ff + r / 2.0
+        return r / denom if denom != 0 else 0.0
+
+
+# ==============================================================================
+# NUMPY IMPLEMENTATIONS (baseline, always available)
+# ==============================================================================
+
+
+def _euclidean_numpy(u, v):
+    return np.linalg.norm(u - v)
+
+
+def _manhattan_numpy(u, v):
+    return np.sum(np.abs(u - v))
+
+
+def _minkowski_numpy(u, v, p):
+    return np.sum(np.abs(u - v) ** p) ** (1.0 / p)
+
+
+def _chebyshev_numpy(u, v):
+    return np.max(np.abs(u - v))
+
+
+def _cosine_similarity_numpy(u, v):
+    dot, norm_u, norm_v = np.dot(u, v), np.linalg.norm(u), np.linalg.norm(v)
+    if norm_u == 0.0 and norm_v == 0.0:
+        return 1.0  # similarity of two zero vectors = 1
+    if norm_u == 0.0 or norm_v == 0.0:
+        return 0.0  # similarity with one zero vectors = 0
+    return dot / (norm_u * norm_v)
+
+
+def _mahalanobis_numpy(u, v, VI):
+    diff = u - v
+    return np.sqrt(diff.T @ VI @ diff)
+
+
+def _hamming_numpy(u, v):
+    return np.mean(u != v)
+
+
+def _jaccard_numpy(u, v):
+    u_bool, v_bool = u.astype(bool), v.astype(bool)
+    intersection, union = np.sum(u_bool & v_bool), np.sum(u_bool | v_bool)
+    if union == 0:
+        return 0.0
+    return 1.0 - (intersection / union)
+
+
+def _pairwise_euclidean_numpy(X, Y):
+    # Using broadcasting for efficiency
+    diff = X[:, np.newaxis, :] - Y[np.newaxis, :, :]
+    return np.sqrt(np.sum(diff**2, axis=-1))
+
+
+def _canberra_numpy(u, v, w=None):
+    """
+    Vectorized Canberra distance.
+    dist = Σ |u[i] - v[i]| / (|u[i]| + |v[i]|) * w[i]
+    """
+    if w is None:
+        w = np.ones_like(u)
+    num = np.abs(u - v)
+    denom = np.abs(u) + np.abs(v)
+    # Safe division
+    with np.errstate(divide="ignore", invalid="ignore"):
+        ratios = np.where(denom != 0, num / denom, 0.0)
+    # Weighted sum using einsum (slightly faster than sum)
+    return np.einsum("i,i->", ratios, w)
+
+
+def _braycurtis_numpy(u, v):
+    diff = np.abs(u - v)
+    sum_val = np.abs(u + v)
+    denom = np.sum(sum_val)
+    if denom == 0.0:
+        return 0.0
+    return np.sum(diff) / denom
+
+
+def _relative_entropy_numpy(u, v):
+    # Filter where both are positive to avoid NaNs/Infs (standard KL behavior)
+    mask = (u > 0) & (v > 0)
+    u_valid = u[mask]
+    v_valid = v[mask]
+    return np.sum(u_valid * np.log(u_valid / v_valid))
+
+
+# --- Boolean Helpers for NumPy ---
+def _get_boolean_counts_numpy(u, v):
+    u_bool = u.astype(bool)
+    v_bool = v.astype(bool)
+    not_u = ~u_bool
+    not_v = ~v_bool
+    c_tt = np.sum(u_bool & v_bool)
+    c_tf = np.sum(u_bool & not_v)
+    c_ft = np.sum(not_u & v_bool)
+    c_ff = np.sum(not_u & not_v)
+    return float(c_tt), float(c_tf), float(c_ft), float(c_ff)
+
+
+def _dice_numpy(u, v):
+    c_tt, c_tf, c_ft, _ = _get_boolean_counts_numpy(u, v)
+    denom = 2.0 * c_tt + c_tf + c_ft
+    return (c_tf + c_ft) / denom if denom != 0 else 0.0
+
+
+def _kulsinski_numpy(u, v):
+    c_tt, c_tf, c_ft, c_ff = _get_boolean_counts_numpy(u, v)
+    n = c_tt + c_tf + c_ft + c_ff
+    denom = c_tf + c_ft + n
+    return (c_tf + c_ft - c_tt + n) / denom if denom != 0 else 0.0
+
+
+def _rogers_tanimoto_numpy(u, v):
+    c_tt, c_tf, c_ft, c_ff = _get_boolean_counts_numpy(u, v)
+    r = 2.0 * (c_tf + c_ft)
+    denom = c_tt + c_ff + r
+    return r / denom if denom != 0 else 0.0
+
+
+def _russellrao_numpy(u, v):
+    c_tt, c_tf, c_ft, c_ff = _get_boolean_counts_numpy(u, v)
+    n = c_tt + c_tf + c_ft + c_ff
+    return (n - c_tt) / n if n != 0 else 0.0
+
+
+def _sokal_michener_numpy(u, v):
+    c_tt, c_tf, c_ft, c_ff = _get_boolean_counts_numpy(u, v)
+    r = 2.0 * (c_tf + c_ft)
+    n = c_tt + c_tf + c_ft + c_ff
+    denom = n + r
+    return r / denom if denom != 0 else 0.0
+
+
+def _sokal_sneath_numpy(u, v):
+    c_tt, c_tf, c_ft, c_ff = _get_boolean_counts_numpy(u, v)
+    r = 2.0 * (c_tf + c_ft)
+    denom = c_tt + r
+    return r / denom if denom != 0 else 0.0
+
+
+def _yule_numpy(u, v):
+    c_tt, c_tf, c_ft, c_ff = _get_boolean_counts_numpy(u, v)
+    r = 2.0 * c_tf * c_ft
+    denom = c_tt * c_ff + r / 2.0
+    return r / denom if denom != 0 else 0.0
 
 
 if not NUMBA_AVAILABLE:
@@ -317,6 +572,16 @@ if not NUMBA_AVAILABLE:
     _hamming_numba = _hamming_numpy
     _jaccard_numba = _jaccard_numpy
     _pairwise_euclidean_numba = _pairwise_euclidean_numpy
+    _canberra_numba = _canberra_numpy
+    _braycurtis_numba = _braycurtis_numpy
+    _relative_entropy_numba = _relative_entropy_numpy
+    _dice_numba = _dice_numpy
+    _kulsinski_numba = _kulsinski_numpy
+    _rogers_tanimoto_numba = _rogers_tanimoto_numpy
+    _russellrao_numba = _russellrao_numpy
+    _sokal_michener_numba = _sokal_michener_numpy
+    _sokal_sneath_numba = _sokal_sneath_numpy
+    _yule_numba = _yule_numpy
 
 if not CUPY_AVAILABLE:
     _euclidean_cupy = _euclidean_numpy
@@ -328,11 +593,23 @@ if not CUPY_AVAILABLE:
     _hamming_cupy = _hamming_numpy
     _jaccard_cupy = _jaccard_numpy
     _pairwise_euclidean_cupy = _pairwise_euclidean_numpy
+    _canberra_cupy = _canberra_numpy
+    _braycurtis_cupy = _braycurtis_numpy
+    _relative_entropy_cupy = _relative_entropy_numpy
+    _dice_cupy = _dice_numpy
+    _kulsinski_cupy = _kulsinski_numpy
+    _rogers_tanimoto_cupy = _rogers_tanimoto_numpy
+    _russellrao_cupy = _russellrao_numpy
+    _sokal_michener_cupy = _sokal_michener_numpy
+    _sokal_sneath_cupy = _sokal_sneath_numpy
+    _yule_cupy = _yule_numpy
 
 
 # ============================================================================
 # PUBLIC DISTANCE CLASS
 # ============================================================================
+
+
 class Distance:
     def __init__(self, gpu_threshold: int = 10_000):
         self.gpu_threshold = gpu_threshold
@@ -342,6 +619,47 @@ class Distance:
         logging.getLogger(__name__).debug(
             f"Distance initialized. GPU: {self.gpu_available}, Numba: {self.numba_available}"
         )
+
+    def list_metrics(self) -> pd.DataFrame:
+        """
+        Returns a DataFrame listing all available metric functions, their
+        descriptions, and usage signatures.
+
+        Returns:
+            pd.DataFrame: A table with columns 'Metric', 'Description', and 'Usage'.
+        """
+        methods_data = []
+
+        # Iterate over all members of the instance
+        for name, func in inspect.getmembers(self, predicate=inspect.ismethod):
+            # Skip private methods (starting with _) and the list_metrics method itself
+            if name.startswith("_") or name == "list_metrics":
+                continue
+
+            # Get the first line of the docstring
+            doc = inspect.getdoc(func)
+            description = doc.split("\n")[0] if doc else "No description available."
+
+            # Get the function signature (arguments)
+            try:
+                signature = str(inspect.signature(func))
+            except ValueError:
+                signature = "(...)"
+
+            methods_data.append(
+                {
+                    "Metric": name,
+                    "Description": description,
+                    "Usage": f"{name}{signature}",
+                }
+            )
+
+        # Create DataFrame and sort by Metric name
+        df = pd.DataFrame(methods_data)
+        if not df.empty:
+            df = df.sort_values(by="Metric").reset_index(drop=True)
+
+        return df
 
     def _validate_vectors(self, u, v, check_dims=True):
         if check_dims and (u.ndim != 1 or v.ndim != 1):
@@ -457,6 +775,99 @@ class Distance:
             + np.cos(lat1) * np.cos(lat2) * np.sin(dlon / 2.0) ** 2
         )
         return radius * 2 * np.arcsin(np.sqrt(a))
+
+    def canberra(
+        self, u: np.ndarray, v: np.ndarray, w: np.ndarray, force_cpu: bool = False
+    ):
+        if self._validate_vectors(u, v) is not None:
+            return 0.0
+        func, u_c, v_c = self._dispatch_v2v("canberra", u, v, force_cpu)
+        return float(func(u_c, v_c, w))
+
+    def cityblock(self, u: np.ndarray, v: np.ndarray, force_cpu: bool = False) -> float:
+        """
+        Calculates the City Block distance (alias for Manhattan distance).
+        """
+        return self.manhattan(u, v, force_cpu)
+
+    def braycurtis(
+        self, u: np.ndarray, v: np.ndarray, force_cpu: bool = False
+    ) -> float:
+        """Calculates the Bray-Curtis distance between two vectors."""
+        if self._validate_vectors(u, v) is not None:
+            return 0.0
+        func, u_c, v_c = self._dispatch_v2v("braycurtis", u, v, force_cpu)
+        return float(func(u_c, v_c))
+
+    def relative_entropy(
+        self, u: np.ndarray, v: np.ndarray, force_cpu: bool = False
+    ) -> float:
+        """
+        Calculates the Relative Entropy (Kullback-Leibler Divergence) D(P||Q).
+        u and v should be probability distributions.
+        """
+        if self._validate_vectors(u, v) is not None:
+            return 0.0
+        func, u_c, v_c = self._dispatch_v2v("relative_entropy", u, v, force_cpu)
+        return float(func(u_c, v_c))
+
+    # --- Boolean Dissimilarity Measures ---
+    def dice(self, u: np.ndarray, v: np.ndarray, force_cpu: bool = False) -> float:
+        """Calculates the Dice dissimilarity between two boolean 1D arrays."""
+        if self._validate_vectors(u, v) is not None:
+            return 0.0
+        func, u_c, v_c = self._dispatch_v2v("dice", u, v, force_cpu)
+        return float(func(u_c, v_c))
+
+    def kulsinski(self, u: np.ndarray, v: np.ndarray, force_cpu: bool = False) -> float:
+        """Calculates the Kulsinski dissimilarity between two boolean 1D arrays."""
+        if self._validate_vectors(u, v) is not None:
+            return 0.0
+        func, u_c, v_c = self._dispatch_v2v("kulsinski", u, v, force_cpu)
+        return float(func(u_c, v_c))
+
+    def rogers_tanimoto(
+        self, u: np.ndarray, v: np.ndarray, force_cpu: bool = False
+    ) -> float:
+        """Calculates the Rogers-Tanimoto dissimilarity between two boolean 1D arrays."""
+        if self._validate_vectors(u, v) is not None:
+            return 0.0
+        func, u_c, v_c = self._dispatch_v2v("rogers_tanimoto", u, v, force_cpu)
+        return float(func(u_c, v_c))
+
+    def russellrao(
+        self, u: np.ndarray, v: np.ndarray, force_cpu: bool = False
+    ) -> float:
+        """Calculates the Russell-Rao dissimilarity between two boolean 1D arrays."""
+        if self._validate_vectors(u, v) is not None:
+            return 0.0
+        func, u_c, v_c = self._dispatch_v2v("russellrao", u, v, force_cpu)
+        return float(func(u_c, v_c))
+
+    def sokal_michener(
+        self, u: np.ndarray, v: np.ndarray, force_cpu: bool = False
+    ) -> float:
+        """Calculates the Sokal-Michener dissimilarity between two boolean 1D arrays."""
+        if self._validate_vectors(u, v) is not None:
+            return 0.0
+        func, u_c, v_c = self._dispatch_v2v("sokal_michener", u, v, force_cpu)
+        return float(func(u_c, v_c))
+
+    def sokal_sneath(
+        self, u: np.ndarray, v: np.ndarray, force_cpu: bool = False
+    ) -> float:
+        """Calculates the Sokal-Sneath dissimilarity between two boolean 1D arrays."""
+        if self._validate_vectors(u, v) is not None:
+            return 0.0
+        func, u_c, v_c = self._dispatch_v2v("sokal_sneath", u, v, force_cpu)
+        return float(func(u_c, v_c))
+
+    def yule(self, u: np.ndarray, v: np.ndarray, force_cpu: bool = False) -> float:
+        """Calculates the Yule dissimilarity between two boolean 1D arrays."""
+        if self._validate_vectors(u, v) is not None:
+            return 0.0
+        func, u_c, v_c = self._dispatch_v2v("yule", u, v, force_cpu)
+        return float(func(u_c, v_c))
 
     # --- Matrix-based Metrics ---
     def pairwise_euclidean(

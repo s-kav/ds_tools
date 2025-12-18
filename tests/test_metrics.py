@@ -70,6 +70,26 @@ def triplet_data():
     return anchor, positive, negative
 
 
+@pytest.fixture(scope="module")
+def fft_signal_power2():
+    """
+    Generates a composite sine wave signal with N=128 (Power of 2).
+    Frequencies: 5Hz and 20Hz.
+    """
+    N = 128
+    t = np.linspace(0.0, 1.0, N, endpoint=False)
+    # Signal: 1.0*sin(5Hz) + 0.5*sin(20Hz)
+    signal = np.sin(2 * np.pi * 5 * t) + 0.5 * np.sin(2 * np.pi * 20 * t)
+    return signal
+
+
+@pytest.fixture(scope="module")
+def fft_signal_odd():
+    """Generates a random signal with non-power-of-2 length (N=100)."""
+    np.random.seed(42)
+    return np.random.random(100).astype(np.float64)
+
+
 # ============================================================================
 # Tests for Initialization and System Awareness
 # ============================================================================
@@ -271,6 +291,65 @@ def test_dispatch_fallback_to_numpy(tools, mocker, small_sample_data):
     assert result == 99.0
 
 
+@pytest.mark.parametrize("engine", ["numpy", "numba"])
+def test_fft_correctness_cpu(tools, fft_signal_power2, engine):
+    """
+    Verifies that CPU engines correctly identify frequencies in a signal.
+    """
+    if engine == "numba" and not NUMBA_AVAILABLE:
+        pytest.skip("Numba is not available")
+
+    # Compute FFT
+    spectrum = tools.metrics.fft(fft_signal_power2)
+
+    # 1. Check Output Type and Shape
+    assert isinstance(spectrum, np.ndarray)
+    assert len(spectrum) == 128
+
+    # 2. Verify Spectral Peaks
+    # We expect peaks at index 5 and 20 (since N=128 and T=1s, indices map to Hz)
+    magnitudes = np.abs(spectrum)
+    # Zero out DC component (index 0) for peak finding
+    magnitudes[0] = 0
+
+    peak_indices = np.argsort(magnitudes)[
+        -4:
+    ]  # Top 4 peaks (positive & negative freqs)
+
+    assert 5 in peak_indices, f"Failed to detect 5Hz component with {engine}"
+    assert 20 in peak_indices, f"Failed to detect 20Hz component with {engine}"
+
+
+@pytest.mark.parametrize("engine", ["numpy", "numba"])
+def test_fft_inverse_cpu(tools, fft_signal_power2, engine):
+    """
+    Verifies that IFFT reconstructs the original signal (Round-trip test).
+    """
+    if engine == "numba" and not NUMBA_AVAILABLE:
+        pytest.skip("Numba is not available")
+
+    # Forward
+    spectrum = tools.metrics.fft(fft_signal_power2)
+    # Inverse
+    reconstructed = tools.metrics.fft(spectrum, inverse=True)
+
+    # Numba implementation returns complex array, take real part
+    assert np.allclose(reconstructed.real, fft_signal_power2, atol=1e-5)
+
+
+def test_numba_padding_logic(tools, fft_signal_odd):
+    """
+    Tests that Numba implementation automatically pads non-power-of-2 inputs.
+    Input N=100 -> Expected Output N=128.
+    """
+    if not NUMBA_AVAILABLE:
+        pytest.skip("Numba is not available")
+
+    spectrum = tools.metrics.fft(fft_signal_odd)
+    assert len(spectrum) == 128
+    assert np.iscomplexobj(spectrum)
+
+
 # ============================================================================
 # Tests for GPU-Specific Execution
 # ============================================================================
@@ -327,6 +406,50 @@ class TestGPUBackends:
         )
         assert np.isclose(loss_gpu, loss_cpu)
         assert isinstance(ga_gpu, np.ndarray)
+
+    def test_fft_correctness_cupy(self, tools, fft_signal_power2):
+        """
+        Verifies CuPy FFT execution and correctness against NumPy baseline.
+        """
+        import cupy as cp
+
+        # 1. Execute on GPU
+        spectrum_gpu = tools.metrics.fft(fft_signal_power2)
+
+        # Check it stays on GPU (is a cupy array)
+        assert isinstance(spectrum_gpu, cp.ndarray)
+
+        # 2. Compare values with NumPy
+        spectrum_cpu = tools.metrics.ft(fft_signal_power2)
+
+        # Transfer back to CPU for comparison
+        np.testing.assert_allclose(cp.asnumpy(spectrum_gpu), spectrum_cpu, atol=1e-5)
+
+    def test_fft_inverse_cupy(self, tools, fft_signal_power2):
+        """
+        Verifies CuPy IFFT round-trip.
+        """
+        import cupy as cp
+
+        # Forward
+        spectrum_gpu = tools.metrics.fft(fft_signal_power2)
+        # Inverse
+        reconstructed_gpu = tools.metrics.fft(spectrum_gpu, inverse=True)
+
+        reconstructed_cpu = cp.asnumpy(reconstructed_gpu).real
+        np.testing.assert_allclose(reconstructed_cpu, fft_signal_power2, atol=1e-5)
+
+    def test_fft_cupy_input_types(self, tools, fft_signal_power2):
+        """
+        Tests that CuPy engine accepts both list and numpy array inputs
+        by handling conversion internally.
+        """
+        import cupy as cp
+
+        # Pass list
+        data_list = fft_signal_power2.tolist()
+        res_list = tools.metrics.fft(data_list)
+        assert isinstance(res_list, cp.ndarray)
 
 
 # ============================================================================
@@ -487,3 +610,138 @@ def test_hinge_loss_branches(tools):
 
     assert np.isclose(loss2, 0.0)
     assert np.all(grad2 == 0.0)
+
+
+# --- Additional Metric Tests ---
+def test_focal_loss_correctness(tools):
+    """Tests Focal Loss against a simple manual calculation."""
+    # y=1, p=0.9, alpha=0.25, gamma=2
+    # loss = -0.25 * (1-0.9)^2 * log(0.9) = -0.25 * 0.01 * -0.10536 = 0.00026
+    y_true = np.array([1.0], dtype=np.float32)
+    y_pred = np.array([0.9], dtype=np.float32)
+
+    loss = tools.metrics.focal_loss(y_true, y_pred, alpha=0.25, gamma=2.0)
+
+    # Approx calc: -0.25 * 0.01 * np.log(0.9)
+    expected = -0.25 * (1 - 0.9) ** 2 * np.log(0.9)
+    assert np.isclose(loss, expected, rtol=1e-4)
+
+
+def test_categorical_crossentropy_correctness(tools):
+    """Tests CCE with one-hot inputs."""
+    # 2 samples, 3 classes
+    y_true = np.array([[0, 1, 0], [0, 0, 1]], dtype=np.float32)
+    y_pred = np.array([[0.1, 0.8, 0.1], [0.2, 0.2, 0.6]], dtype=np.float32)
+
+    loss = tools.metrics.categorical_crossentropy(y_true, y_pred, from_logits=False)
+
+    # Manual: -(log(0.8) + log(0.6)) / 2
+    expected = -(np.log(0.8) + np.log(0.6)) / 2
+    assert np.isclose(loss, expected, rtol=1e-5)
+
+
+def test_contrastive_loss_correctness(tools):
+    """Tests Contrastive Loss."""
+    emb1 = np.array([[1.0, 0.0]], dtype=np.float32)
+    emb2 = np.array([[1.0, 0.0]], dtype=np.float32)
+    y_sim = np.array([1.0], dtype=np.float32)  # Similar
+
+    # Distance is 0. Loss should be dist^2 = 0
+    loss = tools.metrics.contrastive_loss(y_sim, emb1, emb2)
+    assert np.isclose(loss, 0.0)
+
+    # Dissimilar pair, distance 0. Margin 1.
+    # Loss should be max(0, 1 - 0)^2 = 1.
+    y_dissim = np.array([0.0], dtype=np.float32)
+    loss_dissim = tools.metrics.contrastive_loss(y_dissim, emb1, emb2, margin=1.0)
+    # Note: our impl returns 0.5 * loss
+    assert np.isclose(loss_dissim, 0.5)
+
+
+def test_mmd_loss_kernel(tools):
+    """Tests MMD loss (identity)."""
+    X = np.array([[1.0], [2.0]], dtype=np.float32)
+    # MMD between same distributions should be close to 0
+    loss = tools.metrics.mmd_loss(X, X)
+    assert np.isclose(loss, 0.0, atol=1e-6)
+
+
+def test_wasserstein_approx(tools):
+    """Tests 1D Wasserstein approximation."""
+    # Dist 1: [1, 2], Dist 2: [2, 3] (shifted by 1)
+    # Earth mover distance should be 1.0
+    u = np.array([1, 2], dtype=np.float32)
+    v = np.array([2, 3], dtype=np.float32)
+    dist = tools.metrics.wasserstein_approx(u, v)
+    assert np.isclose(dist, 1.0)
+
+
+def test_cohens_d_magnitude(tools):
+    """
+    Specific test for Cohen's d magnitude interpretation.
+    Scenario:
+        Group 1: Mean ~10, Std ~2
+        Group 2: Mean ~12, Std ~2
+    Expected:
+        Difference in means = -2
+        Pooled Std approx = 2
+        Cohen's d approx = -1.0
+    """
+    np.random.seed(42)
+    # Use samples > 1000 to avoid small sample warning
+    g1 = np.random.normal(10, 2, 2000).astype(np.float32)
+    g2 = np.random.normal(12, 2, 2000).astype(np.float32)
+
+    d_val = tools.metrics.cohens_d(g1, g2, force_cpu=True)
+
+    # Allow small tolerance for random generation variance
+    assert np.isclose(d_val, -1.0, atol=0.1)
+
+
+def test_cohens_d_small_sample_warning(tools):
+    """
+    Tests that Cohen's d issues a UserWarning when sample sizes are small (< 1000),
+    as reliability decreases with small N.
+    """
+    g1 = np.random.rand(50)
+    g2 = np.random.rand(50)
+
+    with pytest.warns(UserWarning, match="Small sample sizes"):
+        tools.metrics.cohens_d(g1, g2, force_cpu=True)
+
+
+def test_cohens_d_zero_variance(tools):
+    """
+    Tests Cohen's d handling when pooled standard deviation is zero
+    (e.g., identical constant arrays). Should avoid DivisionByZero error.
+    """
+    # Constant arrays have variance = 0
+    g1 = np.ones(2000, dtype=np.float32) * 5
+    g2 = np.ones(2000, dtype=np.float32) * 5
+
+    d_val = tools.metrics.cohens_d(g1, g2, force_cpu=True)
+    assert d_val == 0.0
+
+
+def test_cohens_d_unequal_sizes(tools):
+    """
+    Tests that Cohen's d supports unequal group sizes, unlike standard
+    element-wise metrics (MAE/MSE) which require shape matching.
+    """
+    np.random.seed(42)
+    g1 = np.random.normal(0, 1, 1500)
+    g2 = np.random.normal(0, 1, 2500)
+
+    # Should execute without raising "Input arrays must have the same shape"
+    d_val = tools.metrics.cohens_d(g1, g2, force_cpu=True)
+    assert isinstance(d_val, float)
+
+
+def test_list_metrics_function(tools):
+    """Tests that list_metrics returns a valid DataFrame."""
+    df = tools.metrics.list_metrics()
+    assert isinstance(df, pd.DataFrame)
+    assert not df.empty
+    assert "Metric" in df.columns
+    assert "mae" in df["Metric"].tolist()
+    assert "focal_loss" in df["Metric"].tolist()

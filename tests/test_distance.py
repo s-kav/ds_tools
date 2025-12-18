@@ -20,13 +20,17 @@ Error and edge case handling (incorrect sizes, empty arrays, incorrect parameter
 *
 """
 import numpy as np
+import pandas as pd
 import pytest
 from scipy.spatial.distance import cdist
+from scipy.stats import entropy
 
 from distance import CUPY_AVAILABLE, NUMBA_AVAILABLE
 
 if NUMBA_AVAILABLE:
     from distance import (
+        _canberra_numba,
+        _canberra_numpy,
         _chebyshev_numba,
         _cosine_similarity_numba,
         _euclidean_numba,
@@ -94,8 +98,6 @@ def inverse_covariance_matrix():
 # ============================================================================
 # Section 1: Direct Tests of Internal Numba Implementations
 # ============================================================================
-
-
 class TestNumbaInternals:
     """
     Tests the correctness of private, Numba-jitted functions directly.
@@ -113,7 +115,7 @@ class TestNumbaInternals:
             [4, 5, 6], dtype=np.float32
         )
         expected = np.sqrt(27.0)  # (1-4)^2 + (2-5)^2 + (3-6)^2 = 9+9+9 = 27
-        assert np.isclose(_euclidean_numba(u, v), expected)
+        assert np.isclose(_euclidean_numba(u, v), expected, rtol=1e-5)
 
     def test_manhattan_numba(self):
         if not NUMBA_AVAILABLE:
@@ -122,7 +124,7 @@ class TestNumbaInternals:
             [4, 5, 6], dtype=np.float32
         )
         expected = 9.0  # |1-4| + |2-5| + |3-6| = 3+3+3 = 9
-        assert np.isclose(_manhattan_numba(u, v), expected)
+        assert np.isclose(_manhattan_numba(u, v), expected, rtol=1e-5)
 
     def test_minkowski_numba(self):
         if not NUMBA_AVAILABLE:
@@ -132,7 +134,7 @@ class TestNumbaInternals:
         )
         # p=3, diffs are all 3. (3^3 + 3^3 + 3^3)^(1/3) = (81)^(1/3)
         expected = (3**3 * 3) ** (1 / 3)
-        assert np.isclose(_minkowski_numba(u, v, 3), expected)
+        assert np.isclose(_minkowski_numba(u, v, 3), expected, rtol=1e-5)
 
     def test_chebyshev_numba(self):
         if not NUMBA_AVAILABLE:
@@ -141,7 +143,7 @@ class TestNumbaInternals:
             [4, 5, 9], dtype=np.float32
         )
         expected = 6.0  # max(|1-4|, |8-5|, |3-9|) = max(3, 3, 6)
-        assert np.isclose(_chebyshev_numba(u, v), expected)
+        assert np.isclose(_chebyshev_numba(u, v), expected, rtol=1e-5)
 
     def test_cosine_similarity_numba(self):
         if not NUMBA_AVAILABLE:
@@ -150,7 +152,7 @@ class TestNumbaInternals:
             [4, 5, 6], dtype=np.float32
         )
         expected = np.dot(u, v) / (np.linalg.norm(u) * np.linalg.norm(v))
-        assert np.isclose(_cosine_similarity_numba(u, v), expected)
+        assert np.isclose(_cosine_similarity_numba(u, v), expected, rtol=1e-5)
         # Test zero vectors
         zero_vec = np.zeros(3, dtype=np.float32)
         assert _cosine_similarity_numba(zero_vec, zero_vec) == 1.0
@@ -163,7 +165,7 @@ class TestNumbaInternals:
         VI = np.array([[2.0, 0.5], [0.5, 1.0]], dtype=np.float32)
         diff = u - v
         expected = np.sqrt(diff.T @ VI @ diff)
-        assert np.isclose(_mahalanobis_numba(u, v, VI), expected)
+        assert np.isclose(_mahalanobis_numba(u, v, VI), expected, rtol=1e-5)
 
     def test_hamming_numba(self):
         if not NUMBA_AVAILABLE:
@@ -171,7 +173,7 @@ class TestNumbaInternals:
         u = np.array([1, 0, 1, 1], dtype=np.float32)
         v = np.array([1, 1, 0, 1], dtype=np.float32)
         expected = 2.0 / 4.0  # 2 differences out of 4
-        assert np.isclose(_hamming_numba(u, v), expected)
+        assert np.isclose(_hamming_numba(u, v), expected, rtol=1e-5)
 
     def test_jaccard_numba(self):
         if not NUMBA_AVAILABLE:
@@ -179,7 +181,7 @@ class TestNumbaInternals:
         u = np.array([1, 1, 0, 1, 0], dtype=np.float32)
         v = np.array([0, 1, 1, 1, 0], dtype=np.float32)
         # Intersection = 2, Union = 4. Distance = 1 - (2/4) = 0.5
-        assert np.isclose(_jaccard_numba(u, v), 0.5)
+        assert np.isclose(_jaccard_numba(u, v), 0.5, rtol=1e-5)
 
     def test_pairwise_euclidean_numba(self):
         if not NUMBA_AVAILABLE:
@@ -191,14 +193,39 @@ class TestNumbaInternals:
             dtype=np.float32,
         )
         result = _pairwise_euclidean_numba(X, Y)
-        assert np.allclose(result, expected)
+        assert np.allclose(result, expected, rtol=1e-5)
+
+    def test_canberra_numba(self):
+        if not NUMBA_AVAILABLE:
+            pytest.skip("Numba is not available in this environment")
+
+        u = np.array([1.0, 2.0, 3.0, 0.0], dtype=np.float32)
+        v = np.array([4.0, 5.0, 6.0, 0.0], dtype=np.float32)
+        w = np.array([1.0, 1.0, 1.0, 1.0], dtype=np.float32)
+
+        # Manual calculation:
+        # i=0: |1-4| / (|1|+|4|) * 1 = 3/5 = 0.6
+        # i=1: |2-5| / (|2|+|5|) * 1 = 3/7 ≈ 0.4286
+        # i=2: |3-6| / (|3|+|6|) * 1 = 3/9 = 0.3333
+        # i=3: |0-0| / (|0|+|0|) * 1 = 0 (division by zero handled)
+        # Total ≈ 1.3619
+        expected = 0.6 + 3 / 7 + 1 / 3  # ≈ 1.3619
+
+        result = _canberra_numba(u, v, w)
+        assert np.isclose(result, expected, rtol=1e-5)
+
+        # Test division by zero handling
+        u_zero = np.array([0.0, 1.0], dtype=np.float32)
+        v_zero = np.array([0.0, 2.0], dtype=np.float32)
+        w_zero = np.array([1.0, 1.0], dtype=np.float32)
+        # i=0: 0/0 → 0 (handled)
+        # i=1: |1-2|/(1+2) = 1/3
+        assert np.isclose(_canberra_numba(u_zero, v_zero, w_zero), 1 / 3, rtol=1e-5)
 
 
 # ============================================================================
 # Section 2: Tests for Initialization and Dispatching
 # ============================================================================
-
-
 def test_public_interface_calls_correct_backend(tools, mocker, small_sample_vectors):
     """
     Tests that public methods dispatch to the correct backend based on availability.
@@ -275,12 +302,82 @@ VECTOR_METRICS = [
     ),
 ]
 
+ADDITIONAL_CONTINUOUS_METRICS = [
+    ("cityblock", {}, lambda u, v: np.sum(np.abs(u - v))),
+    (
+        "braycurtis",
+        {},
+        lambda u, v: cdist(u.reshape(1, -1), v.reshape(1, -1), "braycurtis")[0, 0],
+    ),
+    (
+        "canberra",
+        {},
+        lambda u, v: cdist(u.reshape(1, -1), v.reshape(1, -1), "canberra")[0, 0],
+    ),
+]
+
+# --- Boolean Metrics ---
+# Note: inside lambdas we convert inputs to bool for scipy correctness
+BOOLEAN_METRICS = [
+    (
+        "dice",
+        {},
+        lambda u, v: cdist(
+            u.reshape(1, -1).astype(bool), v.reshape(1, -1).astype(bool), "dice"
+        )[0, 0],
+    ),
+    (
+        "kulsinski",
+        {},
+        lambda u, v: cdist(
+            u.reshape(1, -1).astype(bool), v.reshape(1, -1).astype(bool), "kulsinski"
+        )[0, 0],
+    ),
+    (
+        "rogers_tanimoto",
+        {},
+        lambda u, v: cdist(
+            u.reshape(1, -1).astype(bool),
+            v.reshape(1, -1).astype(bool),
+            "rogersstanimoto",
+        )[0, 0],
+    ),  # Note spelling in scipy: rogersstanimoto
+    (
+        "russellrao",
+        {},
+        lambda u, v: cdist(
+            u.reshape(1, -1).astype(bool), v.reshape(1, -1).astype(bool), "russellrao"
+        )[0, 0],
+    ),
+    (
+        "sokal_michener",
+        {},
+        lambda u, v: cdist(
+            u.reshape(1, -1).astype(bool),
+            v.reshape(1, -1).astype(bool),
+            "sokalmichener",
+        )[0, 0],
+    ),
+    (
+        "sokal_sneath",
+        {},
+        lambda u, v: cdist(
+            u.reshape(1, -1).astype(bool), v.reshape(1, -1).astype(bool), "sokalsneath"
+        )[0, 0],
+    ),
+    (
+        "yule",
+        {},
+        lambda u, v: cdist(
+            u.reshape(1, -1).astype(bool), v.reshape(1, -1).astype(bool), "yule"
+        )[0, 0],
+    ),
+]
+
 
 # ============================================================================
 # Section 4: Test for Fallback Mechanism
 # ============================================================================
-
-
 def test_fallback_without_numba(tools, mocker, small_sample_vectors):
     """
     Tests that the code gracefully falls back to NumPy when Numba is not available.
@@ -306,8 +403,6 @@ def test_fallback_without_numba(tools, mocker, small_sample_vectors):
 # ============================================================================
 # Section 5: Tests for CPU Backends (NumPy and Numba)
 # ============================================================================
-
-
 class TestCPUBackends:
     """Groups tests that specifically target NumPy and Numba backends."""
 
@@ -405,12 +500,68 @@ class TestCPUBackends:
         result = tools.distance.haversine(lat1, lon1, lat2, lon2)
         assert np.isclose(result, expected_distance_km, atol=1)  # Allow 1km tolerance
 
+    @pytest.mark.parametrize(
+        "method_name, kwargs, trusted_func", ADDITIONAL_CONTINUOUS_METRICS
+    )
+    def test_additional_continuous_metrics_numpy(
+        self, tools, mocker, method_name, kwargs, trusted_func, small_sample_vectors
+    ):
+        """
+        Tests correctness of additional continuous metrics
+        (Bray-Curtis, Canberra, Cityblock).
+        """
+        u, v = small_sample_vectors
+        # Ensure we use NumPy
+        mocker.patch.object(tools.distance, "gpu_available", False)
+        mocker.patch.object(tools.distance, "numba_available", False)
+
+        method = getattr(tools.distance, method_name)
+        result = method(u, v, **kwargs)
+
+        expected = trusted_func(u, v)
+        assert np.isclose(result, expected, rtol=1e-5)
+
+    @pytest.mark.parametrize("method_name, kwargs, trusted_func", BOOLEAN_METRICS)
+    def test_boolean_metrics_numpy(
+        self, tools, mocker, method_name, kwargs, trusted_func, small_sample_vectors
+    ):
+        """Tests correctness of boolean dissimilarity metrics."""
+        # Convert float vectors to boolean-like floats (0.0 and 1.0)
+        u_float = (small_sample_vectors[0] > 0.5).astype(np.float32)
+        v_float = (small_sample_vectors[1] > 0.5).astype(np.float32)
+
+        # Ensure we use NumPy
+        mocker.patch.object(tools.distance, "gpu_available", False)
+        mocker.patch.object(tools.distance, "numba_available", False)
+
+        method = getattr(tools.distance, method_name)
+        result = method(u_float, v_float, **kwargs)
+
+        # Calculate expected using the lambda (which handles bool conversion internally)
+        expected = trusted_func(u_float, v_float)
+
+        assert np.isclose(result, expected, rtol=1e-5)
+
+    def test_relative_entropy_numpy(self, tools, mocker, small_sample_vectors):
+        """Tests Relative Entropy (KL Divergence) manually."""
+        # KL requires inputs to be probability distributions (sum=1, positive)
+        u = np.abs(small_sample_vectors[0])
+        v = np.abs(small_sample_vectors[1])
+        u /= u.sum()
+        v /= v.sum()
+
+        mocker.patch.object(tools.distance, "gpu_available", False)
+        mocker.patch.object(tools.distance, "numba_available", False)
+
+        result = tools.distance.relative_entropy(u, v)
+        expected = entropy(u, v)
+
+        assert np.isclose(result, expected, rtol=1e-5)
+
 
 # ============================================================================
 # Section 6: Tests for GPU-Specific Execution
 # ============================================================================
-
-
 @pytestmark_cupy
 class TestGPUBackends:
     """A class to group tests that require a functional CuPy environment."""
@@ -444,8 +595,6 @@ class TestGPUBackends:
 # ============================================================================
 # Section 7: Tests for Matrix-based Functions
 # ============================================================================
-
-
 def test_pairwise_euclidean_correctness(tools, sample_matrices):
     """Tests pairwise Euclidean distance against SciPy's cdist."""
     X, Y = sample_matrices
@@ -544,8 +693,6 @@ def test_mahalanobis_correctness(
 # ============================================================================
 # Section 8: Tests for Edge Cases and Error Handling
 # ============================================================================
-
-
 def test_empty_vector_input(tools):
     """Tests graceful handling of empty vector inputs."""
     u, v = np.array([]), np.array([])
@@ -631,11 +778,85 @@ def test_pairwise_and_neighbors_empty_input(tools):
     assert isinstance(idxs_rad, list) and len(idxs_rad) == 0
 
 
+def test_canberra_basic(self):
+    """Test basic Canberra distance calculation."""
+    if not NUMBA_AVAILABLE:
+        pytest.skip("Numba is not available")
+
+    u = np.array([1.0, 2.0, 3.0], dtype=np.float32)
+    v = np.array([4.0, 5.0, 6.0], dtype=np.float32)
+    w = np.array([1.0, 1.0, 1.0], dtype=np.float32)
+
+    # |1-4|/(1+4) + |2-5|/(2+5) + |3-6|/(3+6)
+    # = 3/5 + 3/7 + 3/9 = 0.6 + 0.4286 + 0.3333 ≈ 1.3619
+    expected = 0.6 + 3 / 7 + 1 / 3
+    result = _canberra_numba(u, v, w)
+    assert np.isclose(result, expected, rtol=1e-5)
+
+
+def test_canberra_division_by_zero(self):
+    """Test that division by zero is handled correctly."""
+    if not NUMBA_AVAILABLE:
+        pytest.skip("Numba is not available")
+
+    u = np.array([0.0, 1.0], dtype=np.float32)
+    v = np.array([0.0, 2.0], dtype=np.float32)
+    w = np.array([1.0, 1.0], dtype=np.float32)
+
+    # First component: both zero, should contribute 0
+    # Second component: |1-2|/(1+2) = 1/3
+    result = _canberra_numba(u, v, w)
+    assert np.isclose(result, 1 / 3, rtol=1e-5)
+
+
+def test_canberra_weighted(self):
+    """Test weighted Canberra distance."""
+    if not NUMBA_AVAILABLE:
+        pytest.skip("Numba is not available")
+
+    u = np.array([1.0, 2.0], dtype=np.float32)
+    v = np.array([2.0, 4.0], dtype=np.float32)
+    w = np.array([2.0, 0.5], dtype=np.float32)
+
+    # |1-2|/(1+2)*2 + |2-4|/(2+4)*0.5
+    # = 1/3*2 + 2/6*0.5 = 2/3 + 1/6 ≈ 0.8333
+    expected = 2 / 3 + 1 / 6
+    result = _canberra_numba(u, v, w)
+    assert np.isclose(result, expected, rtol=1e-5)
+
+
+def test_canberra_identical_vectors(self):
+    """Test Canberra distance between identical vectors."""
+    if not NUMBA_AVAILABLE:
+        pytest.skip("Numba is not available")
+
+    u = np.array([1.0, 2.0, 3.0], dtype=np.float32)
+    v = np.array([1.0, 2.0, 3.0], dtype=np.float32)
+    w = np.array([1.0, 1.0, 1.0], dtype=np.float32)
+
+    # All components should be 0
+    result = _canberra_numba(u, v, w)
+    assert np.isclose(result, 0.0)
+
+
+def test_canberra_consistency_with_numpy(self):
+    """Test that Numba implementation matches NumPy."""
+    if not NUMBA_AVAILABLE:
+        pytest.skip("Numba is not available")
+
+    u = np.array([1.0, 2.0, 3.0, 4.0], dtype=np.float32)
+    v = np.array([5.0, 6.0, 7.0, 8.0], dtype=np.float32)
+    w = np.array([0.5, 1.0, 1.5, 2.0], dtype=np.float32)
+
+    result_numba = _canberra_numba(u, v, w)
+    result_numpy = _canberra_numpy(u, v, w)
+
+    assert np.isclose(result_numba, result_numpy, rtol=1e-5)
+
+
 # ============================================================================
 # Section 9: Dedicated Tests for Each Backend
 # ============================================================================
-
-
 @pytest.mark.parametrize("method_name, kwargs, scipy_metric", VECTOR_METRICS)
 def test_numpy_backend_correctness(
     tools, mocker, method_name, kwargs, scipy_metric, small_sample_vectors
@@ -696,3 +917,30 @@ def test_cupy_backend_correctness(
     expected = cdist(u_2d, v_2d, metric=scipy_metric, **kwargs)[0, 0]
 
     assert np.isclose(result, expected, rtol=1e-5)
+
+
+def test_list_metrics_returns_correct_dataframe(tools):
+    """Tests that list_metrics returns a non-empty DataFrame with correct columns."""
+    df = tools.distance.list_metrics()
+
+    assert isinstance(df, pd.DataFrame)
+    assert not df.empty
+
+    # Check expected columns
+    expected_cols = ["Metric", "Description", "Usage"]
+    assert list(df.columns) == expected_cols
+
+    # Check that known metrics are present
+    metrics = df["Metric"].tolist()
+    assert "euclidean" in metrics
+    assert "manhattan" in metrics
+    assert "cosine_similarity" in metrics
+
+    # Check that private methods are NOT present
+    assert "_validate_vectors" not in metrics
+    assert "_dispatch_v2v" not in metrics
+
+    # Check content of a specific row (e.g., euclidean)
+    euclidean_row = df[df["Metric"] == "euclidean"].iloc[0]
+    assert "Euclidean" in euclidean_row["Description"]
+    assert "force_cpu" in euclidean_row["Usage"]

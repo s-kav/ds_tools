@@ -427,4 +427,3 @@ This project uses **dual licensing**:
 - 💼 **Commercial License Available**: Contact us for business use [License](https://github.com/s-kav/ds_tools/blob/main/CLA.md)
 
 [📋 Full License Details](https://github.com/s-kav/ds_tools/blob/main/LICENSE) | [💰 Get Commercial License](mailto:kavserg@gmail.com)
-
