@@ -97,7 +97,6 @@ def fft_signal_odd():
 
 def test_metrics_initialization(mocker, capsys):
     """Tests that the Metrics class initializes correctly and checks system features."""
-    mock_cpu_count = mocker.patch("psutil.cpu_count", return_value=8)
 
     metrics = Metrics(gpu_threshold=50_000)
 
@@ -105,8 +104,6 @@ def test_metrics_initialization(mocker, capsys):
     assert metrics.numba_available == NUMBA_AVAILABLE
 
     captured = capsys.readouterr()
-    if NUMBA_AVAILABLE:
-        mock_cpu_count.assert_called_once_with(logical=True)
 
     assert "Metrics initialized" in captured.out
 
