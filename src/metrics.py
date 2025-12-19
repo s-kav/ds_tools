@@ -15,13 +15,11 @@ This module provides a collection of high-performance, system-aware metric
 and loss function implementations, with support for gradient calculation and
 real-time monitoring.
 """
-import os
 import warnings
 from typing import Dict, List, Optional, Union
 
 import numpy as np
 import pandas as pd
-import psutil
 
 # --- Environment Checks for Optional Dependencies ---
 try:
@@ -919,12 +917,7 @@ class Metrics:
         self.numba_available = NUMBA_AVAILABLE
         self.gpu_available = CUPY_AVAILABLE
         self.history: Dict[str, List] = {}
-        if self.numba_available:
-            try:
-                num_threads = psutil.cpu_count(logical=True)
-                os.environ["NUMBA_NUM_THREADS"] = str(num_threads)
-            except Exception as e:
-                warnings.warn(f"Could not set Numba threads with psutil: {e}")
+
         print(
             f"Metrics initialized. GPU Available: {self.gpu_available}, Numba Available: {self.numba_available}"
         )
