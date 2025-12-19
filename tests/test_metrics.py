@@ -300,7 +300,7 @@ def test_fft_correctness_cpu(tools, fft_signal_power2, engine):
         pytest.skip("Numba is not available")
 
     # Compute FFT
-    spectrum = tools.metrics.fft(fft_signal_power2)
+    spectrum = tools.metrics.fft(fft_signal_power2, engine=engine)
 
     # 1. Check Output Type and Shape
     assert isinstance(spectrum, np.ndarray)
@@ -329,9 +329,9 @@ def test_fft_inverse_cpu(tools, fft_signal_power2, engine):
         pytest.skip("Numba is not available")
 
     # Forward
-    spectrum = tools.metrics.fft(fft_signal_power2)
+    spectrum = tools.metrics.fft(fft_signal_power2, engine=engine)
     # Inverse
-    reconstructed = tools.metrics.fft(spectrum, inverse=True)
+    reconstructed = tools.metrics.fft(spectrum, inverse=True, engine=engine)
 
     # Numba implementation returns complex array, take real part
     assert np.allclose(reconstructed.real, fft_signal_power2, atol=1e-5)
@@ -345,7 +345,7 @@ def test_numba_padding_logic(tools, fft_signal_odd):
     if not NUMBA_AVAILABLE:
         pytest.skip("Numba is not available")
 
-    spectrum = tools.metrics.fft(fft_signal_odd)
+    spectrum = tools.metrics.fft(fft_signal_odd, engine="numba")
     assert len(spectrum) == 128
     assert np.iscomplexobj(spectrum)
 

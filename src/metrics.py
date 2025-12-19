@@ -280,7 +280,7 @@ if NUMBA_AVAILABLE:
 
     # --- Contrastive Loss ---
     @jit(
-        "float64(float32[:], float32[:], float32[:], float32)",
+        "float64(float32[:], float32[:], float32)",
         nopython=True,
         parallel=True,
         fastmath=True,
@@ -451,7 +451,7 @@ if NUMBA_AVAILABLE:
         # Normalize if inverse
         if inverse:
             output /= n_padded
-
+            return output[:n_orig]
         # Truncate back to original length if it was padded
         # Note: Standard FFT libraries often keep the padded result or standard behavior.
         # Here, we return the full spectrum of the padded signal to maintain frequency bin integrity,
@@ -948,6 +948,8 @@ class Metrics:
         return pd.DataFrame(self.history)
 
     def plot_history(self, metrics: Optional[List[str]] = None):
+        """For visualizing the history of network learning: accuracy, loss
+        in graphs you need to run this code after your training."""
         import matplotlib.pyplot as plt
 
         df = self.get_history_df()
@@ -1029,6 +1031,8 @@ class Metrics:
         return_grad: bool = False,
         force_cpu: bool = False,
     ):
+        """Mean Squared Error is the average of the squared differences
+        between the predicted and actual values."""
         return self._execute("mse", y_true, y_pred, return_grad, force_cpu)
 
     def mae(
@@ -1038,6 +1042,8 @@ class Metrics:
         return_grad: bool = False,
         force_cpu: bool = False,
     ):
+        """Mean absolute error (MAE) is a measure of errors between
+        paired observations expressing the same phenomenon."""
         return self._execute("mae", y_true, y_pred, return_grad, force_cpu)
 
     def rmse(
@@ -1047,6 +1053,11 @@ class Metrics:
         return_grad: bool = False,
         force_cpu: bool = False,
     ):
+        """RMSE (Root Mean Square Error) is a common metric in machine learning
+        and statistics that measures the average magnitude of errors between
+        predicted values and actual observed values, essentially showing
+        how spread out the prediction errors (residuals) are from
+        a model's prediction line or curve."""
         if return_grad:
             mse_val, mse_grad = self.mse(
                 y_true, y_pred, return_grad=True, force_cpu=force_cpu
@@ -1066,6 +1077,8 @@ class Metrics:
         return_grad: bool = False,
         force_cpu: bool = False,
     ):
+        """Huber loss is a loss function used in robust regression,
+        that is less sensitive to outliers in data than the squared error loss."""
         return self._execute(
             "huber", y_true, y_pred, return_grad, force_cpu, delta=delta
         )
@@ -1078,6 +1091,10 @@ class Metrics:
         return_grad: bool = False,
         force_cpu: bool = False,
     ):
+        """Quantile loss, also known as pinball loss, is an asymmetric loss function
+        used in machine learning (especially quantile regression) to predict
+        specific quantiles (e.g., median, P90) of a target variable, penalizing over-
+        and under-predictions differently based on the chosen quantile level (q)."""
         if not 0 < quantile < 1:
             raise ValueError("Quantile must be between 0 and 1.")
         return self._execute(
@@ -1091,6 +1108,9 @@ class Metrics:
         return_grad: bool = False,
         force_cpu: bool = False,
     ):
+        """Hinge loss, also known as max-margin loss, is a loss function
+        that is particularly useful for training models in binary classification problems.
+        """
         # Hinge loss expects labels to be -1 or 1
         return self._execute("hinge", y_true, y_pred, return_grad, force_cpu)
 
@@ -1101,6 +1121,8 @@ class Metrics:
         return_grad: bool = False,
         force_cpu: bool = False,
     ):
+        """Log Loss is a logarithmic transformation of the likelihood function,
+        primarily used to evaluate the performance of probabilistic classifiers."""
         # Log loss expects labels to be 0 or 1
         return self._execute("logloss", y_true, y_pred, return_grad, force_cpu)
 
@@ -1111,6 +1133,11 @@ class Metrics:
         return_grad: bool = False,
         force_cpu: bool = False,
     ):
+        """It measures the average number of bits required to identify an event
+        from one probability distribution, p, using the optimal code for another
+        probability distribution, q. In other words, cross-entropy measures
+        the difference between the discovered probability distribution
+        of a classification model and the predicted values."""
         # Alias for log_loss in the binary case
         return self.log_loss(y_true, y_pred, return_grad, force_cpu)
 
@@ -1123,6 +1150,11 @@ class Metrics:
         return_grad: bool = False,
         force_cpu: bool = False,
     ):
+        """Triplet loss is a deep learning technique for learning useful data embeddings
+        by training on triplets (anchor, positive, negative) to pull similar items closer
+        and push dissimilar ones apart in a feature space, ensuring the anchor-positive distance
+        is less than the anchor-negative distance by a set margin, crucial for tasks
+        like face recognition and verification."""
         val, _ = self._validate_inputs(anchor, positive)
         if val is not None:
             return (val, (None, None, None)) if return_grad else val
@@ -1362,6 +1394,9 @@ class Metrics:
         group2: Union[List[float], np.ndarray],
         force_cpu: bool = False,
     ):
+        """Cohen's d calculates the standardized difference between two group means,
+        essentially measuring effect size by dividing the difference in means by
+        the pooled standard deviation"""
         use_gpu = (
             self.gpu_available and not force_cpu and group1.size >= self.gpu_threshold
         )
@@ -1381,17 +1416,54 @@ class Metrics:
         data: Union[List[float], np.ndarray],
         inverse: bool = False,
         force_cpu: bool = False,
+        engine: str = "auto",
     ) -> Union[np.ndarray, List[complex]]:
+        """
+        Compute the Fast Fourier Transform (FFT) of a 1D signal.
+        FFT with zero-padding to the next power of 2.
+        """
+        data_arr = np.asarray(data)
+        if inverse or np.iscomplexobj(data_arr):
+            target_dtype = np.complex128
+        else:
+            target_dtype = np.float64  # Use float64 for better precision than float32
 
         use_gpu = (
-            self.gpu_available and not force_cpu and data.size >= self.gpu_threshold
+            self.gpu_available and not force_cpu and data_arr.size >= self.gpu_threshold
         )
-        X_c = data.astype(np.float32)
-        if use_gpu:
-            X_c = cp.asarray(X_c)
-            return float(_fft_cupy(X_c, inverse=inverse))
 
-        return float(_fft_numpy(X_c, inverse=inverse))
+        # Resolve 'auto' engine
+        if engine == "auto":
+            if use_gpu and CUPY_AVAILABLE:
+                engine = "cupy"
+            elif self.numba_available and not force_cpu:
+                engine = "numba"
+            else:
+                engine = "numpy"
+
+        # 3. Prepare Data & Execute
+        if engine == "cupy" and CUPY_AVAILABLE:
+            input_data = cp.asarray(data_arr, dtype=target_dtype)
+            # Padding logic for CuPy if desired (usually CuPy FFT handles non-pow2, but for consistency):
+            # n_orig = input_data.shape[0]
+            # n_padded = 1 << (n_orig - 1).bit_length()
+            # if n_orig != n_padded:
+            #     input_data = cp.pad(input_data, (0, n_padded - n_orig), 'constant')
+
+            spectrum = _fft_cupy(input_data, inverse=inverse)
+            return spectrum
+
+        elif engine == "numba" and self.numba_available:
+            # Numba implementation handles padding internally or we do it here.
+            # Our _fft_numba handles padding internally.
+            input_data = np.asarray(data_arr, dtype=target_dtype)
+            return _fft_numba(input_data, inverse=inverse)
+
+        else:
+            # NumPy / Fallback
+            input_data = np.asarray(data_arr, dtype=target_dtype)
+            # Standard NumPy FFT handles any size
+            return _fft_numpy(input_data, inverse=inverse)
 
     def list_metrics(self) -> pd.DataFrame:
         """

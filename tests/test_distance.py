@@ -30,7 +30,6 @@ from distance import CUPY_AVAILABLE, NUMBA_AVAILABLE
 if NUMBA_AVAILABLE:
     from distance import (
         _canberra_numba,
-        _canberra_numpy,
         _chebyshev_numba,
         _cosine_similarity_numba,
         _euclidean_numba,
@@ -303,7 +302,11 @@ VECTOR_METRICS = [
 ]
 
 ADDITIONAL_CONTINUOUS_METRICS = [
-    ("cityblock", {}, lambda u, v: np.sum(np.abs(u - v))),
+    (
+        "cityblock",
+        {},
+        lambda u, v: cdist(u.reshape(1, -1), v.reshape(1, -1), "cityblock")[0, 0],
+    ),
     (
         "braycurtis",
         {},
@@ -330,7 +333,7 @@ BOOLEAN_METRICS = [
         "kulsinski",
         {},
         lambda u, v: cdist(
-            u.reshape(1, -1).astype(bool), v.reshape(1, -1).astype(bool), "kulsinski"
+            u.reshape(1, -1).astype(bool), v.reshape(1, -1).astype(bool), "kulczynski1"
         )[0, 0],
     ),
     (
@@ -339,7 +342,7 @@ BOOLEAN_METRICS = [
         lambda u, v: cdist(
             u.reshape(1, -1).astype(bool),
             v.reshape(1, -1).astype(bool),
-            "rogersstanimoto",
+            "rogerstanimoto",
         )[0, 0],
     ),  # Note spelling in scipy: rogersstanimoto
     (
@@ -539,7 +542,7 @@ class TestCPUBackends:
 
         # Calculate expected using the lambda (which handles bool conversion internally)
         expected = trusted_func(u_float, v_float)
-
+        print("result:", result, "expected:", expected)
         assert np.isclose(result, expected, rtol=1e-5)
 
     def test_relative_entropy_numpy(self, tools, mocker, small_sample_vectors):
@@ -778,7 +781,7 @@ def test_pairwise_and_neighbors_empty_input(tools):
     assert isinstance(idxs_rad, list) and len(idxs_rad) == 0
 
 
-def test_canberra_basic(self):
+def test_canberra_basic(tools):
     """Test basic Canberra distance calculation."""
     if not NUMBA_AVAILABLE:
         pytest.skip("Numba is not available")
@@ -790,11 +793,11 @@ def test_canberra_basic(self):
     # |1-4|/(1+4) + |2-5|/(2+5) + |3-6|/(3+6)
     # = 3/5 + 3/7 + 3/9 = 0.6 + 0.4286 + 0.3333 ≈ 1.3619
     expected = 0.6 + 3 / 7 + 1 / 3
-    result = _canberra_numba(u, v, w)
+    result = tools.distance.canberra(u, v, w)
     assert np.isclose(result, expected, rtol=1e-5)
 
 
-def test_canberra_division_by_zero(self):
+def test_canberra_division_by_zero(tools):
     """Test that division by zero is handled correctly."""
     if not NUMBA_AVAILABLE:
         pytest.skip("Numba is not available")
@@ -805,11 +808,11 @@ def test_canberra_division_by_zero(self):
 
     # First component: both zero, should contribute 0
     # Second component: |1-2|/(1+2) = 1/3
-    result = _canberra_numba(u, v, w)
+    result = tools.distance.canberra(u, v, w)
     assert np.isclose(result, 1 / 3, rtol=1e-5)
 
 
-def test_canberra_weighted(self):
+def test_canberra_weighted(tools):
     """Test weighted Canberra distance."""
     if not NUMBA_AVAILABLE:
         pytest.skip("Numba is not available")
@@ -821,11 +824,11 @@ def test_canberra_weighted(self):
     # |1-2|/(1+2)*2 + |2-4|/(2+4)*0.5
     # = 1/3*2 + 2/6*0.5 = 2/3 + 1/6 ≈ 0.8333
     expected = 2 / 3 + 1 / 6
-    result = _canberra_numba(u, v, w)
+    result = tools.distance.canberra(u, v, w)
     assert np.isclose(result, expected, rtol=1e-5)
 
 
-def test_canberra_identical_vectors(self):
+def test_canberra_identical_vectors(tools):
     """Test Canberra distance between identical vectors."""
     if not NUMBA_AVAILABLE:
         pytest.skip("Numba is not available")
@@ -835,11 +838,11 @@ def test_canberra_identical_vectors(self):
     w = np.array([1.0, 1.0, 1.0], dtype=np.float32)
 
     # All components should be 0
-    result = _canberra_numba(u, v, w)
+    result = tools.distance.canberra(u, v, w)
     assert np.isclose(result, 0.0)
 
 
-def test_canberra_consistency_with_numpy(self):
+def test_canberra_consistency_with_numpy(tools):
     """Test that Numba implementation matches NumPy."""
     if not NUMBA_AVAILABLE:
         pytest.skip("Numba is not available")
@@ -848,8 +851,8 @@ def test_canberra_consistency_with_numpy(self):
     v = np.array([5.0, 6.0, 7.0, 8.0], dtype=np.float32)
     w = np.array([0.5, 1.0, 1.5, 2.0], dtype=np.float32)
 
-    result_numba = _canberra_numba(u, v, w)
-    result_numpy = _canberra_numpy(u, v, w)
+    result_numba = tools.distance.canberra(u, v, w)
+    result_numpy = tools.distance.canberra(u, v, w, force_cpu=True)
 
     assert np.isclose(result_numba, result_numpy, rtol=1e-5)
 
