@@ -49,9 +49,9 @@ from sklearn.metrics import (
 from sklearn.preprocessing import OrdinalEncoder
 from statsmodels.tsa.stattools import adfuller
 
-from distance import Distance
-from metrics import Metrics
-from models import (
+from .distance import Distance
+from .metrics import Metrics
+from .models import (
     CorrelationConfig,
     DistributionConfig,
     GrubbsTestResult,

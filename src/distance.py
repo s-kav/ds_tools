@@ -630,20 +630,20 @@ class Distance:
             f"Distance initialized. GPU: {self.gpu_available}, Numba: {self.numba_available}"
         )
 
-    def list_metrics(self) -> pd.DataFrame:
+    def list_distances(self) -> pd.DataFrame:
         """
-        Returns a DataFrame listing all available metric functions, their
+        Returns a DataFrame listing all available distances functions, their
         descriptions, and usage signatures.
 
         Returns:
-            pd.DataFrame: A table with columns 'Metric', 'Description', and 'Usage'.
+            pd.DataFrame: A table with columns 'Distance', 'Description', and 'Usage'.
         """
         methods_data = []
 
         # Iterate over all members of the instance
         for name, func in inspect.getmembers(self, predicate=inspect.ismethod):
-            # Skip private methods (starting with _) and the list_metrics method itself
-            if name.startswith("_") or name == "list_metrics":
+            # Skip private methods (starting with _) and the list_distances method itself
+            if name.startswith("_") or name == "list_distances":
                 continue
 
             # Get the first line of the docstring
@@ -658,16 +658,16 @@ class Distance:
 
             methods_data.append(
                 {
-                    "Metric": name,
+                    "Distance": name,
                     "Description": description,
                     "Usage": f"{name}{signature}",
                 }
             )
 
-        # Create DataFrame and sort by Metric name
+        # Create DataFrame and sort by Distance name
         df = pd.DataFrame(methods_data)
         if not df.empty:
-            df = df.sort_values(by="Metric").reset_index(drop=True)
+            df = df.sort_values(by="Distance").reset_index(drop=True)
 
         return df
 

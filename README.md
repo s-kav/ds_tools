@@ -377,12 +377,14 @@ A high-performance toolkit for calculating loss functions and their gradients.
 - **Classification Losses:** `hinge_loss`, `log_loss` (Binary Cross-Entropy).
 - **Embedding Losses:** `triplet_loss`.
 - **Monitoring:** `start_monitoring`, `update`, `get_history_df`, `plot_history`.
+- **`list_metrics`**: Prints a list of all available metrics.
 
 ### Distance Toolkit (`tools.distance.*`)
 A high-performance toolkit for calculating distances and similarities.
 - **Vector-to-Vector:** `euclidean`, `manhattan`, `cosine_similarity`, `minkowski`, `chebyshev`, `mahalanobis`, `haversine`, `hamming`, `jaccard`.
 - **Matrix Operations:** `pairwise_euclidean`, `kmeans_distance`.
 - **Neighbor Searches:** `knn_distances`, `radius_neighbors`.
+- **`list_distances`**: Prints a list of all available distances.
 
 
 # Authors
@@ -396,19 +398,28 @@ See [CONTRIBUTING](/CONTRIBUTING.md)
 
 # TODO
 1. Add some important kind of plots:
+
 📌 KS Plot – Measures how well your model separates positive and negative classes.
+
 📌 SHAP Plot – Explains feature impact and model interpretability.
+
 📌 QQ Plot – Checks if your data follows a theoretical distribution.
+
 📌 Cumulative Explained Variance – Helps decide the optimal number of PCA components.
+
 📌 Gini vs Entropy – Key metrics for understanding decision tree impurity.
+
 📌 Bias–Variance Tradeoff – Shows the balance between underfitting and overfitting.
+
 📌 ROC Curve – Evaluates classification performance across thresholds.
+
 📌 Precision–Recall Curve – Crucial for imbalanced datasets.
+
 📌 Elbow Curve – Helps choose the right number of clusters in K-Means.
 
-2. Implement Fast Fourier Transform (FFT) algorithm and Shannon’s interpolation formula
+2. Implement Fast Fourier Transform (FFT) algorithm and Shannon’s interpolation formula: done, 2.3.0.
 
-3. Add some fast distance metrics (expand of existed).
+3. Add some fast distance metrics (expand of existed): done, 2.3.0.
 
 
 # References
