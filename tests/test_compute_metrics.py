@@ -12,7 +12,7 @@
 
 import numpy as np
 import pytest
-from ds_tools import MetricsConfig
+from ds_tools.models import MetricsConfig
 
 N_SAMPLES = 200
 THRESHOLD = 0.5

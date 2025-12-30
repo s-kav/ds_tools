@@ -25,8 +25,7 @@ Error and edge case handling (empty arrays, size mismatch, invalid parameters).
 import numpy as np
 import pandas as pd
 import pytest
-from ds_tools import Metrics
-from ds_tools.metrics import CUPY_AVAILABLE, NUMBA_AVAILABLE
+from ds_tools.metrics import CUPY_AVAILABLE, NUMBA_AVAILABLE, Metrics
 
 pytestmark_cupy = pytest.mark.skipif(
     not CUPY_AVAILABLE, reason="CuPy or compatible GPU is not available"

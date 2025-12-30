@@ -14,7 +14,7 @@ import numpy as np
 import pandas as pd
 import polars as pl
 import pytest
-from ds_tools import DistributionConfig
+from ds_tools.models import DistributionConfig
 from scipy import stats
 
 
