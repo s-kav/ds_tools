@@ -13,7 +13,7 @@
 DSTools: A library of helpful functions for various data science research stages.
 """
 
-__version__ = "2.3.1"
+__version__ = "2.3.2"
 
 from .ds_tool import DSTools
 from .models import (

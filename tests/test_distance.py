@@ -22,10 +22,9 @@ Error and edge case handling (incorrect sizes, empty arrays, incorrect parameter
 import numpy as np
 import pandas as pd
 import pytest
+from ds_tools.distance import CUPY_AVAILABLE, NUMBA_AVAILABLE
 from scipy.spatial.distance import cdist
 from scipy.stats import entropy
-
-from distance import CUPY_AVAILABLE, NUMBA_AVAILABLE
 
 if NUMBA_AVAILABLE:
     from distance import (

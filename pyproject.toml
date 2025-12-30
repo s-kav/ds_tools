@@ -86,5 +86,4 @@ filterwarnings = [
 testpaths = ["tests"]
 pythonpath = [
   ".",
-  "src",
 ]

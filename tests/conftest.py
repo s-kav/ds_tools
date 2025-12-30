@@ -17,8 +17,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import pytest
-
-from ds_tool import DSTools
+from ds_tools import DSTools
 
 
 @pytest.fixture(autouse=True)

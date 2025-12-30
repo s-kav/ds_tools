@@ -13,8 +13,7 @@
 import numpy as np
 import pandas as pd
 import pytest
-
-from ds_tool import OutlierConfig
+from ds_tools import OutlierConfig
 
 
 @pytest.fixture(scope="module")

@@ -12,9 +12,8 @@
 
 import numpy as np
 import pytest
+from ds_tools import DistributionConfig
 from scipy import stats
-
-from ds_tool import DistributionConfig
 
 
 def describe_generated_data(data: np.ndarray):

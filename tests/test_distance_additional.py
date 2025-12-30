@@ -14,9 +14,8 @@ import types
 
 import numpy as np
 import pytest
-
-import distance
-from distance import CUPY_AVAILABLE, NUMBA_AVAILABLE
+from ds_tools import distance
+from ds_tools.distance import CUPY_AVAILABLE, NUMBA_AVAILABLE
 
 # --- Helpers ---------------------------------------------------------------
 

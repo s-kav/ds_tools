@@ -13,8 +13,7 @@ This file validates default values, constraints, and custom validation logic.
  *
 """
 import pytest
-
-from models import (
+from ds_tools.models import (
     CorrelationConfig,
     DistributionConfig,
     GrubbsTestResult,
