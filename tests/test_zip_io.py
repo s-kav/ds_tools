@@ -135,9 +135,12 @@ def test_read_dataframes_from_zip_pandas_fallback_to_csv(
     # mock pd.read_parquet so it throws an error,
     # and check that after this pd.read_csv will be called.
     mocker.patch(
-        "ds_tool.pd.read_parquet", side_effect=ValueError("Simulated read error")
+        "ds_tools.ds_tool.pd.read_parquet",
+        side_effect=ValueError("Simulated read error"),
     )
-    mock_read_csv = mocker.patch("ds_tool.pd.read_csv", return_value=sample_pandas_df)
+    mock_read_csv = mocker.patch(
+        "ds_tools.ds_tool.pd.read_csv", return_value=sample_pandas_df
+    )
 
     with tempfile.TemporaryDirectory() as temp_dir:
         # Create a dummy zip archive with a "non-parquet" file, but with the .parquet extension

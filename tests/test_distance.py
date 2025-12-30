@@ -27,7 +27,7 @@ from scipy.spatial.distance import cdist
 from scipy.stats import entropy
 
 if NUMBA_AVAILABLE:
-    from distance import (
+    from ds_tools.distance import (
         _canberra_numba,
         _chebyshev_numba,
         _cosine_similarity_numba,
@@ -235,14 +235,16 @@ def test_public_interface_calls_correct_backend(tools, mocker, small_sample_vect
     if NUMBA_AVAILABLE:
         mocker.patch.object(tools.distance, "gpu_available", False)
         mocker.patch.object(tools.distance, "numba_available", True)
-        mock_numba = mocker.patch("distance._manhattan_numba", return_value=1.0)
+        mock_numba = mocker.patch(
+            "ds_tools.distance._manhattan_numba", return_value=1.0
+        )
         tools.distance.manhattan(u, v)
         mock_numba.assert_called_once()
 
     # Case 2: Only NumPy is available
     mocker.patch.object(tools.distance, "gpu_available", False)
     mocker.patch.object(tools.distance, "numba_available", False)
-    mock_numpy = mocker.patch("distance._manhattan_numpy", return_value=2.0)
+    mock_numpy = mocker.patch("ds_tools.distance._manhattan_numpy", return_value=2.0)
     tools.distance.manhattan(u, v)
     mock_numpy.assert_called_once()
 
@@ -263,9 +265,11 @@ def test_backend_dispatching_logic(
 
     dist = tools.distance
     mocker.patch.object(dist, "gpu_available", True)
-    mocker.patch("distance.cp.asarray", side_effect=lambda x: x)
-    mock_numba = mocker.patch("distance._euclidean_numba", return_value=1.0)
-    mock_cupy = mocker.patch("distance._euclidean_cupy", return_value=2.0, create=True)
+    mocker.patch("ds_tools.distance.cp.asarray", side_effect=lambda x: x)
+    mock_numba = mocker.patch("ds_tools.distance._euclidean_numba", return_value=1.0)
+    mock_cupy = mocker.patch(
+        "ds_tools.distance._euclidean_cupy", return_value=2.0, create=True
+    )
 
     # 1. Small data -> Numba should be used
     u_small, v_small = small_sample_vectors
@@ -392,7 +396,9 @@ def test_fallback_without_numba(tools, mocker, small_sample_vectors):
     mocker.patch.object(dist, "numba_available", False)
 
     # --- Spy on the NumPy backend to ensure it's called ---
-    mock_numpy_fallback = mocker.patch("distance._euclidean_numpy", return_value=99.0)
+    mock_numpy_fallback = mocker.patch(
+        "ds_tools.distance._euclidean_numpy", return_value=99.0
+    )
 
     # Call the method on the original 'tools' instance
     result = dist.euclidean(u, v)
@@ -921,19 +927,19 @@ def test_cupy_backend_correctness(
     assert np.isclose(result, expected, rtol=1e-5)
 
 
-def test_list_metrics_returns_correct_dataframe(tools):
-    """Tests that list_metrics returns a non-empty DataFrame with correct columns."""
-    df = tools.distance.list_metrics()
+def test_list_distances_returns_correct_dataframe(tools):
+    """Tests that list_distances returns a non-empty DataFrame with correct columns."""
+    df = tools.distance.list_distances()
 
     assert isinstance(df, pd.DataFrame)
     assert not df.empty
 
     # Check expected columns
-    expected_cols = ["Metric", "Description", "Usage"]
+    expected_cols = ["Distance", "Description", "Usage"]
     assert list(df.columns) == expected_cols
 
     # Check that known metrics are present
-    metrics = df["Metric"].tolist()
+    metrics = df["Distance"].tolist()
     assert "euclidean" in metrics
     assert "manhattan" in metrics
     assert "cosine_similarity" in metrics
@@ -943,6 +949,6 @@ def test_list_metrics_returns_correct_dataframe(tools):
     assert "_dispatch_v2v" not in metrics
 
     # Check content of a specific row (e.g., euclidean)
-    euclidean_row = df[df["Metric"] == "euclidean"].iloc[0]
+    euclidean_row = df[df["Distance"] == "euclidean"].iloc[0]
     assert "Euclidean" in euclidean_row["Description"]
     assert "force_cpu" in euclidean_row["Usage"]

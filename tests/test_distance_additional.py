@@ -75,7 +75,8 @@ def test_pairwise_euclidean_fallback_when_cupy_missing(monkeypatch, mocker):
     monkeypatch.delitem(distance.__dict__, "_pairwise_euclidean_cupy", raising=False)
 
     mock_numpy = mocker.patch(
-        "distance._pairwise_euclidean_numpy", return_value=np.full((10, 12), 777.0)
+        "ds_tools.distance._pairwise_euclidean_numpy",
+        return_value=np.full((10, 12), 777.0),
     )
 
     res = dist.pairwise_euclidean(X, Y, force_cpu=False)

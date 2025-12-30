@@ -245,10 +245,12 @@ def test_gpu_threshold_logic(tools, mocker, small_sample_data, large_sample_data
         pytest.skip("This test requires both CuPy and Numba to be installed.")
 
     mocker.patch.object(tools.metrics, "gpu_available", True)
-    mocker.patch("metrics.cp.asarray", side_effect=lambda x: x, create=True)
+    mocker.patch("ds_tools.metrics.cp.asarray", side_effect=lambda x: x, create=True)
     # Mock the backends to see which one is called
-    mock_cupy = mocker.patch("metrics._mae_cupy", return_value=1.0, create=True)
-    mock_numba = mocker.patch("metrics._mae_numba", return_value=2.0)
+    mock_cupy = mocker.patch(
+        "ds_tools.metrics._mae_cupy", return_value=1.0, create=True
+    )
+    mock_numba = mocker.patch("ds_tools.metrics._mae_numba", return_value=2.0)
 
     # 1. Test with small data -> Numba should be called
     y_true_small, y_pred_small = small_sample_data
@@ -269,7 +271,7 @@ def test_gpu_threshold_logic(tools, mocker, small_sample_data, large_sample_data
 )
 def test_dispatch_fallback_to_numpy(tools, mocker, small_sample_data):
     """Tests that dispatcher falls back to NumPy if Numba is missing."""
-    mock_numpy = mocker.patch("metrics._mae_numpy", return_value=99.0)
+    mock_numpy = mocker.patch("ds_tools.metrics._mae_numpy", return_value=99.0)
     y_true, y_pred = small_sample_data
     result = tools.metrics.mae(y_true, y_pred, force_cpu=True)
     mock_numpy.assert_called_once()
