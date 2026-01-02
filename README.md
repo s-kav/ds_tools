@@ -61,7 +61,7 @@ This toolkit is built on top of popular libraries like Pandas, Polars, Scikit-le
 
 ## What's New in Version X.X.X
 
-See CHANGELOG.md.
+See [CHANGELOG.md](/CHANGELOG.md).
 
 ## TODO & Future Plans
 
@@ -79,7 +79,7 @@ Here is the development roadmap:
     -   [ ] Create simple wrappers around Matplotlib/Seaborn for common plots (e.g., feature distribution, ROC curves).
 -   [X] **Community & Contributions:**
     -   [X] Improve documentation with more examples.
-    -   [X] Create contribution guidelines (`CONTRIBUTING.md`).
+    -   [X] Create contribution guidelines ([CONTRIBUTING.md](/CONTRIBUTING.md).
 
 Your feature requests and contributions are highly encouraged! Please open an issue to suggest a new function.
 
@@ -234,7 +234,9 @@ print(f"Effect Size: {effect_size}")
 
 # 2. Compute FFT using Numba engine
 signal = np.random.random(1000)
-spectrum = tools.metrics.fft(signal, engine='numba') # Automatically pads to 1024, or to 128 at 100 as input
+
+# Automatically pads to 1024, or to 128 at 100 as input
+spectrum = tools.metrics.fft(signal, engine='numba')
 print(f"Spectrum shape: {len(spectrum)}")
 
 ```
@@ -436,7 +438,7 @@ A high-performance toolkit for calculating distances and similarities.
 
 # Contributing
 
-See [CONTRIBUTING](/CONTRIBUTING.md)
+See [CONTRIBUTING](/CONTRIBUTING.md) and [CONTRIBUTOR_LICENSE_AGREEMENT](/CONTRIBUTOR_LICENSE_AGREEMENT.md).
 
 # TODO
 1. Add some important kind of plots:
@@ -459,9 +461,9 @@ See [CONTRIBUTING](/CONTRIBUTING.md)
 
 📌 Elbow Curve – Helps choose the right number of clusters in K-Means.
 
-2. Implement Fast Fourier Transform (FFT) algorithm and Shannon’s interpolation formula: done, 2.3.2.
+2. Implement Fast Fourier Transform (FFT) algorithm and Shannon’s interpolation formula: done, version 2.3.2.
 
-3. Add some fast distance metrics (expand of existed): done, 2.3.2.
+3. Add some fast distance metrics (expand of existed): done, version 2.3.2.
 
 
 # References
