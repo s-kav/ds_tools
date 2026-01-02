@@ -107,11 +107,10 @@ jobs:
       - name: Upload combined coverage to Codecov
         uses: codecov/codecov-action@v4
         with:
+          token: ${{ secrets.CODECOV_TOKEN }}
           file: ./combined-coverage.xml
           flags: unittests
-          name: "Combined Report"
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+          name: "Python ${{ matrix.python-version }}"
 
 
   # --- LINTING TASK ---

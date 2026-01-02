@@ -59,14 +59,9 @@ This toolkit is built on top of popular libraries like Pandas, Polars, Scikit-le
 -   **Advanced Statistics:** Calculate non-parametric correlation (`chatterjee_correlation`), entropy, and KL-divergence.
 -   **Utilities:** Save/load DataFrames to/from ZIP archives, generate random alphanumeric codes, and more.
 
-## What's New in Version 2.0.0
+## What's New in Version X.X.X
 
-This version marks a major architectural refactoring of the library, focusing on modularity, performance, and advanced ML features.
-
--   **✨ Modular Design:** The toolkit is now re-organized into logical namespaces. Instead of a single flat API, you now access functionality through `tools.metrics`, `tools.distance`, etc.
--   **🚀 High-Performance Backends:** Major functions in `metrics` and `distance` now automatically leverage **GPU acceleration (CuPy)** and **parallel CPU execution (Numba)** for significant speedups on large datasets.
--   **🤖 Gradient Calculation:** Key loss functions (like `mse`, `mae`, `huber_loss`) can now return their gradients (`return_grad=True`), making them suitable for custom training loops in ML frameworks.
--   **📈 Training Monitoring:** A new real-time monitoring system has been added to the `metrics` module to track and plot metrics during model training.
+See CHANGELOG.md.
 
 ## TODO & Future Plans
 
@@ -74,17 +69,17 @@ This library is actively maintained and will be expanded to cover more aspects o
 
 Here is the development roadmap:
 
--   [ ] **Expand Core Modules:**
-    -   [ ] Add more loss and another functions and metrics to `tools.metrics` (e.g. for classification, clusterization, etc.).
-    -   [ ] Implement more distance measures in `tools.distance` (e.g., Levenshtein for strings, Silhouette, etc.).
+-   [X] **Expand Core Modules:**
+    -   [X] Add more loss and another functions and metrics to `tools.metrics` (e.g. for classification, clusterization, etc.).
+    -   [X] Implement more distance measures in `tools.distance` (e.g., Levenshtein for strings, Silhouette, etc.).
 -   [ ] **New `Preprocessing` Module:**
     -   [ ] Develop high-performance feature scaling and encoding functions.
     -   [ ] Add utilities for handling time-series data.
 -   [ ] **New `Visualization` Module:**
     -   [ ] Create simple wrappers around Matplotlib/Seaborn for common plots (e.g., feature distribution, ROC curves).
--   [ ] **Community & Contributions:**
-    -   [ ] Improve documentation with more examples.
-    -   [ ] Create contribution guidelines (`CONTRIBUTING.md`).
+-   [X] **Community & Contributions:**
+    -   [X] Improve documentation with more examples.
+    -   [X] Create contribution guidelines (`CONTRIBUTING.md`).
 
 Your feature requests and contributions are highly encouraged! Please open an issue to suggest a new function.
 
@@ -127,9 +122,17 @@ The library provides a wide range of functions. To see a full, formatted list of
 ```python
 
 from ds_tools import DSTools
+import pandas as pd
 
 tools = DSTools()
-tools.function_list()
+print('\n', '='*30, ' Functions ', '='*30, '\n')
+display(pd.DataFrame(tools.function_list()))
+
+print('\n', '='*30, ' Distances ', '='*30, '\n')
+display(tools.distance.list_distances().iloc[:, 0:2])
+
+print('\n', '='*30, ' Metrics ', '='*30, '\n')
+display(tools.metrics.list_metrics().iloc[:, 0:2])
 
 ```
 
@@ -145,7 +148,7 @@ Calculate Mean Absolute Error and its gradient. The best backend (GPU/Numba/NumP
 
 import numpy as np
 
-y_true = np.array()
+y_true = np.array([1.0, 2.0, 3.0, 4.0])
 y_pred = np.array([1.1, 2.2, 2.8, 4.3])
 
 # Calculate only the loss value
@@ -160,8 +163,8 @@ print(f"Gradient: {grad}")
 ## Using the Distance Module
 
 ```python
-u = np.array()
-v = np.array()
+u = np.random.rand(4)
+v = np.random.rand(4)
 
 euc_dist = tools.distance.euclidean(u, v)
 print(f"Euclidean Distance: {euc_dist:.4f}")
@@ -174,7 +177,7 @@ print(f"Euclidean Distance: {euc_dist:.4f}")
 tools.metrics.start_monitoring()
 
 # 2. Simulate training loop
-for epoch in range(10):
+for epoch in range(100):
     # Dummy loss values
     loss = 1 / (epoch + 1)
     val_loss = 1.2 / (epoch + 1) + np.random.rand() * 0.1
@@ -203,7 +206,7 @@ tools = DSTools()
 
 # 2. Generate some dummy data
 y_true = np.array([0, 1, 1, 0, 1, 0, 0, 1])
-y_probs = np.array([0.1, 0.8, 0.6, 0.3, 0.9, 0.2, 0.4, 0.7])
+y_probs = np.array([0.1, 0.8, 0.6, 0.7, 0.4, 0.2, 0.4, 0.7])
 
 # 3. Get a comprehensive evaluation report
 # This will print metrics and show plots for ROC and Precision-Recall curves.
@@ -211,6 +214,28 @@ results = tools.evaluate_classification(true_labels=y_true, pred_probs=y_probs)
 
 # The results are also returned as a dictionary
 print(f"\nROC AUC Score: {results['roc_auc']:.4f}")
+
+```
+
+## Calculate Cohen's distance and fast compute FFT.
+
+```python
+
+import numpy as np
+from ds_tools import DSTools
+
+tools = DSTools()
+
+# 1. Calculate Cohen's distance
+group_a = np.random.normal(10, 2, 5000)
+group_b = np.random.normal(12, 2, 5000)
+effect_size = tools.metrics.cohens_d(group_a, group_b)
+print(f"Effect Size: {effect_size}")
+
+# 2. Compute FFT using Numba engine
+signal = np.random.random(1000)
+spectrum = tools.metrics.fft(signal, engine='numba') # Automatically pads to 1024, or to 128 at 100 as input
+print(f"Spectrum shape: {len(spectrum)}")
 
 ```
 
@@ -271,12 +296,18 @@ print(f"Generated Std: {np.std(generated_data):.2f}")
 Visualize the relationships in your data with a highly customizable correlation matrix.
 
 ```python
-# --- Sample Data ---
+import numpy as np
+import pandas as pd
+from ds_tools import DSTools, CorrelationConfig
+
+tools = DSTools()
+
 data = {
     'feature_a': np.random.rand(100) * 100,
     'feature_b': np.random.rand(100) * 50 + 25,
     'feature_c': np.random.rand(100) * -80,
 }
+
 df = pd.DataFrame(data)
 df['feature_d'] = df['feature_a'] * 1.5 + np.random.normal(0, 10, 100)
 
@@ -299,7 +330,11 @@ This will display a publication-quality heatmap, masked to show only the lower t
 Quickly understand the distribution of your categorical features.
 
 ```python
-# --- Sample Data ---
+import pandas as pd
+from ds_tools import DSTools, CorrelationConfig
+
+tools = DSTools()
+
 data = {
     'city': ['London', 'Paris', 'London', 'New York', 'Paris', 'London'],
     'status': ['Active', 'Inactive', 'Active', 'Active', 'Inactive', 'Active']
@@ -324,14 +359,21 @@ Helps to plot confusion matrix in graphical kind, especially for calssification 
 
 
 ```python
+import numpy as np
+from ds_tools import DSTools, CorrelationConfig
+
+tools = DSTools()
+
 np.random.seed(42)
 N_SAMPLES = 1500
+N_CLASSES = 3
 
-y_true_multi = np.random.randint(0, 3, size=N_SAMPLES)
+random_errors = np.random.randint(1, N_CLASSES, size=N_SAMPLES)
+y_true_multi = np.random.randint(0, N_CLASSES, size=N_SAMPLES)
 correct_preds = np.random.rand(N_SAMPLES) < 0.75
-y_pred_multi = np.where(correct_preds, y_true_multi, (y_true_multi + random_errors) % 3)
+y_pred_multi = np.where(correct_preds, y_true_multi, (y_true_multi + random_errors) % N_CLASSES)
 
-plot_confusion_matrix(
+tools.plot_confusion_matrix(
 y_true_multi,
 y_pred_multi,
 class_labels=['Cat', 'Dog', 'Bird'],
@@ -417,16 +459,16 @@ See [CONTRIBUTING](/CONTRIBUTING.md)
 
 📌 Elbow Curve – Helps choose the right number of clusters in K-Means.
 
-2. Implement Fast Fourier Transform (FFT) algorithm and Shannon’s interpolation formula: done, 2.3.0.
+2. Implement Fast Fourier Transform (FFT) algorithm and Shannon’s interpolation formula: done, 2.3.2.
 
-3. Add some fast distance metrics (expand of existed): done, 2.3.0.
+3. Add some fast distance metrics (expand of existed): done, 2.3.2.
 
 
 # References
 
 For citing you should use:
 
-Sergii Kavun. (2025). s-kav/ds_tools: Version 2.0.0 (v.2.0.0). Zenodo. https://doi.org/10.5281/zenodo.17080822
+Sergii Kavun. (2025). s-kav/ds_tools: Version 2.3.2 (v.2.3.2). Zenodo. https://doi.org/10.5281/zenodo.17080822
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.17080822.svg)](https://doi.org/10.5281/zenodo.17080822)
 
