@@ -79,7 +79,7 @@ Here is the development roadmap:
     -   [ ] Create simple wrappers around Matplotlib/Seaborn for common plots (e.g., feature distribution, ROC curves).
 -   [X] **Community & Contributions:**
     -   [X] Improve documentation with more examples.
-    -   [X] Create contribution guidelines ([CONTRIBUTING.md](/CONTRIBUTING.md).
+    -   [X] Create contribution guidelines ([CONTRIBUTING.md](/CONTRIBUTING.md)).
 
 Your feature requests and contributions are highly encouraged! Please open an issue to suggest a new function.
 
@@ -117,7 +117,7 @@ pip install -r requirements.txt
 
 # Function Overview
 
-The library provides a wide range of functions. To see a full, formatted list of available tools, you can use the function_list method:
+The library provides a wide range of functions. To see a full, formatted list of available tools, metrics and distances, you can use the appropriate list methods:
 
 ```python
 

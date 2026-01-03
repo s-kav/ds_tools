@@ -110,7 +110,6 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           file: ./combined-coverage.xml
           flags: unittests
-          name: "Python ${{ matrix.python-version }}"
 
 
   # --- LINTING TASK ---
