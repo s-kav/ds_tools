@@ -63,28 +63,32 @@ prange = _DEPS["prange"]  # None, if Numba unavailable
 if NUMBA_AVAILABLE:
     # --- Vector-to-Vector Distances ---
     @jit("float64(float32[:], float32[:])", nopython=True, fastmath=True)
-    def _euclidean_numba(u, v):  # Euclidean / L2
+    def _euclidean_numba(u, v):  # pragma: no cover
+        # Euclidean / L2
         dist_sq = 0.0
         for i in range(u.shape[0]):
             dist_sq += (u[i] - v[i]) ** 2
         return np.sqrt(dist_sq)
 
     @jit("float64(float32[:], float32[:])", nopython=True, fastmath=True)
-    def _manhattan_numba(u, v):  # Manhattan / L1
+    def _manhattan_numba(u, v):  # pragma: no cover
+        # Manhattan / L1
         dist = 0.0
         for i in range(u.shape[0]):
             dist += abs(u[i] - v[i])
         return dist
 
     @jit("float64(float32[:], float32[:], int_)", nopython=True, fastmath=True)
-    def _minkowski_numba(u, v, p):  # Minkowski
+    def _minkowski_numba(u, v, p):  # pragma: no cover
+        # Minkowski
         dist = 0.0
         for i in range(u.shape[0]):
             dist += abs(u[i] - v[i]) ** p
         return dist ** (1.0 / p)
 
     @jit("float64(float32[:], float32[:])", nopython=True, fastmath=True)
-    def _chebyshev_numba(u, v):  # Chebyshev / L-infinity
+    def _chebyshev_numba(u, v):  # pragma: no cover
+        # Chebyshev / L-infinity
         max_dist = 0.0
         for i in range(u.shape[0]):
             dist = abs(u[i] - v[i])
@@ -93,7 +97,8 @@ if NUMBA_AVAILABLE:
         return max_dist
 
     @jit("float64(float32[:], float32[:])", nopython=True, fastmath=True)
-    def _cosine_similarity_numba(u, v):  # Cosine Similarity
+    def _cosine_similarity_numba(u, v):  # pragma: no cover
+        # Cosine Similarity
         dot, norm_u, norm_v = 0.0, 0.0, 0.0
         for i in range(u.shape[0]):
             dot += u[i] * v[i]
@@ -107,7 +112,8 @@ if NUMBA_AVAILABLE:
         return dot / (norm_u * norm_v)
 
     @jit("float64(float32[:], float32[:], float32[:,:])", nopython=True, fastmath=True)
-    def _mahalanobis_numba(u, v, VI):  # Mahalanobis
+    def _mahalanobis_numba(u, v, VI):  # pragma: no cover
+        # Mahalanobis
         diff = u - v
         # Perform (u-v)^T @ VI @ (u-v)
         tmp = np.empty(VI.shape[0], dtype=np.float32)
@@ -122,7 +128,8 @@ if NUMBA_AVAILABLE:
         return np.sqrt(result)
 
     @jit("float64(float32[:], float32[:])", nopython=True, fastmath=True)
-    def _hamming_numba(u, v):  # Hamming
+    def _hamming_numba(u, v):  # pragma: no cover
+        # Hamming
         diff_count = 0
         for i in range(u.shape[0]):
             if u[i] != v[i]:
@@ -130,7 +137,8 @@ if NUMBA_AVAILABLE:
         return diff_count / u.shape[0]
 
     @jit("float64(float32[:], float32[:])", nopython=True, fastmath=True)
-    def _jaccard_numba(u, v):  # Jaccard
+    def _jaccard_numba(u, v):  # pragma: no cover
+        # Jaccard
         intersection, union = 0, 0
         for i in range(u.shape[0]):
             u_bool = u[i] != 0
@@ -144,7 +152,8 @@ if NUMBA_AVAILABLE:
         return 1.0 - (intersection / union)
 
     @jit("float64(float32[:], float32[:], float32[:])", nopython=True, fastmath=True)
-    def _canberra_numba(u, v, w):  # weighted Canberra distance
+    def _canberra_numba(u, v, w):  # pragma: no cover
+        # weighted Canberra distance
         n = u.shape[0]
         dist = 0.0
         for i in range(n):
@@ -159,7 +168,8 @@ if NUMBA_AVAILABLE:
         return dist
 
     @jit("float64(float32[:], float32[:])", nopython=True, fastmath=True)
-    def _braycurtis_numba(u, v):  # Bray-Curtis distance between two 1D arrays
+    def _braycurtis_numba(u, v):  # pragma: no cover
+        # Bray-Curtis distance between two 1D arrays
         diff_sum = 0.0
         abs_sum = 0.0
         for i in range(u.shape[0]):
@@ -171,7 +181,8 @@ if NUMBA_AVAILABLE:
 
     # --- Relative Entropy (Kullback-Leibler Divergence) ---
     @jit("float64(float32[:], float32[:])", nopython=True, fastmath=True)
-    def _relative_entropy_numba(u, v):  # relative entropy between two 1D arrays
+    def _relative_entropy_numba(u, v):  # pragma: no cover
+        # relative entropy between two 1D arrays
         entropy = 0.0
         for i in range(u.shape[0]):
 
@@ -180,9 +191,9 @@ if NUMBA_AVAILABLE:
                 entropy += u[i] * np.log(u[i] / v[i])
         return entropy
 
-    # Helper to calculate contingency table components
     @jit("UniTuple(float64, 4)(float32[:], float32[:])", nopython=True, fastmath=True)
-    def _get_boolean_counts_numba(u, v):
+    def _get_boolean_counts_numba(u, v):  # pragma: no cover
+        # Helper to calculate contingency table components
         c_tt = 0.0  # True-True
         c_tf = 0.0  # True-False
         c_ft = 0.0  # False-True
@@ -203,7 +214,8 @@ if NUMBA_AVAILABLE:
         return c_tt, c_tf, c_ft, c_ff
 
     @jit("float64(float32[:], float32[:])", nopython=True, fastmath=True)
-    def _dice_numba(u, v):  # Dice dissimilarity between two boolean 1D arrays
+    def _dice_numba(u, v):  # pragma: no cover
+        # Dice dissimilarity between two boolean 1D arrays
         c_tt, c_tf, c_ft, _ = _get_boolean_counts_numba(u, v)
         denom = 2.0 * c_tt + c_tf + c_ft
         if denom == 0.0:
@@ -211,7 +223,8 @@ if NUMBA_AVAILABLE:
         return (c_tf + c_ft) / denom
 
     @jit("float64(float32[:], float32[:])", nopython=True, fastmath=True)
-    def _kulsinski_numba(u, v):  # Kulsinski dissimilarity between two boolean 1D arrays
+    def _kulsinski_numba(u, v):  # pragma: no cover
+        # Kulsinski dissimilarity between two boolean 1D arrays
         c_tt, c_tf, c_ft, c_ff = _get_boolean_counts_numba(u, v)
         denom = c_tf + c_ft
         if denom == 0.0:
@@ -219,9 +232,8 @@ if NUMBA_AVAILABLE:
         return c_tt / denom
 
     @jit("float64(float32[:], float32[:])", nopython=True, fastmath=True)
-    def _rogers_tanimoto_numba(
-        u, v
-    ):  # Rogers-Tanimoto dissimilarity between two boolean 1D arrays
+    def _rogers_tanimoto_numba(u, v):  # pragma: no cover
+        # Rogers-Tanimoto dissimilarity between two boolean 1D arrays
         c_tt, c_tf, c_ft, c_ff = _get_boolean_counts_numba(u, v)
         r = 2.0 * (c_tf + c_ft)
         denom = c_tt + c_ff + r
@@ -230,9 +242,8 @@ if NUMBA_AVAILABLE:
         return r / denom
 
     @jit("float64(float32[:], float32[:])", nopython=True, fastmath=True)
-    def _russellrao_numba(
-        u, v
-    ):  # Ruseell-Rao dissimilarity between two boolean 1D arrays
+    def _russellrao_numba(u, v):  # pragma: no cover
+        # Ruseell-Rao dissimilarity between two boolean 1D arrays
         c_tt, c_tf, c_ft, c_ff = _get_boolean_counts_numba(u, v)
         n = c_tt + c_tf + c_ft + c_ff
         if n == 0.0:
@@ -240,9 +251,8 @@ if NUMBA_AVAILABLE:
         return (n - c_tt) / n
 
     @jit("float64(float32[:], float32[:])", nopython=True, fastmath=True)
-    def _sokal_michener_numba(
-        u, v
-    ):  # Sokal-Michener dissimilarity between two boolean 1D arrays
+    def _sokal_michener_numba(u, v):  # pragma: no cover
+        # Sokal-Michener dissimilarity between two boolean 1D arrays
         c_tt, c_tf, c_ft, c_ff = _get_boolean_counts_numba(u, v)
         r = 2.0 * (c_tf + c_ft)
         n = c_tt + c_tf + c_ft + c_ff
@@ -252,9 +262,8 @@ if NUMBA_AVAILABLE:
         return r / denom
 
     @jit("float64(float32[:], float32[:])", nopython=True, fastmath=True)
-    def _sokal_sneath_numba(
-        u, v
-    ):  # Sokal-Sneath dissimilarity between two boolean 1D arrays
+    def _sokal_sneath_numba(u, v):  # pragma: no cover
+        # Sokal-Sneath dissimilarity between two boolean 1D arrays
         c_tt, c_tf, c_ft, c_ff = _get_boolean_counts_numba(u, v)
         r = 2.0 * (c_tf + c_ft)
         denom = c_tt + r
@@ -263,7 +272,8 @@ if NUMBA_AVAILABLE:
         return r / denom
 
     @jit("float64(float32[:], float32[:])", nopython=True, fastmath=True)
-    def _yule_numba(u, v):  # Yule dissimilarity between two boolean 1D arrays
+    def _yule_numba(u, v):  # pragma: no cover
+        # Yule dissimilarity between two boolean 1D arrays
         c_tt, c_tf, c_ft, c_ff = _get_boolean_counts_numba(u, v)
         r = 2.0 * c_tf * c_ft
         denom = c_tt * c_ff + r / 2.0
@@ -298,19 +308,19 @@ if NUMBA_AVAILABLE:
 
 if CUPY_AVAILABLE:
 
-    def _euclidean_cupy(u, v):
+    def _euclidean_cupy(u, v):  # pragma: no cover
         return cp.linalg.norm(u - v)
 
-    def _manhattan_cupy(u, v):
+    def _manhattan_cupy(u, v):  # pragma: no cover
         return cp.sum(cp.abs(u - v))
 
-    def _minkowski_cupy(u, v, p):
+    def _minkowski_cupy(u, v, p):  # pragma: no cover
         return cp.sum(cp.abs(u - v) ** p) ** (1.0 / p)
 
-    def _chebyshev_cupy(u, v):
+    def _chebyshev_cupy(u, v):  # pragma: no cover
         return cp.max(cp.abs(u - v))
 
-    def _cosine_similarity_cupy(u, v):
+    def _cosine_similarity_cupy(u, v):  # pragma: no cover
         dot, norm_u, norm_v = cp.dot(u, v), cp.linalg.norm(u), cp.linalg.norm(v)
         if norm_u == 0.0 and norm_v == 0.0:
             return 1.0  # similarity of two zero vectors = 1
@@ -318,25 +328,25 @@ if CUPY_AVAILABLE:
             return 0.0  # similarity with one zero vectors = 0
         return dot / (norm_u * norm_v)
 
-    def _mahalanobis_cupy(u, v, VI):
+    def _mahalanobis_cupy(u, v, VI):  # pragma: no cover
         diff = u - v
         return cp.sqrt(diff.T @ VI @ diff)
 
-    def _hamming_cupy(u, v):
+    def _hamming_cupy(u, v):  # pragma: no cover
         return cp.mean(u != v)
 
-    def _jaccard_cupy(u, v):
+    def _jaccard_cupy(u, v):  # pragma: no cover
         u_bool, v_bool = u.astype(bool), v.astype(bool)
         intersection, union = cp.sum(u_bool & v_bool), cp.sum(u_bool | v_bool)
         if union == 0:
             return 0.0
         return 1.0 - (intersection / union)
 
-    def _pairwise_euclidean_cupy(X, Y):
+    def _pairwise_euclidean_cupy(X, Y):  # pragma: no cover
         diff = X[:, None, :] - Y[None, :, :]
         return cp.sqrt(cp.sum(diff**2, axis=-1))
 
-    def _canberra_cupy(u, v, w=None):
+    def _canberra_cupy(u, v, w=None):  # pragma: no cover
         """GPU-accelerated Canberra distance."""
         if w is None:
             w = cp.ones_like(u)
@@ -347,7 +357,7 @@ if CUPY_AVAILABLE:
         ratios = cp.where(mask, num / denom, 0.0)
         return float(cp.sum(ratios * w))
 
-    def _braycurtis_cupy(u, v):
+    def _braycurtis_cupy(u, v):  # pragma: no cover
         diff = cp.abs(u - v)
         sum_val = cp.abs(u + v)
         denom = cp.sum(sum_val)
@@ -355,7 +365,7 @@ if CUPY_AVAILABLE:
             return 0.0
         return cp.sum(diff) / denom
 
-    def _relative_entropy_cupy(u, v):
+    def _relative_entropy_cupy(u, v):  # pragma: no cover
         # Filter where both are positive to avoid NaNs/Infs
         mask = (u > 0) & (v > 0)
         u_valid = u[mask]
@@ -363,7 +373,7 @@ if CUPY_AVAILABLE:
         return cp.sum(u_valid * cp.log(u_valid / v_valid))
 
     # --- Boolean Helpers for CuPy ---
-    def _get_boolean_counts_cupy(u, v):
+    def _get_boolean_counts_cupy(u, v):  # pragma: no cover
         u_bool = u.astype(bool)
         v_bool = v.astype(bool)
         not_u = ~u_bool
@@ -374,43 +384,43 @@ if CUPY_AVAILABLE:
         c_ff = cp.sum(not_u & not_v)
         return float(c_tt), float(c_tf), float(c_ft), float(c_ff)
 
-    def _dice_cupy(u, v):
+    def _dice_cupy(u, v):  # pragma: no cover
         c_tt, c_tf, c_ft, _ = _get_boolean_counts_cupy(u, v)
         denom = 2.0 * c_tt + c_tf + c_ft
         return (c_tf + c_ft) / denom if denom != 0 else 0.0
 
-    def _kulsinski_cupy(u, v):
+    def _kulsinski_cupy(u, v):  # pragma: no cover
         c_tt, c_tf, c_ft, c_ff = _get_boolean_counts_cupy(u, v)
         denom = c_tf + c_ft
         if denom == 0.0:
             return 0.0
         return c_tt / denom
 
-    def _rogers_tanimoto_cupy(u, v):
+    def _rogers_tanimoto_cupy(u, v):  # pragma: no cover
         c_tt, c_tf, c_ft, c_ff = _get_boolean_counts_cupy(u, v)
         r = 2.0 * (c_tf + c_ft)
         denom = c_tt + c_ff + r
         return r / denom if denom != 0 else 0.0
 
-    def _russellrao_cupy(u, v):
+    def _russellrao_cupy(u, v):  # pragma: no cover
         c_tt, c_tf, c_ft, c_ff = _get_boolean_counts_cupy(u, v)
         n = c_tt + c_tf + c_ft + c_ff
         return (n - c_tt) / n if n != 0 else 0.0
 
-    def _sokal_michener_cupy(u, v):
+    def _sokal_michener_cupy(u, v):  # pragma: no cover
         c_tt, c_tf, c_ft, c_ff = _get_boolean_counts_cupy(u, v)
         r = 2.0 * (c_tf + c_ft)
         n = c_tt + c_tf + c_ft + c_ff
         denom = n + r
         return r / denom if denom != 0 else 0.0
 
-    def _sokal_sneath_cupy(u, v):
+    def _sokal_sneath_cupy(u, v):  # pragma: no cover
         c_tt, c_tf, c_ft, c_ff = _get_boolean_counts_cupy(u, v)
         r = 2.0 * (c_tf + c_ft)
         denom = c_tt + r
         return r / denom if denom != 0 else 0.0
 
-    def _yule_cupy(u, v):
+    def _yule_cupy(u, v):  # pragma: no cover
         c_tt, c_tf, c_ft, c_ff = _get_boolean_counts_cupy(u, v)
         r = 2.0 * c_tf * c_ft
         denom = c_tt * c_ff + r / 2.0

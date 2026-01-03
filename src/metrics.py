@@ -59,7 +59,7 @@ EPSILON = 1e-15  # for numerical stability
 if NUMBA_AVAILABLE:
     # --- MSE Implementations ---
     @jit("float64(float32[:], float32[:])", nopython=True, parallel=True, fastmath=True)
-    def _mse_numba(y_true, y_pred):
+    def _mse_numba(y_true, y_pred):  # pragma: no cover
         n = y_true.shape[0]
         error = 0.0
         for i in prange(n):
@@ -72,7 +72,7 @@ if NUMBA_AVAILABLE:
         parallel=True,
         fastmath=True,
     )
-    def _mse_grad_numba(y_true, y_pred):
+    def _mse_grad_numba(y_true, y_pred):  # pragma: no cover
         n = y_true.shape[0]
         grad = np.empty_like(y_pred)
         for i in prange(n):
@@ -81,7 +81,7 @@ if NUMBA_AVAILABLE:
 
     # --- MAE Implementations ---
     @jit("float64(float32[:], float32[:])", nopython=True, parallel=True, fastmath=True)
-    def _mae_numba(y_true, y_pred):
+    def _mae_numba(y_true, y_pred):  # pragma: no cover
         n = y_true.shape[0]
         error = 0.0
         for i in prange(n):
@@ -94,7 +94,7 @@ if NUMBA_AVAILABLE:
         parallel=True,
         fastmath=True,
     )
-    def _mae_grad_numba(y_true, y_pred):
+    def _mae_grad_numba(y_true, y_pred):  # pragma: no cover
         n = y_true.shape[0]
         grad = np.empty_like(y_pred)
         for i in prange(n):
@@ -109,7 +109,7 @@ if NUMBA_AVAILABLE:
         parallel=True,
         fastmath=True,
     )
-    def _huber_numba(y_true, y_pred, delta):
+    def _huber_numba(y_true, y_pred, delta):  # pragma: no cover
         n = y_true.shape[0]
         error = 0.0
         for i in prange(n):
@@ -126,7 +126,7 @@ if NUMBA_AVAILABLE:
         parallel=True,
         fastmath=True,
     )
-    def _huber_grad_numba(y_true, y_pred, delta):
+    def _huber_grad_numba(y_true, y_pred, delta):  # pragma: no cover
         n = y_true.shape[0]
         grad = np.empty_like(y_pred)
         for i in prange(n):
@@ -144,7 +144,7 @@ if NUMBA_AVAILABLE:
         parallel=True,
         fastmath=True,
     )
-    def _quantile_numba(y_true, y_pred, quantile):
+    def _quantile_numba(y_true, y_pred, quantile):  # pragma: no cover
         n = y_true.shape[0]
         error = 0.0
         for i in prange(n):
@@ -161,7 +161,7 @@ if NUMBA_AVAILABLE:
         parallel=True,
         fastmath=True,
     )
-    def _quantile_grad_numba(y_true, y_pred, quantile):
+    def _quantile_grad_numba(y_true, y_pred, quantile):  # pragma: no cover
         n = y_true.shape[0]
         grad = np.empty_like(y_pred)
         for i in prange(n):
@@ -171,7 +171,7 @@ if NUMBA_AVAILABLE:
 
     # --- Hinge Loss Implementations ---
     @jit("float64(float32[:], float32[:])", nopython=True, parallel=True, fastmath=True)
-    def _hinge_numba(y_true, y_pred):
+    def _hinge_numba(y_true, y_pred):  # pragma: no cover
         n = y_true.shape[0]
         loss = 0.0
         for i in prange(n):
@@ -184,7 +184,7 @@ if NUMBA_AVAILABLE:
         parallel=True,
         fastmath=True,
     )
-    def _hinge_grad_numba(y_true, y_pred):
+    def _hinge_grad_numba(y_true, y_pred):  # pragma: no cover
         n = y_true.shape[0]
         grad = np.empty_like(y_pred)
         for i in prange(n):
@@ -193,7 +193,7 @@ if NUMBA_AVAILABLE:
 
     # --- LogLoss / Cross-Entropy Implementations ---
     @jit("float64(float32[:], float32[:])", nopython=True, parallel=True, fastmath=True)
-    def _logloss_numba(y_true, y_pred):
+    def _logloss_numba(y_true, y_pred):  # pragma: no cover
         n = y_true.shape[0]
         loss = 0.0
         for i in prange(n):
@@ -209,7 +209,7 @@ if NUMBA_AVAILABLE:
         parallel=True,
         fastmath=True,
     )
-    def _logloss_grad_numba(y_true, y_pred):
+    def _logloss_grad_numba(y_true, y_pred):  # pragma: no cover
         n = y_true.shape[0]
         grad = np.empty_like(y_pred)
         for i in prange(n):
@@ -224,7 +224,7 @@ if NUMBA_AVAILABLE:
         parallel=True,
         fastmath=True,
     )
-    def _focal_loss_numba(y_true, y_pred, alpha, gamma):
+    def _focal_loss_numba(y_true, y_pred, alpha, gamma):  # pragma: no cover
         n = y_true.shape[0]
         loss = 0.0
         for i in prange(n):
@@ -241,7 +241,7 @@ if NUMBA_AVAILABLE:
         parallel=True,
         fastmath=True,
     )
-    def _focal_loss_grad_numba(y_true, y_pred, alpha, gamma):
+    def _focal_loss_grad_numba(y_true, y_pred, alpha, gamma):  # pragma: no cover
         n = y_true.shape[0]
         grad = np.empty_like(y_pred)
 
@@ -283,7 +283,7 @@ if NUMBA_AVAILABLE:
         parallel=True,
         fastmath=True,
     )
-    def _contrastive_loss_numba(y_true, dist_sq, margin):
+    def _contrastive_loss_numba(y_true, dist_sq, margin):  # pragma: no cover
         # y_true: 1 for similar, 0 for dissimilar
         # dist_sq: squared euclidean distance between pairs
         n = y_true.shape[0]
@@ -303,7 +303,9 @@ if NUMBA_AVAILABLE:
         parallel=True,
         fastmath=True,
     )
-    def _contrastive_loss_grad_numba(y_true, dist_sq, margin, diff_norm):
+    def _contrastive_loss_grad_numba(
+        y_true, dist_sq, margin, diff_norm
+    ):  # pragma: no cover
         # Returns gradient w.r.t distance (which is often intermediate)
         # Typically gradient is w.r.t embeddings, but here we return grad w.r.t distance for simplicity in this signature
         # dL/d(dist)
@@ -321,7 +323,9 @@ if NUMBA_AVAILABLE:
         return grad / n
 
     @jit(nopython=True, cache=True, parallel=True, fastmath=True)
-    def _cohens_d_numba(group1: np.ndarray, group2: np.ndarray) -> float:
+    def _cohens_d_numba(
+        group1: np.ndarray, group2: np.ndarray
+    ) -> float:  # pragma: no cover
         """
         Numba-optimized implementation of Cohen's d.
 
@@ -371,7 +375,7 @@ if NUMBA_AVAILABLE:
         return d
 
     @jit(nopython=True, cache=True)
-    def _next_power_of_2(n: int) -> int:
+    def _next_power_of_2(n: int) -> int:  # pragma: no cover
         """Helper to find the next power of 2 for Radix-2 FFT."""
         if n == 0:
             return 1
@@ -384,7 +388,9 @@ if NUMBA_AVAILABLE:
         return n + 1
 
     @jit(nopython=True, cache=True)
-    def _fft_radix2_numba(a: np.ndarray, invert: bool) -> np.ndarray:
+    def _fft_radix2_numba(
+        a: np.ndarray, invert: bool
+    ) -> np.ndarray:  # pragma: no cover
         """
         Core Recursive Cooley-Tukey FFT implementation compatible with Numba.
         Requires input length to be a power of 2.
@@ -411,7 +417,9 @@ if NUMBA_AVAILABLE:
         return combined
 
     @jit(nopython=True, cache=True)
-    def _fft_numba(data: np.ndarray, inverse: bool = False) -> np.ndarray:
+    def _fft_numba(
+        data: np.ndarray, inverse: bool = False
+    ) -> np.ndarray:  # pragma: no cover
         """
         Numba-optimized Fast Fourier Transform using the Cooley-Tukey algorithm.
 
@@ -465,19 +473,19 @@ if NUMBA_AVAILABLE:
 
 if CUPY_AVAILABLE:
 
-    def _mse_cupy(y_true, y_pred):
+    def _mse_cupy(y_true, y_pred):  # pragma: no cover
         return cp.mean((y_true - y_pred) ** 2)
 
-    def _mse_grad_cupy(y_true, y_pred):
+    def _mse_grad_cupy(y_true, y_pred):  # pragma: no cover
         return 2.0 / y_true.shape[0] * (y_pred - y_true)
 
-    def _mae_cupy(y_true, y_pred):
+    def _mae_cupy(y_true, y_pred):  # pragma: no cover
         return cp.mean(cp.abs(y_true - y_pred))
 
-    def _mae_grad_cupy(y_true, y_pred):
+    def _mae_grad_cupy(y_true, y_pred):  # pragma: no cover
         return cp.sign(y_pred - y_true) / y_true.shape[0]
 
-    def _huber_cupy(y_true, y_pred, delta):
+    def _huber_cupy(y_true, y_pred, delta):  # pragma: no cover
         err = y_true - y_pred
         abs_err = cp.abs(err)
         return cp.mean(
@@ -486,33 +494,33 @@ if CUPY_AVAILABLE:
             )
         )
 
-    def _huber_grad_cupy(y_true, y_pred, delta):
+    def _huber_grad_cupy(y_true, y_pred, delta):  # pragma: no cover
         err = y_pred - y_true
         return (
             cp.where(cp.abs(err) <= delta, err, cp.sign(err) * delta) / y_true.shape[0]
         )
 
-    def _quantile_cupy(y_true, y_pred, quantile):
+    def _quantile_cupy(y_true, y_pred, quantile):  # pragma: no cover
         err = y_true - y_pred
         return cp.mean(cp.maximum(quantile * err, (quantile - 1) * err))
 
-    def _quantile_grad_cupy(y_true, y_pred, quantile):
+    def _quantile_grad_cupy(y_true, y_pred, quantile):  # pragma: no cover
         err = y_true - y_pred
         return cp.where(err <= 0, quantile, quantile - 1.0) / y_true.shape[0]
 
-    def _hinge_cupy(y_true, y_pred):
+    def _hinge_cupy(y_true, y_pred):  # pragma: no cover
         return cp.mean(cp.maximum(0.0, 1.0 - y_true * y_pred))
 
-    def _hinge_grad_cupy(y_true, y_pred):
+    def _hinge_grad_cupy(y_true, y_pred):  # pragma: no cover
         return cp.where(1.0 - y_true * y_pred > 0, -y_true, 0.0) / y_true.shape[0]
 
-    def _logloss_cupy(y_true, y_pred):
+    def _logloss_cupy(y_true, y_pred):  # pragma: no cover
         pred_clipped = cp.clip(y_pred, EPSILON, 1.0 - EPSILON)
         return -cp.mean(
             y_true * cp.log(pred_clipped) + (1.0 - y_true) * cp.log(1.0 - pred_clipped)
         )
 
-    def _logloss_grad_cupy(y_true, y_pred):
+    def _logloss_grad_cupy(y_true, y_pred):  # pragma: no cover
         pred_clipped = cp.clip(y_pred, EPSILON, 1.0 - EPSILON)
         return (
             (pred_clipped - y_true)
@@ -520,14 +528,14 @@ if CUPY_AVAILABLE:
             / y_true.shape[0]
         )
 
-    def _focal_loss_cupy(y_true, y_pred, alpha, gamma):
+    def _focal_loss_cupy(y_true, y_pred, alpha, gamma):  # pragma: no cover
         p = cp.clip(y_pred, EPSILON, 1.0 - EPSILON)
         pt = cp.where(y_true == 1, p, 1 - p)
         alpha_t = cp.where(y_true == 1, alpha, 1 - alpha)
         loss = -alpha_t * (1 - pt) ** gamma * cp.log(pt)
         return cp.mean(loss)
 
-    def _focal_loss_grad_cupy(y_true, y_pred, alpha, gamma):
+    def _focal_loss_grad_cupy(y_true, y_pred, alpha, gamma):  # pragma: no cover
         p = cp.clip(y_pred, EPSILON, 1.0 - EPSILON)
         # Implementing derivative logic for y=1 and y=0
         term_pos = (
@@ -540,20 +548,22 @@ if CUPY_AVAILABLE:
         )
         return cp.where(y_true == 1, term_pos, term_neg) / y_true.shape[0]
 
-    def _contrastive_loss_cupy(y_true, dist_sq, margin):
+    def _contrastive_loss_cupy(y_true, dist_sq, margin):  # pragma: no cover
         dist = cp.sqrt(dist_sq)
         loss_sim = dist_sq
         loss_dissim = cp.maximum(0.0, margin - dist) ** 2
         return 0.5 * cp.mean(cp.where(y_true == 1, loss_sim, loss_dissim))
 
-    def _contrastive_loss_grad_cupy(y_true, dist_sq, margin, diff_norm):
+    def _contrastive_loss_grad_cupy(
+        y_true, dist_sq, margin, diff_norm
+    ):  # pragma: no cover
         dist = cp.sqrt(dist_sq) + EPSILON
         grad_sim = dist
         grad_dissim = -cp.maximum(0.0, margin - dist)  # if dist > margin, grad is 0
         return cp.where(y_true == 1, grad_sim, grad_dissim) / y_true.shape[0]
 
     # --- MMD (Maximum Mean Discrepancy) using Gaussian Kernel ---
-    def _mmd_cupy(X, Y, gamma):
+    def _mmd_cupy(X, Y, gamma):  # pragma: no cover
         # X: (n, d), Y: (m, d)
         XX = cp.dot(X, X.T)
         XY = cp.dot(X, Y.T)
@@ -568,7 +578,9 @@ if CUPY_AVAILABLE:
 
         return cp.mean(K_XX) + cp.mean(K_YY) - 2 * cp.mean(K_XY)
 
-    def _cohens_d_cupy(group1: cp.ndarray, group2: cp.ndarray) -> float:
+    def _cohens_d_cupy(
+        group1: cp.ndarray, group2: cp.ndarray
+    ) -> float:  # pragma: no cover
         """
         CuPy (GPU) implementation of Cohen's d.
 
@@ -629,7 +641,9 @@ if CUPY_AVAILABLE:
         # Return as python float (move from GPU if necessary)
         return float(d)
 
-    def _fft_cupy(data: cp.ndarray, inverse: bool = False) -> cp.ndarray:
+    def _fft_cupy(
+        data: cp.ndarray, inverse: bool = False
+    ) -> cp.ndarray:  # pragma: no cover
         """
         CuPy (GPU) implementation of Fast Fourier Transform.
         Uses cuFFT via CuPy.
