@@ -104,4 +104,10 @@ exclude_lines = [
     "if __name__ == .__main__.:",
     "raise NotImplementedError",
     "if TYPE_CHECKING:",
+    "def .*_numba\\(",
+    "def .*_cupy\\(",
+    "if not NUMBA_AVAILABLE:",
+    "if not CUPY_AVAILABLE:",
+    "if HAS_NUMBA:",
+    "if HAS_CUPY:",
 ]
