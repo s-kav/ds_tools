@@ -68,17 +68,7 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-          
-      - name: Install coverage tools
-        run: |
-          python -m pip install --upgrade pip
-          pip install coverage[toml]
-          
+           
       - name: Download all coverage artifacts
         uses: actions/download-artifact@v4
         with:
@@ -89,27 +79,16 @@ jobs:
       - name: List downloaded files
         run: |
           echo "Downloaded coverage files:"
-          ls -la coverage-reports/
-          
-      - name: Combine coverage reports
-        run: |
-          echo "Combining coverage reports..."
-          cd coverage-reports
-          python ../.github/scripts/combine_coverage.py
-          
-      - name: Verify combined coverage
-        run: |
-          echo "Combined coverage file:"
-          ls -la combined-coverage.xml
-          echo "Coverage content preview:"
-          head -20 combined-coverage.xml
+          ls -R coverage-reports/
           
       - name: Upload combined coverage to Codecov
         uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          file: ./combined-coverage.xml
-          flags: unittests
+          directory: ./coverage-reports/
+          fail_ci_if_error: true
+          verbose: true
+          name: codecov-umbrella
 
 
   # --- LINTING TASK ---
