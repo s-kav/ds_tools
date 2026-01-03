@@ -39,19 +39,24 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          pip install .[test]
+          pip install -e .[test]
         
           if [ "${{ matrix.optional-deps }}" = "numba" ]; then
-            pip install .[performance-numba]
+            pip install -e .[performance-numba]
           elif [ "${{ matrix.optional-deps }}" = "cupy" ]; then
-            pip install .[performance-cupy]
+            pip install -e .[performance-cupy]
           elif [ "${{ matrix.optional-deps }}" = "all" ]; then
-            pip install .[performance]
+            pip install -e .[performance]
           fi
       
       - name: Run tests and collect coverage 
         run: |
           pytest --cov=src --cov-report=xml:coverage-${{ matrix.python-version }}-${{ matrix.optional-deps }}.xml tests/
+
+      - name: Inspect coverage file paths
+        run: |
+          echo "First 20 lines of coverage report:"
+          head -n 20 coverage-${{ matrix.python-version }}-${{ matrix.optional-deps }}.xml
           
       - name: Upload coverage artifact
         uses: actions/upload-artifact@v4

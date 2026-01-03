@@ -87,3 +87,21 @@ testpaths = ["tests"]
 pythonpath = [
   ".",
 ]
+
+[tool.coverage.run]
+
+source = ["src"]
+# IMPORTANT: This forces coverage to write relative paths that are understood by Codecs
+relative_files = true
+branch = true
+
+[tool.coverage.report]
+# Exclude empty files or test files from the report
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "if __name__ == .__main__.:",
+    "raise NotImplementedError",
+    "if TYPE_CHECKING:",
+]
