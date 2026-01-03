@@ -278,7 +278,7 @@ if NUMBA_AVAILABLE:
         parallel=True,
         fastmath=True,
     )
-    def _pairwise_euclidean_numba(X, Y):
+    def _pairwise_euclidean_numba(X, Y):  # pragma: no cover
         n_x, n_y = X.shape[0], Y.shape[0]
         n_features = X.shape[1]
         distances = np.empty((n_x, n_y), dtype=np.float32)
