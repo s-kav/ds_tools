@@ -482,3 +482,7 @@ This project uses **dual licensing**:
 - 💼 **Commercial License Available**: Contact us for business use [License](https://github.com/s-kav/ds_tools/blob/main/CLA.md)
 
 [📋 Full License Details](https://github.com/s-kav/ds_tools/blob/main/LICENSE) | [💰 Get Commercial License](mailto:kavserg@gmail.com)
+
+✨ Thanks for visiting DSTools: Data Science Research Toolkit!
+
+![visitors](https://visitor-badge.laobi.icu/badge?page_id=s-kav.ds_tools)
