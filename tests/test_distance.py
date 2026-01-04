@@ -862,6 +862,41 @@ def test_canberra_consistency_with_numpy(tools):
     assert np.isclose(result_numba, result_numpy, rtol=1e-5)
 
 
+def test_boolean_metrics_zero_division_guards(tools):
+    """
+    Tests edge cases where boolean metrics might encounter division by zero.
+    This covers the 'if denom == 0: return 0.0' branches in implementations.
+    """
+    # Case 1: Both vectors are all zeros (Empty sets)
+    # Triggers 0/0 in Dice, Jaccard, Yule
+    u_zeros = np.zeros(10, dtype=np.float32)
+    v_zeros = np.zeros(10, dtype=np.float32)
+
+    # Dice: 2*TP / (2*TP + FP + FN). All 0 -> 0/0
+    assert tools.distance.dice(u_zeros, v_zeros) == 0.0
+
+    # Yule: (ad - bc) / (ad + bc).
+    # With zeros: a(FF)=10, b=0, c=0, d(TT)=0. ad=0, bc=0. -> 0/0
+    assert tools.distance.yule(u_zeros, v_zeros) == 0.0
+
+    # Rogers-Tanimoto (check specific implementation logic)
+    # Denom = c_tt + c_ff + 2*(c_tf + c_ft). With zeros: 0 + 10 + 0 = 10. Safe.
+    # But let's check tiny vector case just in case
+    u_empty = np.array([], dtype=np.float32)
+    v_empty = np.array([], dtype=np.float32)
+    # RussellRao: TP / n. If n=0 -> 0/0
+    assert tools.distance.russellrao(u_empty, v_empty) == 0.0
+
+    # Case 2: Identical vectors (All True)
+    # Triggers 0/0 in Kulsinski (Kulczynski 1) where denom is (FP + FN)
+    u_ones = np.ones(10, dtype=np.float32)
+    v_ones = np.ones(10, dtype=np.float32)
+
+    # Kulsinski (Kulczynski 1): TP / (FP + FN).
+    # TP=10, FP=0, FN=0. -> 10 / 0.
+    assert tools.distance.kulsinski(u_ones, v_ones) == 0.0
+
+
 # ============================================================================
 # Section 9: Dedicated Tests for Each Backend
 # ============================================================================

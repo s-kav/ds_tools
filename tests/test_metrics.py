@@ -167,6 +167,7 @@ METRICS_TO_TEST = [
     ("hinge_loss", {}),
     ("log_loss", {}),
     ("cross_entropy_loss", {}),
+    ("focal_loss", {"alpha": 0.25, "gamma": 2.0}),
 ]
 
 
@@ -628,21 +629,37 @@ def test_categorical_crossentropy_correctness(tools):
 
 
 def test_contrastive_loss_correctness(tools):
-    """Tests Contrastive Loss."""
+    """Tests Contrastive Loss and its gradients (covering _contrastive_loss_grad_numpy)."""
     emb1 = np.array([[1.0, 0.0]], dtype=np.float32)
     emb2 = np.array([[1.0, 0.0]], dtype=np.float32)
-    y_sim = np.array([1.0], dtype=np.float32)  # Similar
 
+    # --- Case 1: Similar pair (y=1) ---
+    y_sim = np.array([1.0], dtype=np.float32)
     # Distance is 0. Loss should be dist^2 = 0
     loss = tools.metrics.contrastive_loss(y_sim, emb1, emb2)
     assert np.isclose(loss, 0.0)
 
-    # Dissimilar pair, distance 0. Margin 1.
-    # Loss should be max(0, 1 - 0)^2 = 1.
+    # Check Gradient for Similar pair (force_cpu=True triggers _contrastive_loss_grad_numpy)
+    loss_val, (g1, g2) = tools.metrics.contrastive_loss(
+        y_sim, emb1, emb2, return_grad=True, force_cpu=True
+    )
+    assert isinstance(g1, np.ndarray)
+    assert g1.shape == emb1.shape
+
+    # --- Case 2: Dissimilar pair (y=0) ---
     y_dissim = np.array([0.0], dtype=np.float32)
-    loss_dissim = tools.metrics.contrastive_loss(y_dissim, emb1, emb2, margin=1.0)
-    # Note: our impl returns 0.5 * loss
+    margin = 1.0
+    # Loss should be max(0, 1 - 0)^2 = 1. (Our impl returns 0.5 * loss)
+    loss_dissim = tools.metrics.contrastive_loss(y_dissim, emb1, emb2, margin=margin)
     assert np.isclose(loss_dissim, 0.5)
+
+    # Check Gradient for Dissimilar pair
+    loss_val_d, (g1_d, g2_d) = tools.metrics.contrastive_loss(
+        y_dissim, emb1, emb2, margin=margin, return_grad=True, force_cpu=True
+    )
+    assert isinstance(g1_d, np.ndarray)
+    # Gradient shouldn't be None (ensures we entered the calculation block)
+    assert not np.isnan(g1_d).any()
 
 
 def test_mmd_loss_kernel(tools):

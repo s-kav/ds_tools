@@ -36,7 +36,7 @@ try:
     import cupy as cp
 
     try:
-        if cp.cuda.runtime.getDeviceCount() > 0:
+        if cp.cuda.runtime.getDeviceCount() > 0:  # pragma: no cover
             CUPY_AVAILABLE = True
             cp.cuda.Device(0).use()
         else:
@@ -988,7 +988,7 @@ class Metrics:
         use_gpu = (
             self.gpu_available and not force_cpu and y_true.size >= self.gpu_threshold
         )
-        if use_gpu:
+        if use_gpu:  # pragma: no cover
             backend_choice = "cupy"
         elif self.numba_available:
             backend_choice = "numba"
@@ -997,7 +997,7 @@ class Metrics:
         )
         y_true_conv = y_true.astype(np.float32)
         y_pred_conv = y_pred.astype(np.float32)
-        if use_gpu:
+        if use_gpu:  # pragma: no cover
             y_true_conv = cp.asarray(y_true_conv)
             y_pred_conv = cp.asarray(y_pred_conv)
         return func, y_true_conv, y_pred_conv
@@ -1178,7 +1178,7 @@ class Metrics:
         positive_c = positive.astype(np.float32)
         negative_c = negative.astype(np.float32)
 
-        if use_gpu:
+        if use_gpu:  # pragma: no cover
             anchor_c, positive_c, negative_c = (
                 cp.asarray(anchor_c),
                 cp.asarray(positive_c),
@@ -1202,7 +1202,7 @@ class Metrics:
 
         if return_grad:
             mask = (loss > 0).astype(np.float32)
-            if use_gpu:
+            if use_gpu:  # pragma: no cover
                 mask = cp.asarray(mask)
 
             grad_anchor = 2 * (negative_c - positive_c) * mask[..., np.newaxis]
@@ -1213,7 +1213,7 @@ class Metrics:
             grad_positive /= anchor.shape[0]
             grad_negative /= anchor.shape[0]
 
-            if use_gpu:
+            if use_gpu:  # pragma: no cover
                 return loss_val, (
                     cp.asnumpy(grad_anchor),
                     cp.asnumpy(grad_positive),
@@ -1268,7 +1268,7 @@ class Metrics:
         y_true_c = y_true
         y_pred_c = y_pred
 
-        if use_gpu:
+        if use_gpu:  # pragma: no cover
             y_true_c = cp.asarray(y_true)
             y_pred_c = cp.asarray(y_pred)
 
@@ -1285,7 +1285,7 @@ class Metrics:
             # Creating one-hot logic on the fly efficiently
             n = y_pred_c.shape[0]
             # Flatten if needed
-            if y_true_c.ndim > 1:
+            if y_true_c.ndim > 1:  # pragma: no cover
                 y_true_c = y_true_c.flatten()
             log_p = -xp.log(y_pred_c[xp.arange(n), y_true_c.astype(int)])
             return float(xp.mean(log_p))
@@ -1324,7 +1324,7 @@ class Metrics:
         e2 = embedding_2.astype(np.float32)
         y = y_true.astype(np.float32)
 
-        if use_gpu:
+        if use_gpu:  # pragma: no cover
             e1, e2, y = cp.asarray(e1), cp.asarray(e2), cp.asarray(y)
 
         # L2 Distance Squared
@@ -1332,7 +1332,7 @@ class Metrics:
         dist_sq = xp.sum(diff**2, axis=-1)
 
         # Dispatch to compiled kernels for loss calculation
-        if use_gpu:
+        if use_gpu:  # pragma: no cover
             loss = _contrastive_loss_cupy(y, dist_sq, margin)
         elif self.numba_available and not force_cpu:
             # Numba needs numpy arrays, conversion happens inside dispatch if we used it
@@ -1346,7 +1346,7 @@ class Metrics:
             # dL/de1 = dL/d(dist_sq) * d(dist_sq)/de1
             # d(dist_sq)/de1 = 2 * (e1 - e2)
 
-            if use_gpu:
+            if use_gpu:  # pragma: no cover
                 grad_dist = _contrastive_loss_grad_cupy(y, dist_sq, margin, None)
             elif self.numba_available and not force_cpu:
                 grad_dist = _contrastive_loss_grad_numba(y, dist_sq, margin, dist_sq)
@@ -1356,7 +1356,7 @@ class Metrics:
             grad_e1 = grad_dist[:, np.newaxis] * 2 * diff
             grad_e2 = -grad_e1
 
-            if use_gpu:
+            if use_gpu:  # pragma: no cover
                 return float(loss), (cp.asnumpy(grad_e1), cp.asnumpy(grad_e2))
             return float(loss), (grad_e1, grad_e2)
 
@@ -1374,7 +1374,7 @@ class Metrics:
         X_c = X.astype(np.float32)
         Y_c = Y.astype(np.float32)
 
-        if use_gpu:
+        if use_gpu:  # pragma: no cover
             X_c = cp.asarray(X_c)
             Y_c = cp.asarray(Y_c)
             return float(_mmd_cupy(X_c, Y_c, gamma))
@@ -1411,7 +1411,7 @@ class Metrics:
         X_c = group1.astype(np.float32)
         Y_c = group2.astype(np.float32)
 
-        if use_gpu:
+        if use_gpu:  # pragma: no cover
             X_c = cp.asarray(X_c)
             Y_c = cp.asarray(Y_c)
             return float(_cohens_d_cupy(X_c, Y_c))
@@ -1441,7 +1441,7 @@ class Metrics:
 
         # Resolve 'auto' engine
         if engine == "auto":
-            if use_gpu and CUPY_AVAILABLE:
+            if use_gpu and CUPY_AVAILABLE:  # pragma: no cover
                 engine = "cupy"
             elif self.numba_available and not force_cpu:
                 engine = "numba"

@@ -35,7 +35,7 @@ def _detect_optional_dependencies():
     try:
         import cupy
 
-        if cupy.cuda.runtime.getDeviceCount() > 0:
+        if cupy.cuda.runtime.getDeviceCount() > 0:  # pragma: no cover
             cupy.cuda.Device(0).use()
             deps.update({"cupy_available": True, "cp": cupy})
         else:
