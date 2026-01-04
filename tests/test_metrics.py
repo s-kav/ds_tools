@@ -181,7 +181,7 @@ def test_metric_correctness(tools, metric_name, kwargs, force_cpu, large_sample_
     y_true, y_pred = large_sample_data
 
     # Special handling for classification metrics
-    if metric_name in ["hinge_loss", "log_loss", "cross_entropy_loss"]:
+    if metric_name in ["hinge_loss", "log_loss", "cross_entropy_loss", "focal_loss"]:
         y_true = np.random.randint(0, 2, size=len(y_true)).astype(np.float32)
         y_pred = np.random.rand(len(y_pred)).astype(np.float32)
         if metric_name == "hinge_loss":
@@ -216,17 +216,13 @@ def test_metric_correctness(tools, metric_name, kwargs, force_cpu, large_sample_
     elif metric_name == "focal_loss":
         alpha = kwargs["alpha"]
         gamma = kwargs["gamma"]
+        eps = 1e-7
         # Clip predictions to avoid exact 0 or 1
-        p = np.clip(
-            y_pred, 1e-7, 1.0 - 1e-7
-        )  # Используйте более жесткий clip для теста
+        p = np.clip(y_pred, eps, 1.0 - eps)
 
         # vectorized formula of focal loss
         pt = np.where(y_true == 1, p, 1 - p)
         alpha_t = np.where(y_true == 1, alpha, 1 - alpha)
-
-        # Safety clip for log input specifically in test calculation
-        pt = np.clip(pt, 1e-7, 1.0)
 
         expected = -np.mean(alpha_t * (1 - pt) ** gamma * np.log(pt))
 

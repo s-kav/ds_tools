@@ -54,7 +54,7 @@ except ImportError:
 # ============================================================================
 
 
-EPSILON = 1e-15  # for numerical stability
+EPSILON = 1e-7  # for numerical stability (safe for float32)
 
 if NUMBA_AVAILABLE:
     # --- MSE Implementations ---
