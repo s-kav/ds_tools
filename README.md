@@ -108,7 +108,7 @@ cd ds_tools
 
 ## Install Dependencies
 
-Ensure you have Python version 3.8 or higher and install the required packages:
+Ensure you have Python version 3.9+ or higher and install the required packages:
 
 ```bash
 pip install -r requirements.txt

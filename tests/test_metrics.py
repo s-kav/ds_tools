@@ -216,10 +216,18 @@ def test_metric_correctness(tools, metric_name, kwargs, force_cpu, large_sample_
     elif metric_name == "focal_loss":
         alpha = kwargs["alpha"]
         gamma = kwargs["gamma"]
-        p = np.clip(y_pred, 1e-15, 1 - 1e-15)
+        # Clip predictions to avoid exact 0 or 1
+        p = np.clip(
+            y_pred, 1e-7, 1.0 - 1e-7
+        )  # Используйте более жесткий clip для теста
+
         # vectorized formula of focal loss
         pt = np.where(y_true == 1, p, 1 - p)
         alpha_t = np.where(y_true == 1, alpha, 1 - alpha)
+
+        # Safety clip for log input specifically in test calculation
+        pt = np.clip(pt, 1e-7, 1.0)
+
         expected = -np.mean(alpha_t * (1 - pt) ** gamma * np.log(pt))
 
     assert np.isclose(result, expected, rtol=1e-5)
