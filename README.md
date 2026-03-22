@@ -3,7 +3,7 @@
 [![Tests](https://img.shields.io/github/actions/workflow/status/s-kav/ds_tools/python-publish.yml?label=Tests&color=darkgreen&style=flat)](https://github.com/s-kav/ds_tools/actions)
 [![PyPI version](https://img.shields.io/pypi/v/dscience-tools.svg)](https://pypi.org/project/dscience-tools/)
 [![codecov](https://codecov.io/gh/s-kav/ds_tools/branch/main/graph/badge.svg)](https://codecov.io/gh/s-kav/ds_tools)
-[![License: PolyForm Non-Commercial 1.0.0](https://img.shields.io/badge/License-PolyForm%20Non--Commercial-blue.svg)](https://polyformproject.org/licenses/noncommercial/1.0.0/)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![PyPI Downloads](https://static.pepy.tech/badge/dscience-tools)](https://pepy.tech/projects/dscience-tools)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-darkgreen?logo=pre-commit)](https://github.com/pre-commit/pre-commit)
@@ -483,12 +483,13 @@ Sergii Kavun. (2025). s-kav/ds_tools: Version 2.3.2 (v.2.3.2). Zenodo. https://d
 
 
 # License
-This project uses **dual licensing**:
 
-- 🎓 **Free for Academic & Research**: PolyForm Noncommercial 1.0.0
-- 💼 **Commercial License Available**: Contact us for business use [License](https://github.com/s-kav/ds_tools/blob/main/CLA.md)
+This project is licensed under the **Apache License 2.0**.
 
-[📋 Full License Details](https://github.com/s-kav/ds_tools/blob/main/LICENSE) | [💰 Get Commercial License](mailto:kavserg@gmail.com)
+You are free to use, modify, and distribute this software in both commercial
+and non-commercial projects.
+
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 ✨ Thanks for visiting DSTools: Data Science Research Toolkit!
 

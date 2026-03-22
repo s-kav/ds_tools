@@ -12,7 +12,7 @@ maintainers = [
   { name="Sergii Kavun", email="kavserg@gmail.com" }
 ]
 
-license = {text = "PolyForm-Noncommercial-1.0.0 OR Commercial"}
+license = {text = "Apache License 2.0"}
 dependencies = ["pandas<=2.2.3,>=0.25.0", "numpy<=2.2.0,>=1.22.0"]
 requires-python = ">=3.9.0"
 
@@ -26,9 +26,13 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
     "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
     "Topic :: Scientific/Engineering :: Information Analysis",
     "Topic :: Scientific/Engineering :: Mathematics",
+    "License :: OSI Approved :: Apache Software License",
 ]
 
 dynamic = []
