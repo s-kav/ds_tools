@@ -29,17 +29,24 @@
 *   [License](#license)
 
 
-# Short intro
+# Short intro: DSTools — drop-in replacement for scattered scipy/sklearn utils
 
-**DSTools** is a Python library designed to assist data scientists and researchers by providing a collection of helpful functions for various stages of a data science project, from data exploration and preprocessing to model evaluation and synthetic data generation.
+**10x faster** distance calculations via Numba/GPU | **Unified API** for metrics + distances | Cohen's d, FFT, Mahalanobis in one import
 
-The library is built upon the author's extensive multi-decade experience (30+ years) in data science, statistical modeling, and enterprise software development. Drawing from real-world challenges encountered across diverse industries including finance, banking, healthcare, insurance, and e-commerce, this toolkit addresses common pain points that practitioners face daily in their analytical workflows.
+```bash
+pip install dscience-tools
 
-The development philosophy emphasizes practical utility over theoretical complexity, incorporating battle-tested patterns and methodologies that have proven effective in production environments. Each function and module reflects lessons learned from managing large-scale data projects, optimizing computational performance, and ensuring code maintainability in collaborative team settings.
+from ds_tools import DSTools
+tools = DSTools()
+tools.metrics.cohens_d(group_a, group_b)  # numpy/numba/cupy auto-dispatch
+```
 
-The library encapsulates best practices developed through years of consulting work, academic research collaborations, and hands-on problem-solving in high-stakes business environments. It represents a distillation of proven techniques, streamlined workflows, and robust error-handling approaches that have evolved through countless iterations and real-world applications.
-
-This comprehensive toolkit serves as a bridge between theoretical data science concepts and practical implementation needs, offering developers and researchers a reliable foundation built on decades of field-tested expertise and continuous refinement based on community feedback and emerging industry requirements. This library with helper functions to accelerate and simplify various stages of the data science research cycle.
+| Feature | scipy | sklearn | DSTools |
+| :--- | :---: | :---: | :---: |
+| GPU acceleration | ❌ | ❌ | ✅ |
+| Auto backend dispatch | ❌ | ❌ | ✅ |
+| Cohen's d | ❌ | ❌ | ✅ |
+| FFT + metrics in one API | ❌ | ❌ | ✅ |
 
 This toolkit is built on top of popular libraries like Pandas, Polars, Scikit-learn, Optuna, and Matplotlib, providing a higher-level API for common tasks in Exploratory Data Analysis (EDA), feature preprocessing, model evaluation, and synthetic data generation. It is designed for data scientists, analysts, and researchers who want to write cleaner, more efficient, and more reproducible code.
 
