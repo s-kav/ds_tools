@@ -24,6 +24,8 @@ import pandas as pd
 import pytest
 from ds_tools.distance import CUPY_AVAILABLE, NUMBA_AVAILABLE
 from scipy.spatial.distance import cdist
+from scipy.spatial.distance import kulczynski1 as scipy_kulczynski1
+from scipy.spatial.distance import sokalmichener as scipy_sokalmichener
 from scipy.stats import entropy
 
 if NUMBA_AVAILABLE:
@@ -335,9 +337,7 @@ BOOLEAN_METRICS = [
     (
         "kulsinski",
         {},
-        lambda u, v: cdist(
-            u.reshape(1, -1).astype(bool), v.reshape(1, -1).astype(bool), "kulczynski1"
-        )[0, 0],
+        lambda u, v: scipy_kulczynski1(u.astype(bool), v.astype(bool)),
     ),
     (
         "rogers_tanimoto",
@@ -358,11 +358,7 @@ BOOLEAN_METRICS = [
     (
         "sokal_michener",
         {},
-        lambda u, v: cdist(
-            u.reshape(1, -1).astype(bool),
-            v.reshape(1, -1).astype(bool),
-            "sokalmichener",
-        )[0, 0],
+        lambda u, v: scipy_sokalmichener(u.astype(bool), v.astype(bool)),
     ),
     (
         "sokal_sneath",
