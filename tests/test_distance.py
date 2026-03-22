@@ -24,9 +24,33 @@ import pandas as pd
 import pytest
 from ds_tools.distance import CUPY_AVAILABLE, NUMBA_AVAILABLE
 from scipy.spatial.distance import cdist
-from scipy.spatial.distance import kulczynski1 as scipy_kulczynski1
-from scipy.spatial.distance import sokalmichener as scipy_sokalmichener
 from scipy.stats import entropy
+
+
+def _ref_kulczynski1(u, v):
+    """Reference: c_tt / (c_tf + c_ft)"""
+    u_b = u.astype(bool)
+    v_b = v.astype(bool)
+    c_tt = np.sum(u_b & v_b)
+    c_tf = np.sum(u_b & ~v_b)
+    c_ft = np.sum(~u_b & v_b)
+    denom = c_tf + c_ft
+    return 0.0 if denom == 0 else float(c_tt / denom)
+
+
+def _ref_sokalmichener(u, v):
+    """Reference: 2*(c_tf + c_ft) / (n + c_tf + c_ft)"""
+    u_b = u.astype(bool)
+    v_b = v.astype(bool)
+    c_tt = np.sum(u_b & v_b)
+    c_tf = np.sum(u_b & ~v_b)
+    c_ft = np.sum(~u_b & v_b)
+    c_ff = np.sum(~u_b & ~v_b)
+    r = 2.0 * (c_tf + c_ft)
+    n = c_tt + c_tf + c_ft + c_ff
+    denom = n + r
+    return 0.0 if denom == 0 else float(r / denom)
+
 
 if NUMBA_AVAILABLE:
     from ds_tools.distance import (
@@ -337,7 +361,7 @@ BOOLEAN_METRICS = [
     (
         "kulsinski",
         {},
-        lambda u, v: scipy_kulczynski1(u.astype(bool), v.astype(bool)),
+        lambda u, v: _ref_kulczynski1(u, v),
     ),
     (
         "rogers_tanimoto",
@@ -358,7 +382,7 @@ BOOLEAN_METRICS = [
     (
         "sokal_michener",
         {},
-        lambda u, v: scipy_sokalmichener(u.astype(bool), v.astype(bool)),
+        lambda u, v: _ref_sokalmichener(u, v),
     ),
     (
         "sokal_sneath",
