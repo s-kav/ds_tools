@@ -39,7 +39,9 @@ def _ref_kulczynski1(u, v):
 
 
 def _ref_sokalmichener(u, v):
-    """Reference: 2*(c_tf + c_ft) / (n + c_tf + c_ft)"""
+    """Reference matching distance.py implementation:
+    2*(c_tf + c_ft) / (c_tt + c_ff + 2*(c_tf + c_ft))
+    """
     u_b = u.astype(bool)
     v_b = v.astype(bool)
     c_tt = np.sum(u_b & v_b)
@@ -47,7 +49,7 @@ def _ref_sokalmichener(u, v):
     c_ft = np.sum(~u_b & v_b)
     c_ff = np.sum(~u_b & ~v_b)
     r = 2.0 * (c_tf + c_ft)
-    n = c_tt + c_tf + c_ft + c_ff
+    n = c_tt + c_ff
     denom = n + r
     return 0.0 if denom == 0 else float(r / denom)
 
