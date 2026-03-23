@@ -123,3 +123,10 @@ available at
 For answers to common questions about this code of conduct, see the FAQ at
 <https://www.contributor-covenant.org/faq/>. Translations are available at
 <https://www.contributor-covenant.org/translations/>.
+
+## Licensing and Participation
+
+All code and documentation in this repository are licensed under the **Apache License 2.0**.
+By contributing to this project, you agree that your contributions will be licensed under the same terms.
+
+For the full license text, see the [LICENSE](https://raw.githubusercontent.com/s-kav/ds_tools/refs/heads/main/LICENSE) file in this repository.
