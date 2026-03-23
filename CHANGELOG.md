@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.3.3] - 2026-03-23
+
+### Added
+- Added license reference to `CODE_OF_CONDUCT.md` to clarify contribution terms
+- Added licensing and participation section in contributor guidelines
+
+### Changed
+- Updated license documentation with proper Apache 2.0 attribution
+- Improved legal clarity for contributors regarding licensing terms
+
+### Documentation
+- Enhanced cross-linking between `LICENSE` and `CODE_OF_CONDUCT.md`
+- Added explicit note that contributions are accepted under Apache License 2.0
+
 ## [2.3.2] - 2025-12-31
 
 This release introduces advanced mathematical capabilities with hardware acceleration support, fixes critical metric definitions to align with scientific standards, and improves library stability.
