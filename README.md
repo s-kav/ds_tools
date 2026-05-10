@@ -82,8 +82,8 @@ Here is the development roadmap:
 -   [ ] **New `Preprocessing` Module:**
     -   [ ] Develop high-performance feature scaling and encoding functions.
     -   [ ] Add utilities for handling time-series data.
--   [ ] **New `Visualization` Module:**
-    -   [ ] Create simple wrappers around Matplotlib/Seaborn for common plots (e.g., feature distribution, ROC curves).
+-   [X] **New `Visualization` Module:**
+    -   [X] Create simple wrappers around Matplotlib/Seaborn for common plots (e.g., feature distribution, ROC curves).
 -   [X] **Community & Contributions:**
     -   [X] Improve documentation with more examples.
     -   [X] Create contribution guidelines ([CONTRIBUTING.md](/CONTRIBUTING.md)).
@@ -199,7 +199,7 @@ print(history_df)
 tools.metrics.plot_history()
 ```
 
-## Evaluate a classification model.
+## Evaluate a classification model
 
 Tired of writing boilerplate code to see your model's performance? Use `evaluate_classification` for a complete summary.
 
@@ -224,7 +224,7 @@ print(f"\nROC AUC Score: {results['roc_auc']:.4f}")
 
 ```
 
-## Calculate Cohen's distance and fast compute FFT.
+## Calculate Cohen's distance and fast compute FFT
 
 ```python
 
@@ -263,7 +263,7 @@ This will produce:
 **Example of classification metrics, report, and confusion matrix (at threshold = 0.5, for comparison)**
 ![](tests_figures/eval_class_3.png)
 
-## Generating a Synthetic Distribution.
+## Generating a Synthetic Distribution
 
 Need to create a dataset with specific statistical properties? - generate_distribution_from_metrics can do that.
 
@@ -334,7 +334,7 @@ This will display a publication-quality heatmap, masked to show only the lower t
 ![](tests_figures/corr_spearman_example.png)
 
 
-## Detailed Categorical Analysis.
+## Detailed Categorical Analysis
 
 Quickly understand the distribution of your categorical features.
 
@@ -362,7 +362,7 @@ tools.category_stats(df, 'city')
 
 ```
 
-## Plot confusion matrix.
+## Plot confusion matrix
 
 Helps to plot confusion matrix in graphical kind, especially for calssification tasks.
 
@@ -447,26 +447,26 @@ A high-performance toolkit for calculating distances and similarities.
 
 See [CONTRIBUTING](/CONTRIBUTING.md) and [CONTRIBUTOR_LICENSE_AGREEMENT](/CONTRIBUTOR_LICENSE_AGREEMENT.md).
 
-# TODO
+# Implemented
 1. Add some important kind of plots:
 
-📌 KS Plot – Measures how well your model separates positive and negative classes.
+✅ `plot_ks` — KS Plot: Measures how well your model separates positive and negative classes (version 2.3.3).
 
-📌 SHAP Plot – Explains feature impact and model interpretability.
+✅ `plot_shap` — SHAP Plot: Explains feature impact and model interpretability (version 2.3.3).
 
-📌 QQ Plot – Checks if your data follows a theoretical distribution.
+✅ `plot_qq` — QQ Plot: Checks if your data follows a theoretical distribution (version 2.3.3).
 
-📌 Cumulative Explained Variance – Helps decide the optimal number of PCA components.
+✅ `plot_cumulative_explained_variance` — Cumulative Explained Variance: Helps decide the optimal number of PCA components (version 2.3.3).
 
-📌 Gini vs Entropy – Key metrics for understanding decision tree impurity.
+✅ `plot_gini_entropy` — Gini vs Entropy: Key metrics for understanding decision tree impurity (version 2.3.3).
 
-📌 Bias–Variance Tradeoff – Shows the balance between underfitting and overfitting.
+✅ `plot_bias_variance` — Bias–Variance Tradeoff: Shows the balance between underfitting and overfitting (version 2.3.3).
 
-📌 ROC Curve – Evaluates classification performance across thresholds.
+✅ `plot_roc_curve` — ROC Curve: Standalone multi-model ROC visualization (version 2.3.3).
 
-📌 Precision–Recall Curve – Crucial for imbalanced datasets.
+✅ `plot_precision_recall` — Precision–Recall Curve: Standalone multi-model PR visualization, crucial for imbalanced datasets (version 2.3.3).
 
-📌 Elbow Curve – Helps choose the right number of clusters in K-Means.
+✅ `plot_elbow_curve` — Elbow Curve: Helps choose the right number of clusters in K-Means (version 2.3.3).
 
 2. Implement Fast Fourier Transform (FFT) algorithm and Shannon’s interpolation formula: done, version 2.3.2.
 

@@ -1,5 +1,5 @@
 # src/ds_tool/ds_tools.py
-# version 2.0.0
+# version 2.3.4
 
 """
 /*
@@ -124,6 +124,33 @@ class DSTools:
 
     plot_confusion_matrix:
         Plots a clear and readable confusion matrix using seaborn
+
+    plot_ks:
+        Plots the KS (Kolmogorov-Smirnov) curve measuring model class separation
+
+    plot_shap:
+        Plots SHAP values for feature impact and model interpretability (requires shap)
+
+    plot_qq:
+        Plots a Q-Q diagram to assess whether data follows a theoretical distribution
+
+    plot_cumulative_explained_variance:
+        Plots cumulative explained variance to guide PCA component selection
+
+    plot_gini_entropy:
+        Plots Gini Impurity vs Entropy as functions of class probability
+
+    plot_bias_variance:
+        Plots the Bias-Variance Tradeoff across a model complexity parameter
+
+    plot_roc_curve:
+        Plots ROC Curve(s) for one or more binary classifiers with multi-model support
+
+    plot_precision_recall:
+        Plots Precision-Recall Curve(s) for one or more binary classifiers
+
+    plot_elbow_curve:
+        Plots the Elbow Curve to find the optimal number of K-Means clusters
 
     add_missing_value_features:
         Adds features based on the count of missing values per row
@@ -1327,6 +1354,607 @@ class DSTools:
 
         plt.tight_layout()
         plt.show()
+
+    @staticmethod
+    def plot_ks(
+        y_true: np.ndarray,
+        y_pred_proba: np.ndarray,
+        figsize: Tuple[int, int] = (10, 6),
+    ) -> Tuple[float, float]:
+        """Plots the KS (Kolmogorov-Smirnov) curve measuring model class separation.
+
+        Shows cumulative distribution functions of predicted probabilities for
+        positive and negative classes. The KS statistic is the maximum vertical
+        distance between the two CDFs.
+
+        Args:
+            y_true: Array of true binary labels (0 or 1).
+            y_pred_proba: Array of predicted probabilities for the positive class.
+            figsize: The size of the figure.
+
+        Returns:
+            Tuple of (ks_statistic, optimal_threshold).
+
+        Usage:
+            tools = DSTools()
+            ks_stat, threshold = tools.plot_ks(y_true, y_pred_proba)
+            print(f"KS = {ks_stat:.4f} at threshold = {threshold:.3f}")
+
+        """
+        pos_probs = np.sort(y_pred_proba[np.asarray(y_true) == 1])
+        neg_probs = np.sort(y_pred_proba[np.asarray(y_true) == 0])
+        thresholds = np.linspace(0, 1, 300)
+
+        cum_pos = np.array([np.mean(pos_probs <= t) for t in thresholds])
+        cum_neg = np.array([np.mean(neg_probs <= t) for t in thresholds])
+
+        ks_idx = int(np.argmax(np.abs(cum_pos - cum_neg)))
+        ks_stat = float(np.abs(cum_pos - cum_neg)[ks_idx])
+        ks_threshold = float(thresholds[ks_idx])
+
+        plt.style.use("seaborn-v0_8-whitegrid")
+        fig, ax = plt.subplots(figsize=figsize)
+
+        ax.plot(
+            thresholds, cum_neg, label="Negative Class CDF", color="blue", linewidth=2
+        )
+        ax.plot(
+            thresholds, cum_pos, label="Positive Class CDF", color="red", linewidth=2
+        )
+        ax.axvline(
+            x=ks_threshold,
+            color="green",
+            linestyle="--",
+            linewidth=1.5,
+            label=f"KS = {ks_stat:.4f} at threshold = {ks_threshold:.3f}",
+        )
+        mid_y = (cum_pos[ks_idx] + cum_neg[ks_idx]) / 2
+        ax.annotate(
+            f"KS = {ks_stat:.4f}",
+            xy=(ks_threshold, mid_y),
+            xytext=(min(ks_threshold + 0.08, 0.9), mid_y),
+            fontsize=12,
+            color="green",
+            arrowprops=dict(arrowstyle="->", color="green"),
+        )
+        ax.set_xlabel("Predicted Probability Threshold", fontsize=14)
+        ax.set_ylabel("Cumulative Distribution", fontsize=14)
+        ax.set_title(f"KS Plot — Model Separation (KS = {ks_stat:.4f})", fontsize=16)
+        ax.legend(fontsize=12)
+        plt.tight_layout()
+        plt.show()
+
+        return ks_stat, ks_threshold
+
+    @staticmethod
+    def plot_shap(
+        model: Any,
+        X: Union[np.ndarray, pd.DataFrame],
+        plot_type: Literal["summary", "bar", "beeswarm"] = "summary",
+        max_display: int = 20,
+        figsize: Tuple[int, int] = (10, 8),
+    ):
+        """Plots SHAP values for feature impact and model interpretability.
+
+        Requires the optional 'shap' library (pip install shap).
+
+        Args:
+            model: A fitted ML model compatible with shap.Explainer.
+            X: Feature matrix (NumPy array or Pandas DataFrame).
+            plot_type: Type of SHAP plot — 'summary', 'bar', or 'beeswarm'.
+            max_display: Maximum number of features to display.
+            figsize: The size of the figure.
+
+        Returns:
+            SHAP Explanation object.
+
+        Usage:
+            tools = DSTools()
+            shap_vals = tools.plot_shap(fitted_model, X_test)
+            shap_vals = tools.plot_shap(fitted_model, X_test, plot_type="bar")
+
+        """
+        try:
+            import shap
+        except ImportError as exc:
+            raise ImportError(
+                "The 'shap' library is required. Install with: pip install shap"
+            ) from exc
+
+        explainer = shap.Explainer(model, X)
+        shap_values = explainer(X)
+
+        plt.figure(figsize=figsize)
+        if plot_type == "summary":
+            shap.summary_plot(shap_values, X, max_display=max_display, show=False)
+        elif plot_type == "bar":
+            shap.plots.bar(shap_values, max_display=max_display, show=False)
+        elif plot_type == "beeswarm":
+            shap.plots.beeswarm(shap_values, max_display=max_display, show=False)
+        else:
+            raise ValueError(
+                f"Unknown plot_type '{plot_type}'. Choose from: 'summary', 'bar', 'beeswarm'."
+            )
+
+        plt.tight_layout()
+        plt.show()
+        return shap_values
+
+    @staticmethod
+    def plot_qq(
+        data: Union[np.ndarray, pd.Series],
+        dist: str = "norm",
+        figsize: Tuple[int, int] = (8, 8),
+    ) -> Dict[str, float]:
+        """Plots a Q-Q (Quantile-Quantile) diagram to assess distributional fit.
+
+        Compares sample quantiles against theoretical quantiles of a given
+        distribution. Points on the reference line indicate a good fit.
+
+        Args:
+            data: 1D array-like of sample values.
+            dist: Theoretical distribution name from scipy.stats (default: 'norm').
+            figsize: The size of the figure.
+
+        Returns:
+            Dict with 'slope', 'intercept', and 'r_squared' of the fitted line.
+
+        Usage:
+            tools = DSTools()
+            result = tools.plot_qq(residuals)
+            print(f"R² = {result['r_squared']:.4f}")
+
+        """
+        data_arr = np.asarray(data).ravel()
+        (osm, osr), (slope, intercept, r) = stats.probplot(
+            data_arr, dist=dist, fit=True
+        )
+
+        plt.style.use("seaborn-v0_8-whitegrid")
+        fig, ax = plt.subplots(figsize=figsize)
+
+        ax.scatter(
+            osm, osr, s=20, alpha=0.6, color="steelblue", label="Sample quantiles"
+        )
+        fit_line = slope * np.array(osm) + intercept
+        ax.plot(
+            osm,
+            fit_line,
+            color="red",
+            linewidth=2,
+            label=f"Reference line (R²={r**2:.4f})",
+        )
+        ax.set_xlabel("Theoretical Quantiles", fontsize=14)
+        ax.set_ylabel("Sample Quantiles", fontsize=14)
+        ax.set_title(f"Q-Q Plot vs {dist} Distribution", fontsize=16)
+        ax.legend(fontsize=12)
+        plt.tight_layout()
+        plt.show()
+
+        return {
+            "slope": float(slope),
+            "intercept": float(intercept),
+            "r_squared": float(r**2),
+        }
+
+    @staticmethod
+    def plot_cumulative_explained_variance(
+        X: Union[np.ndarray, pd.DataFrame],
+        max_components: Optional[int] = None,
+        threshold: float = 0.95,
+        figsize: Tuple[int, int] = (10, 6),
+    ) -> Tuple[int, np.ndarray]:
+        """Plots cumulative explained variance to guide PCA component selection.
+
+        Fits PCA and shows how much total variance is captured as the number of
+        components grows. A horizontal threshold line indicates the target variance.
+
+        Args:
+            X: Feature matrix (NumPy array or Pandas DataFrame).
+            max_components: Maximum number of components. Defaults to min(n_samples, n_features).
+            threshold: Variance threshold line to draw (default: 0.95 = 95%).
+            figsize: The size of the figure.
+
+        Returns:
+            Tuple of (n_components_needed_for_threshold, cumulative_variance_array).
+
+        Usage:
+            tools = DSTools()
+            n, cum_var = tools.plot_cumulative_explained_variance(X_scaled)
+            print(f"Components for 95% variance: {n}")
+
+        """
+        from sklearn.decomposition import PCA
+
+        X_arr = np.asarray(X)
+        n_max = min(X_arr.shape) if max_components is None else max_components
+
+        pca = PCA(n_components=n_max)
+        pca.fit(X_arr)
+        cumulative_var = np.cumsum(pca.explained_variance_ratio_)
+
+        n_threshold = min(int(np.searchsorted(cumulative_var, threshold)) + 1, n_max)
+        component_range = np.arange(1, n_max + 1)
+
+        plt.style.use("seaborn-v0_8-whitegrid")
+        fig, ax = plt.subplots(figsize=figsize)
+
+        ax.plot(
+            component_range,
+            cumulative_var,
+            marker="o",
+            markersize=4,
+            linewidth=2,
+            color="steelblue",
+        )
+        ax.fill_between(component_range, cumulative_var, alpha=0.15, color="steelblue")
+        ax.axhline(
+            y=threshold,
+            color="red",
+            linestyle="--",
+            linewidth=1.5,
+            label=f"{threshold * 100:.0f}% variance threshold",
+        )
+        ax.axvline(
+            x=n_threshold,
+            color="green",
+            linestyle="--",
+            linewidth=1.5,
+            label=f"{n_threshold} components needed",
+        )
+        ax.set_xlabel("Number of Principal Components", fontsize=14)
+        ax.set_ylabel("Cumulative Explained Variance", fontsize=14)
+        ax.set_title("Cumulative Explained Variance by PCA Components", fontsize=16)
+        ax.set_ylim([0, 1.05])
+        ax.legend(fontsize=12)
+        plt.tight_layout()
+        plt.show()
+
+        return n_threshold, cumulative_var
+
+    @staticmethod
+    def plot_gini_entropy(figsize: Tuple[int, int] = (10, 6)):
+        """Plots Gini Impurity vs Entropy as functions of class probability.
+
+        Visualises the three standard impurity measures used in decision trees:
+        Gini Impurity, Entropy (scaled by 0.5 for comparison), and Misclassification
+        Error. Useful for understanding how each splitting criterion behaves.
+
+        Args:
+            figsize: The size of the figure.
+
+        Usage:
+            tools = DSTools()
+            tools.plot_gini_entropy()
+
+        """
+        p = np.linspace(0, 1, 200)
+        gini = 2 * p * (1 - p)
+        entropy_vals = -p * np.log2(p + EPSILON) - (1 - p) * np.log2(1 - p + EPSILON)
+        misclassification = np.minimum(p, 1 - p)
+
+        plt.style.use("seaborn-v0_8-whitegrid")
+        fig, ax = plt.subplots(figsize=figsize)
+
+        ax.plot(p, gini, label="Gini Impurity", color="blue", linewidth=2.5)
+        ax.plot(
+            p,
+            entropy_vals / 2,
+            label="Entropy / 2 (scaled)",
+            color="red",
+            linewidth=2.5,
+        )
+        ax.plot(
+            p,
+            misclassification,
+            label="Misclassification Error",
+            color="green",
+            linewidth=2,
+            linestyle="--",
+        )
+        ax.set_xlabel("Probability of Class 1 (p)", fontsize=14)
+        ax.set_ylabel("Impurity Measure", fontsize=14)
+        ax.set_title("Gini vs Entropy: Decision Tree Impurity Measures", fontsize=16)
+        ax.set_xlim([0, 1])
+        ax.set_ylim([0, 0.6])
+        ax.legend(fontsize=12)
+        plt.tight_layout()
+        plt.show()
+
+    @staticmethod
+    def plot_bias_variance(
+        train_errors: Union[np.ndarray, List[float]],
+        val_errors: Union[np.ndarray, List[float]],
+        param_range: Union[np.ndarray, List],
+        param_name: str = "Model Complexity",
+        figsize: Tuple[int, int] = (10, 6),
+    ) -> Any:
+        """Plots the Bias-Variance Tradeoff across a model complexity parameter.
+
+        Shows how training and validation errors evolve as model complexity changes.
+        The gap between the two curves represents variance; the training error floor
+        represents bias.
+
+        Args:
+            train_errors: Sequence of training errors, one per parameter value.
+            val_errors: Sequence of validation errors, one per parameter value.
+            param_range: Parameter values on the x-axis (e.g., tree depths, C values).
+            param_name: Label for the x-axis (default: 'Model Complexity').
+            figsize: The size of the figure.
+
+        Returns:
+            The parameter value at minimum validation error.
+
+        Usage:
+            tools = DSTools()
+            best = tools.plot_bias_variance(train_errs, val_errs, depths, "Tree Depth")
+            print(f"Best depth: {best}")
+
+        """
+        train_errors = np.asarray(train_errors)
+        val_errors = np.asarray(val_errors)
+        param_range = np.asarray(param_range)
+        optimal_idx = int(np.argmin(val_errors))
+        optimal_param = param_range[optimal_idx]
+
+        plt.style.use("seaborn-v0_8-whitegrid")
+        fig, ax = plt.subplots(figsize=figsize)
+
+        ax.plot(
+            param_range,
+            train_errors,
+            label="Training Error (↓ Bias)",
+            color="blue",
+            linewidth=2,
+            marker="o",
+            markersize=5,
+        )
+        ax.plot(
+            param_range,
+            val_errors,
+            label="Validation Error (Bias + Variance)",
+            color="red",
+            linewidth=2,
+            marker="o",
+            markersize=5,
+        )
+        ax.fill_between(
+            param_range,
+            train_errors,
+            val_errors,
+            alpha=0.15,
+            color="orange",
+            label="Variance gap",
+        )
+        ax.axvline(
+            x=optimal_param,
+            color="green",
+            linestyle="--",
+            linewidth=1.5,
+            label=f"Optimal {param_name} = {optimal_param}",
+        )
+        ax.set_xlabel(param_name, fontsize=14)
+        ax.set_ylabel("Error", fontsize=14)
+        ax.set_title("Bias-Variance Tradeoff", fontsize=16)
+        ax.legend(fontsize=12)
+        plt.tight_layout()
+        plt.show()
+
+        return optimal_param
+
+    @staticmethod
+    def plot_roc_curve(
+        y_true: Union[np.ndarray, List[np.ndarray]],
+        y_pred_proba: Union[np.ndarray, List[np.ndarray]],
+        model_names: Optional[List[str]] = None,
+        figsize: Tuple[int, int] = (8, 8),
+    ):
+        """Plots ROC Curve(s) for one or more binary classifiers.
+
+        Standalone reusable version of the ROC curve with multi-model support.
+        Pass a single array for one model, or lists of arrays to compare models.
+
+        Args:
+            y_true: True binary labels — single array or list of arrays (one per model).
+            y_pred_proba: Predicted probabilities — single array or list of arrays.
+            model_names: Optional list of model names for the legend.
+            figsize: The size of the figure.
+
+        Usage:
+            tools = DSTools()
+            tools.plot_roc_curve(y_test, proba)
+
+            # Multi-model comparison:
+            tools.plot_roc_curve([y_test, y_test], [proba_a, proba_b], ["LR", "XGB"])
+
+        """
+        if isinstance(y_pred_proba, np.ndarray) and y_pred_proba.ndim == 1:
+            y_true_list: List[np.ndarray] = [np.asarray(y_true)]
+            y_proba_list: List[np.ndarray] = [y_pred_proba]
+        else:
+            y_true_list = (
+                [np.asarray(y) for y in y_true]
+                if isinstance(y_true, list)
+                else [np.asarray(y_true)]
+            )
+            y_proba_list = (
+                list(y_pred_proba)
+                if isinstance(y_pred_proba, list)
+                else [np.asarray(y_pred_proba)]
+            )
+
+        plt.style.use("seaborn-v0_8-whitegrid")
+        fig, ax = plt.subplots(figsize=figsize)
+        colors = plt.cm.tab10(np.linspace(0, 1, max(len(y_proba_list), 1)))
+
+        for i, (yt, yp) in enumerate(zip(y_true_list, y_proba_list)):
+            fpr, tpr, _ = roc_curve(yt, yp)
+            roc_auc = auc(fpr, tpr)
+            name = (
+                model_names[i]
+                if model_names and i < len(model_names)
+                else f"Model {i + 1}"
+            )
+            ax.plot(
+                fpr, tpr, color=colors[i], lw=2, label=f"{name} (AUC = {roc_auc:.3f})"
+            )
+
+        ax.plot([0, 1], [0, 1], "k--", lw=1.5, label="Random Classifier (AUC = 0.500)")
+        ax.set_xlim([0.0, 1.0])
+        ax.set_ylim([0.0, 1.05])
+        ax.set_xlabel("False Positive Rate", fontsize=14)
+        ax.set_ylabel("True Positive Rate (Recall)", fontsize=14)
+        ax.set_title("Receiver Operating Characteristic (ROC) Curve", fontsize=16)
+        ax.legend(loc="lower right", fontsize=12)
+        plt.tight_layout()
+        plt.show()
+
+    @staticmethod
+    def plot_precision_recall(
+        y_true: Union[np.ndarray, List[np.ndarray]],
+        y_pred_proba: Union[np.ndarray, List[np.ndarray]],
+        model_names: Optional[List[str]] = None,
+        figsize: Tuple[int, int] = (8, 8),
+    ):
+        """Plots Precision-Recall Curve(s) for one or more binary classifiers.
+
+        Particularly informative for imbalanced datasets where ROC curves can be
+        misleading. Supports multi-model comparison on a single figure.
+
+        Args:
+            y_true: True binary labels — single array or list of arrays (one per model).
+            y_pred_proba: Predicted probabilities — single array or list of arrays.
+            model_names: Optional list of model names for the legend.
+            figsize: The size of the figure.
+
+        Usage:
+            tools = DSTools()
+            tools.plot_precision_recall(y_test, proba)
+
+            # Multi-model comparison:
+            tools.plot_precision_recall([y_test, y_test], [proba_a, proba_b], ["LR", "XGB"])
+
+        """
+        if isinstance(y_pred_proba, np.ndarray) and y_pred_proba.ndim == 1:
+            y_true_list: List[np.ndarray] = [np.asarray(y_true)]
+            y_proba_list: List[np.ndarray] = [y_pred_proba]
+        else:
+            y_true_list = (
+                [np.asarray(y) for y in y_true]
+                if isinstance(y_true, list)
+                else [np.asarray(y_true)]
+            )
+            y_proba_list = (
+                list(y_pred_proba)
+                if isinstance(y_pred_proba, list)
+                else [np.asarray(y_pred_proba)]
+            )
+
+        plt.style.use("seaborn-v0_8-whitegrid")
+        fig, ax = plt.subplots(figsize=figsize)
+        colors = plt.cm.tab10(np.linspace(0, 1, max(len(y_proba_list), 1)))
+
+        for i, (yt, yp) in enumerate(zip(y_true_list, y_proba_list)):
+            precision, recall, _ = precision_recall_curve(yt, yp)
+            ap = average_precision_score(yt, yp)
+            name = (
+                model_names[i]
+                if model_names and i < len(model_names)
+                else f"Model {i + 1}"
+            )
+            ax.step(
+                recall,
+                precision,
+                where="post",
+                color=colors[i],
+                lw=2,
+                label=f"{name} (AP = {ap:.3f})",
+            )
+
+        baseline = float(np.mean(y_true_list[0]))
+        ax.axhline(
+            y=baseline,
+            color="gray",
+            linestyle="--",
+            lw=1.5,
+            label=f"Random Classifier (AP ≈ {baseline:.3f})",
+        )
+        ax.set_xlim([0.0, 1.0])
+        ax.set_ylim([0.0, 1.05])
+        ax.set_xlabel("Recall", fontsize=14)
+        ax.set_ylabel("Precision", fontsize=14)
+        ax.set_title("Precision-Recall Curve", fontsize=16)
+        ax.legend(fontsize=12)
+        plt.tight_layout()
+        plt.show()
+
+    @staticmethod
+    def plot_elbow_curve(
+        X: Union[np.ndarray, pd.DataFrame],
+        max_clusters: int = 10,
+        figsize: Tuple[int, int] = (10, 6),
+    ) -> Tuple[int, List[Tuple[int, float]]]:
+        """Plots the Elbow Curve to find the optimal K for K-Means clustering.
+
+        Fits K-Means for k = 1..max_clusters, plots the within-cluster inertia,
+        and automatically suggests the optimal k via the second-difference method.
+
+        Args:
+            X: Feature matrix (NumPy array or Pandas DataFrame).
+            max_clusters: Maximum number of clusters to evaluate (default: 10).
+            figsize: The size of the figure.
+
+        Returns:
+            Tuple of (suggested_k, list_of_(k, inertia)_tuples).
+
+        Usage:
+            tools = DSTools()
+            best_k, results = tools.plot_elbow_curve(X_scaled, max_clusters=12)
+            print(f"Suggested k: {best_k}")
+
+        """
+        from sklearn.cluster import KMeans
+
+        X_arr = np.asarray(X)
+        k_range = range(1, max_clusters + 1)
+        inertias: List[float] = []
+
+        for k in k_range:
+            km = KMeans(n_clusters=k, random_state=42, n_init=10)
+            km.fit(X_arr)
+            inertias.append(float(km.inertia_))
+
+        suggested_k = 1
+        if len(inertias) >= 3:
+            diffs2 = np.diff(np.diff(inertias))
+            suggested_k = int(np.argmax(diffs2)) + 2
+
+        plt.style.use("seaborn-v0_8-whitegrid")
+        fig, ax = plt.subplots(figsize=figsize)
+
+        ax.plot(
+            list(k_range),
+            inertias,
+            marker="o",
+            markersize=8,
+            linewidth=2,
+            color="steelblue",
+        )
+        ax.axvline(
+            x=suggested_k,
+            color="red",
+            linestyle="--",
+            linewidth=1.5,
+            label=f"Suggested elbow: k = {suggested_k}",
+        )
+        ax.set_xlabel("Number of Clusters (k)", fontsize=14)
+        ax.set_ylabel("Inertia (Within-Cluster Sum of Squares)", fontsize=14)
+        ax.set_title("Elbow Curve for K-Means Cluster Selection", fontsize=16)
+        ax.legend(fontsize=12)
+        plt.tight_layout()
+        plt.show()
+
+        return suggested_k, list(zip(k_range, inertias))
 
     @staticmethod
     def add_missing_value_features(

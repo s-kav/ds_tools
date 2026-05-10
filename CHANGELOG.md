@@ -2,6 +2,34 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.3.4] - 2026-05-10
+
+### Added
+
+- plot_ks: Plots the KS (Kolmogorov-Smirnov) curve measuring model class separation
+- plot_shap: Plots SHAP values for feature impact and model interpretability (requires shap)
+- plot_qq: Plots a Q-Q diagram to assess whether data follows a theoretical distribution
+- plot_cumulative_explained_variance: Plots cumulative explained variance to guide PCA component selection
+- plot_gini_entropy: Plots Gini Impurity vs Entropy as functions of class probability
+- plot_bias_variance: Plots the Bias-Variance Tradeoff across a model complexity parameter
+- plot_roc_curve: Plots ROC Curve(s) for one or more binary classifiers with multi-model support
+- plot_precision_recall: Plots Precision-Recall Curve(s) for one or more binary classifiers
+- plot_elbow_curve: Plots the Elbow Curve to find the optimal number of K-Means clusters
+
+### Visualization Methods Documentation
+
+| Method | Signature | Returns |
+|--------|-----------|---------|
+| `plot_ks` | `(y_true, y_pred_proba, figsize)` | `Tuple[float, float]` — KS statistic and threshold |
+| `plot_shap` | `(model, X, plot_type, max_display, figsize)` | `SHAP Explanation object` |
+| `plot_qq` | `(data, dist='norm', figsize)` | `Dict[slope, intercept, r_squared]` |
+| `plot_cumulative_explained_variance` | `(X, max_components, threshold, figsize)` | `Tuple[int, ndarray]` |
+| `plot_gini_entropy` | `(figsize)` | `—` |
+| `plot_bias_variance` | `(train_errors, val_errors, param_range, param_name, figsize)` | Optimal parameter |
+| `plot_roc_curve` | `(y_true, y_pred_proba, model_names, figsize)` | `—` |
+| `plot_precision_recall` | `(y_true, y_pred_proba, model_names, figsize)` | `—` |
+| `plot_elbow_curve` | `(X, max_clusters, figsize)` | `Tuple[int, List[Tuple]]` |
+
 ## [2.3.3] - 2026-03-23
 
 ### Added
