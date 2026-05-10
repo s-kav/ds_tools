@@ -14,8 +14,9 @@ import numpy as np
 import pandas as pd
 import polars as pl
 import pytest
-from ds_tools.models import DistributionConfig
 from scipy import stats
+
+from ds_tools.models import DistributionConfig
 
 
 def describe_metrics(arr: np.ndarray):

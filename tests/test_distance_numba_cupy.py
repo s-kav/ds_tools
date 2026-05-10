@@ -1,6 +1,7 @@
 # tests/test_distance_numba_cupy.py
 import numpy as np
 import pytest
+
 from ds_tools import distance
 
 NUMBA_AVAILABLE = distance.NUMBA_AVAILABLE

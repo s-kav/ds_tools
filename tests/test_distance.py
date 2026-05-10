@@ -22,9 +22,10 @@ Error and edge case handling (incorrect sizes, empty arrays, incorrect parameter
 import numpy as np
 import pandas as pd
 import pytest
-from ds_tools.distance import CUPY_AVAILABLE, NUMBA_AVAILABLE
 from scipy.spatial.distance import cdist
 from scipy.stats import entropy
+
+from ds_tools.distance import CUPY_AVAILABLE, NUMBA_AVAILABLE
 
 
 def _ref_kulczynski1(u, v):

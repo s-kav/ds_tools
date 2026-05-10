@@ -13,6 +13,7 @@
 import numpy as np
 import pandas as pd
 import pytest
+
 from ds_tools.models import CorrelationConfig
 
 N_SAMPLES = 100

@@ -12,6 +12,7 @@
 
 import numpy as np
 import pytest
+
 from ds_tools.models import MetricsConfig
 
 N_SAMPLES = 200
