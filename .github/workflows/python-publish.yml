@@ -116,7 +116,7 @@ jobs:
       - name: Install linters
         run: pip install .[lint]
       - name: Check formatting with Black
-        run: black --check .
+        run: black --check --fast .
       - name: Lint with Ruff
         run: ruff check .
 
