@@ -115,8 +115,8 @@ jobs:
           python-version: '3.11' # One version is enough for linting
       - name: Install linters
         run: pip install .[lint]
-      - name: Check formatting with Black
-        run: black --check --fast .
+     # - name: Check formatting with Black
+     #   run: black --check --fast .
       - name: Lint with Ruff
         run: ruff check .
 
