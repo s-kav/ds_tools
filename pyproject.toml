@@ -87,6 +87,7 @@ where = ["src"]
 
 [tool.black]
 line-length = 88
+fast = true
 
 [tool.ruff]
 line-length = 88
